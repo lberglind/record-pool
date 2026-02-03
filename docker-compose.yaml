@@ -1,4 +1,26 @@
 services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - database
+      - minio
+
+  frontend:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    command: npm run dev --host
+    environment:
+      - VITE_API_URL=http://localhost:8080
+
+
   database:
     image: postgres:15-alpine
     container_name: recordpool_db
