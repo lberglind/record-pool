@@ -1,0 +1,38 @@
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: recordpool_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: recordpool
+      TZ: CET
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      #- ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  minio:
+    image: minio/minio
+    container_name: recordpool_minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000" # API-Port
+      - "9001:9001" # Web-GUI-port
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+
+volumes:
+  postgres_data:
+  minio_data:
+
+
+
+

@@ -1,0 +1,45 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(256) UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE tracks (
+    track_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    file_hash TEXT UNIQUE NOT NULL,
+    file_format VARCHAR(10) NOT NULL,
+    file_path TEXT NOT NULL,
+    title TEXT,
+    artist TEXT,
+    is_public BOOLEAN DEFAULT true,
+    duration_seconds DECIMAL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE track_metadata (
+    version_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    track_id UUID NOT NULL REFERENCES tracks(track_id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
+    bpm DECIMAL(5,2),
+    cue_points JSONB DEFAULT '[]',
+    beatgrid JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE playlists (
+    playlist_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    is_public BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE playlist_tracks (
+    playlist_id UUID REFERENCES playlists(playlist_id) ON DELETE CASCADE,
+    track_id UUID REFERENCES tracks(track_id) ON DELETE CASCADE,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY(playlist_id, track_id)
+);
