@@ -57,7 +57,7 @@ func UploadFile(ctx context.Context, minioClient *minio.Client, objectName, file
 	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
 }
 
-func FetchAllFiles(ctx context.Context, minioClient *minio.Client) ([]string, error) {
+func FetchAllFilenames(ctx context.Context, minioClient *minio.Client) ([]string, error) {
 	var filenames []string
 	bucketName := os.Getenv("MINIO_BUCKET_TRACKS")
 	objectCh := minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
@@ -70,4 +70,13 @@ func FetchAllFiles(ctx context.Context, minioClient *minio.Client) ([]string, er
 		filenames = append(filenames, object.Key)
 	}
 	return filenames, nil
+}
+
+func GetFile(ctx context.Context, minioClient *minio.Client, fileName string) (*minio.Object, error) {
+	object, err := minioClient.GetObject(ctx, os.Getenv("MINIO_BUCKET_TRACKS"), fileName, minio.GetObjectOptions{})
+	if err != nil {
+		log.Printf("File not found: %v\n", err)
+		return nil, err
+	}
+	return object, err
 }

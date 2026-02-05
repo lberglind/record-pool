@@ -9,13 +9,25 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dhowden/tag"
 	"github.com/hcl/audioduration"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 )
 
-func AddTrack(ctx context.Context, conn *pgx.Conn, filepath string) (string, error) {
+type TrackResponse struct {
+	Hash      string    `json:"hash"`
+	Format    string    `json:"format"`
+	Title     string    `json:"title"`
+	Artist    string    `json:"artist"`
+	Duration  float64   `json:"duration"`
+	TimeStamp time.Time `json:"timeStamp"`
+	// Size      int64  `json:"size"`
+}
+
+func AddTrack(ctx context.Context, pool *pgxpool.Pool, filepath string) (string, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		log.Printf("Could not open file at %s: %s\n", filepath, err)
@@ -62,7 +74,7 @@ func AddTrack(ctx context.Context, conn *pgx.Conn, filepath string) (string, err
 	VALUES ($1, $2, $3, $4, $5, $6) RETURNING track_id`
 
 	var trackID string
-	err = conn.QueryRow(ctx, query, fileHash, format, minioPath, title, artist, duration).Scan(&trackID)
+	err = pool.QueryRow(ctx, query, fileHash, format, minioPath, title, artist, duration).Scan(&trackID)
 	if err != nil {
 		log.Printf("Error inserting track in tracks: %s\n", err)
 	} else {
@@ -71,12 +83,12 @@ func AddTrack(ctx context.Context, conn *pgx.Conn, filepath string) (string, err
 	return fileHash, nil
 }
 
-func CreateUser(ctx context.Context, conn *pgx.Conn, email, name string) {
+func CreateUser(ctx context.Context, pool *pgxpool.Pool, email, name string) {
 	var newID string
 
 	query := "INSERT INTO users (email, name) VALUES ($1, $2) RETURNING user_id"
 
-	err := conn.QueryRow(ctx, query, email, name).Scan(&newID)
+	err := pool.QueryRow(ctx, query, email, name).Scan(&newID)
 	if err != nil {
 		fmt.Printf("Couldn't create user: %v", err)
 		return
@@ -85,27 +97,57 @@ func CreateUser(ctx context.Context, conn *pgx.Conn, email, name string) {
 	fmt.Printf("User created with ID: %s\n", newID)
 }
 
-func Init() *pgx.Conn {
-	//err := godotenv.Load() // Only used when not running in Docker
-	//if err != nil {
-	//	fmt.Println("Couldn't find file .env, uses system variables")
-	//}
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_URL"))
+func Connect(ctx context.Context) *pgxpool.Pool {
+	err := godotenv.Load("../.env") // Only used when not running in Docker
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	} else {
-		fmt.Println("Successfully connected to database!")
+		fmt.Println("Couldn't find file .env, uses system variables")
 	}
-
-	return conn
+	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Printf("Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	err = pool.Ping(ctx)
+	if err != nil {
+		log.Printf("Databse unreachable: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Successfully connected to database!")
+	return pool
 }
 
-func getTitle(ctx context.Context, conn *pgx.Conn, hash string) (string, error) {
-	var title string
-	query := "SELECT TITLE FROM TRACKS WHERE file_hash = $1"
+//func getTitle(ctx context.Context, pool *pgxpool.Pool, hash string) (string, error) {
+//	var title string
+//	query := "SELECT title FROM tracks WHERE file_hash = $1"
+//
+//	err := pool.QueryRow(ctx, query, hash).Scan(&title)
+//	return title, err
+//}
 
-	err := conn.QueryRow(ctx, query, hash).Scan(&title)
-	return title, err
+func GetAllTracks(ctx context.Context, pool *pgxpool.Pool) ([]TrackResponse, error) {
+	query := "SELECT file_hash, file_format, title, artist, duration_seconds, created_at FROM tracks"
+
+	rows, err := pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tracks := []TrackResponse{}
+	for rows.Next() {
+		var t TrackResponse
+		// err := rows.Scan(&t.Hash, &t.Format, &t.Title, &t.Artist, &t.Size, &t.Duration, &t.TimeStamp)
+		err := rows.Scan(
+			&t.Hash,
+			&t.Format,
+			&t.Title,
+			&t.Artist,
+			&t.Duration,
+			&t.TimeStamp)
+		if err != nil {
+			continue
+		}
+		tracks = append(tracks, t)
+	}
+	return tracks, nil
 }

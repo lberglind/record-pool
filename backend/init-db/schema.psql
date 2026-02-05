@@ -14,6 +14,7 @@ CREATE TABLE tracks (
     file_path TEXT NOT NULL,
     title TEXT,
     artist TEXT,
+    size DECIMAL,
     is_public BOOLEAN DEFAULT true,
     duration_seconds DECIMAL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
