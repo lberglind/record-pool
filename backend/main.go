@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	"record-pool/handler"
 
 	db "record-pool/dbInteract"
@@ -25,6 +24,7 @@ func main() {
 
 	// Map URLs to functions
 	http.HandleFunc("/files", enableCORS(srv.ListAllFilesHandler))
+	http.HandleFunc("/download", enableCORS(srv.DownloadFileHandler))
 
 	// Execution. Keep processes alive
 	fmt.Println("Backend is live on http://localhost:8080")

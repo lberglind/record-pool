@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fileService } from '../services/api';
+import { FileDownload } from './FileDownload';
 
 export function FileList() {
     const [tracks, setTracks] = useState([]);
@@ -36,6 +37,7 @@ export function FileList() {
                             <td>{track.duration.toFixed(2)}</td>
                             <td>{track.format}</td>
                             <td>{track.timeStamp}</td>
+                            <td><FileDownload track={track} /></td>
                         </tr>
                     ))}
                 </tbody>

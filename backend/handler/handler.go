@@ -60,14 +60,14 @@ func (s *Server) ListAllFilesHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 	// Get filename from query string
-	fileName := r.URL.Query().Get("file")
-	if fileName == "" {
+	hash := r.URL.Query().Get("file")
+	if hash == "" {
 		http.Error(w, "File name required", http.StatusBadRequest)
 		return
 	}
 
 	// Fetch the file from MinIO
-	object, err := storage.GetFile(r.Context(), s.MinioClient, fileName)
+	object, err := storage.GetFile(r.Context(), s.MinioClient, hash)
 	if err != nil {
 		http.Error(w, "File not found", http.StatusNotFound)
 		return
@@ -82,14 +82,19 @@ func (s *Server) DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "File storage error", http.StatusInternalServerError)
 		return
 	}
+	name, format, err := db.GetFileName(r.Context(), s.DB, hash)
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
 
-	contentType := mime.TypeByExtension(filepath.Ext(fileName))
+	contentType := mime.TypeByExtension(filepath.Ext(hash))
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
 
 	// Set headers
-	w.Header().Set("Context-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", name, format))
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", stat.Size))
 

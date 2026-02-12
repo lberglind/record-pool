@@ -116,13 +116,13 @@ func Connect(ctx context.Context) *pgxpool.Pool {
 	return pool
 }
 
-//func getTitle(ctx context.Context, pool *pgxpool.Pool, hash string) (string, error) {
-//	var title string
-//	query := "SELECT title FROM tracks WHERE file_hash = $1"
-//
-//	err := pool.QueryRow(ctx, query, hash).Scan(&title)
-//	return title, err
-//}
+func GetFileName(ctx context.Context, pool *pgxpool.Pool, hash string) (string, string, error) {
+	var title, format string
+	query := "SELECT title, file_format FROM tracks WHERE file_hash = $1"
+
+	err := pool.QueryRow(ctx, query, hash).Scan(&title, &format)
+	return title, format, err
+}
 
 func GetAllTracks(ctx context.Context, pool *pgxpool.Pool) ([]TrackResponse, error) {
 	query := "SELECT file_hash, file_format, title, artist, duration_seconds, created_at FROM tracks"

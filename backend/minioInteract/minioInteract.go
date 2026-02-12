@@ -78,5 +78,10 @@ func GetFile(ctx context.Context, minioClient *minio.Client, fileName string) (*
 		log.Printf("File not found: %v\n", err)
 		return nil, err
 	}
+	_, err = object.Stat()
+	if err != nil {
+		log.Printf("MinIO Stat Error for %s: %v\n", fileName, err)
+		return nil, err
+	}
 	return object, err
 }
