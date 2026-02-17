@@ -6,7 +6,6 @@ toolchain go1.24.12
 
 require (
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
-	github.com/hcl/audioduration v0.0.0-20221028095105-c8039191ae43
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/joho/godotenv v1.5.1
 	github.com/minio/minio-go/v7 v7.0.98
