@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -47,14 +48,21 @@ func Init() *minio.Client {
 }
 
 // Upload file
-func UploadFile(ctx context.Context, minioClient *minio.Client, objectName, filePath string) {
+//func UploadFile(ctx context.Context, minioClient *minio.Client, objectName, filePath string) {
+//	bucketName := os.Getenv("MINIO_BUCKET_TRACKS")
+//	contentType := "audio/mpeg"
+//	info, err := minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
+//	if err != nil {
+//		log.Printf("Could not upload file to minio: %v\n", err)
+//	}
+//	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
+//}
+
+func Upload(ctx context.Context, minioClient *minio.Client, objectName string, reader io.Reader, size int64) error {
 	bucketName := os.Getenv("MINIO_BUCKET_TRACKS")
 	contentType := "audio/mpeg"
-	info, err := minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
-	if err != nil {
-		log.Printf("Could not upload file to minio: %v\n", err)
-	}
-	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
+	_, err := minioClient.PutObject(ctx, bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: contentType})
+	return err
 }
 
 func FetchAllFilenames(ctx context.Context, minioClient *minio.Client) ([]string, error) {

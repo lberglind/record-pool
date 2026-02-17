@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,27 +21,27 @@ type Server struct {
 	MinioClient *minio.Client
 }
 
-func Upload(ctx context.Context, pool *pgxpool.Pool, minioClient *minio.Client, filePath string) {
-	hash, err := db.AddTrack(ctx, pool, filePath)
-	if err != nil {
-		log.Printf("Could not insert track in database: %s\n", err)
-	} else {
-		storage.UploadFile(ctx, minioClient, hash, filePath)
-	}
-}
+//func Upload(ctx context.Context, pool *pgxpool.Pool, minioClient *minio.Client, filePath string) {
+//	hash, err := db.AddTrack(ctx, pool, filePath)
+//	if err != nil {
+//		log.Printf("Could not insert track in database: %s\n", err)
+//	} else {
+//		storage.UploadFile(ctx, minioClient, hash, filePath)
+//	}
+//}
 
-func (s *Server) ListFileHandler(w http.ResponseWriter, r *http.Request) {
-	files, err := storage.FetchAllFilenames(r.Context(), s.MinioClient)
-	if err != nil {
-		http.Error(w, "Failed to fetch files from storage", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(files)
-	if err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
-	}
-}
+//func (s *Server) ListFileHandler(w http.ResponseWriter, r *http.Request) {
+//	files, err := storage.FetchAllFilenames(r.Context(), s.MinioClient)
+//	if err != nil {
+//		http.Error(w, "Failed to fetch files from storage", http.StatusInternalServerError)
+//		return
+//	}
+//	w.Header().Set("Content-Type", "application/json")
+//	err = json.NewEncoder(w).Encode(files)
+//	if err != nil {
+//		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+//	}
+//}
 
 func (s *Server) ListAllFilesHandler(w http.ResponseWriter, r *http.Request) {
 	tracks, err := db.GetAllTracks(r.Context(), s.DB)
@@ -102,5 +101,35 @@ func (s *Server) DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = io.Copy(w, object)
 	if err != nil {
 		log.Printf("Error streaming file: %v\n", err)
+		return
 	}
+}
+
+func (s *Server) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
+	const maxMemory = 10 << 20
+	if err := r.ParseMultipartForm(maxMemory); err != nil {
+		http.Error(w, "File too large or bad request", http.StatusBadRequest)
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Invalid file", http.StatusBadRequest)
+		return
+	}
+	fmt.Println(header)
+	defer file.Close()
+
+	hash, err := db.AddTrack(r.Context(), s.DB, file, header.Size)
+	if err != nil {
+		http.Error(w, "Could not add track", http.StatusInternalServerError)
+		return
+	}
+	file.Seek(0, 0)
+	storage.Upload(r.Context(), s.MinioClient, hash, file, header.Size)
+	if err != nil {
+		http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintf(w, "Upload Successful: %s", hash)
 }

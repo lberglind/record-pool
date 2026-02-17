@@ -25,6 +25,7 @@ func main() {
 	// Map URLs to functions
 	http.HandleFunc("/files", enableCORS(srv.ListAllFilesHandler))
 	http.HandleFunc("/download", enableCORS(srv.DownloadFileHandler))
+	http.HandleFunc("/upload", enableCORS(srv.UploadFileHandler))
 
 	// Execution. Keep processes alive
 	fmt.Println("Backend is live on http://localhost:8080")
@@ -35,7 +36,7 @@ func main() {
 
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
