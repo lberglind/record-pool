@@ -1,0 +1,12 @@
+:8000 {
+    # This strips "/api" from the URL before sending to Go
+    # e.g. /api/auth/login becomes /auth/login for the Go server
+    handle_path /api/* {
+        reverse_proxy localhost:8080
+    }
+
+    # Everything else goes to your Frontend (Vite/React/etc)
+    handle {
+        reverse_proxy localhost:3000
+    }
+}
