@@ -1,36 +1,36 @@
 services:
-  backend:
-    build: ./backend
-    container_name: backend
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    #environment:
-    #  -  DATABASE_URL=postgres://admin:password@database:5432/recordpool
-    #  -  MINIO_ENDPOINT=localhost:9000
-    #  -  MINIO_ROOT_USER=admin
-    #  -  MINIO_ROOT_PASSWORD=password
-    #  -  MINIO_USE_SLL=false
-    #  -  MINIO_BUCKET_TRACKS=recordpool
-    depends_on:
-      database:
-        condition: service_healthy
-      minio:
-        condition: service_started
+#  backend:
+#    build: ./backend
+#    container_name: backend
+#    ports:
+#      - "8080:8080"
+#    env_file:
+#      - .env
+#    #environment:
+#    #  -  DATABASE_URL=postgres://admin:password@database:5432/recordpool
+#    #  -  MINIO_ENDPOINT=localhost:9000
+#    #  -  MINIO_ROOT_USER=admin
+#    #  -  MINIO_ROOT_PASSWORD=password
+#    #  -  MINIO_USE_SLL=false
+#    #  -  MINIO_BUCKET_TRACKS=recordpool
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#      minio:
+#        condition: service_started
 
-  frontend:
-    image: node:20
-    container_name: frontend
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    ports:
-      - "5173:5173"
-    entrypoint: [sh, -c, "npm install && exec npm run dev -- --host 0.0.0.0"]
-    environment:
-      - VITE_API_URL=http://localhost:8080
+#  frontend:
+#    image: node:20
+#    container_name: frontend
+#    working_dir: /app
+#    volumes:
+#      - ./frontend:/app
+#      - /app/node_modules
+#    ports:
+#      - "5173:5173"
+#    entrypoint: [sh, -c, "npm install && exec npm run dev -- --host 0.0.0.0"]
+#    environment:
+#      - VITE_API_URL=http://localhost:8080
 
 
   database:
