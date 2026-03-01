@@ -1,2 +1,5 @@
 .env
 .DS_Store
+record-pool-frontend/localhost.pem
+record-pool-frontend/localhost-key.pem
+
