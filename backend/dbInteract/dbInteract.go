@@ -14,7 +14,6 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 )
 
 type TrackResponse struct {
@@ -25,6 +24,113 @@ type TrackResponse struct {
 	Duration  float64   `json:"duration"`
 	TimeStamp time.Time `json:"timeStamp"`
 	// Size      int64  `json:"size"`
+}
+
+func Connect(ctx context.Context) *pgxpool.Pool {
+	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	fmt.Println(os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Printf("Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	err = pool.Ping(ctx)
+	if err != nil {
+		log.Printf("Databse unreachable: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Successfully connected to database!")
+	return pool
+}
+
+func AddUser(ctx context.Context, pool *pgxpool.Pool, email, name string) (string, error) {
+	var userID string
+
+	query := `
+		INSERT INTO users (email, name) 
+		VALUES ($1, $2) 
+		ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name
+		RETURNING user_id`
+
+	err := pool.QueryRow(ctx, query, email, name).Scan(&userID)
+	if err != nil {
+		fmt.Printf("Couldn't create user: %v", err)
+		return "", err
+	}
+
+	fmt.Printf("User exists with ID: %s\n", userID)
+	sessionID, err := CreateSession(ctx, pool, userID)
+	if err != nil {
+		return "", err
+	}
+
+	return sessionID, nil
+}
+
+func CreateSession(ctx context.Context, pool *pgxpool.Pool, userID string) (string, error) {
+	var sessionID string
+
+	query := `
+		INSERT INTO sessions (user_id, expires)
+		VALUES ($1, NOW() + INTERVAL '7 days')
+		RETURNING session_id`
+
+	err := pool.QueryRow(ctx, query, userID).Scan(&sessionID)
+	if err != nil {
+		return "", err
+	}
+	return sessionID, err
+}
+
+func GetEmailFromSession(ctx context.Context, pool *pgxpool.Pool, session string) (string, error) {
+	var email string
+
+	query := `
+		SELECT u.email FROM users u
+		JOIN sessions s ON u.user_id == s.user_id
+		WHERE s.session_id = $1
+		AND s.expires > NOW()
+		`
+	err := pool.QueryRow(ctx, query, session).Scan(&email)
+	if err != nil {
+		return "", err
+	}
+	return email, err
+}
+
+func GetFileName(ctx context.Context, pool *pgxpool.Pool, hash string) (string, string, error) {
+	var title, format string
+	query := "SELECT title, file_format FROM tracks WHERE file_hash = $1"
+
+	err := pool.QueryRow(ctx, query, hash).Scan(&title, &format)
+	return title, format, err
+}
+
+func GetAllTracks(ctx context.Context, pool *pgxpool.Pool) ([]TrackResponse, error) {
+	query := "SELECT file_hash, file_format, title, artist, COALESCE(duration_seconds, 0), created_at FROM tracks"
+
+	rows, err := pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tracks := []TrackResponse{}
+	for rows.Next() {
+		var t TrackResponse
+		// err := rows.Scan(&t.Hash, &t.Format, &t.Title, &t.Artist, &t.Size, &t.Duration, &t.TimeStamp)
+		err := rows.Scan(
+			&t.Hash,
+			&t.Format,
+			&t.Title,
+			&t.Artist,
+			&t.Duration,
+			&t.TimeStamp)
+		if err != nil {
+			continue
+		}
+		tracks = append(tracks, t)
+	}
+	return tracks, nil
 }
 
 func AddTrack(ctx context.Context, pool *pgxpool.Pool, file multipart.File, size int64) (string, error) {
@@ -69,73 +175,4 @@ func AddTrack(ctx context.Context, pool *pgxpool.Pool, file multipart.File, size
 		fmt.Printf("Track: %s inserted.\n", title)
 	}
 	return fileHash, nil
-}
-
-func CreateUser(ctx context.Context, pool *pgxpool.Pool, email, name string) {
-	var newID string
-
-	query := "INSERT INTO users (email, name) VALUES ($1, $2) RETURNING user_id"
-
-	err := pool.QueryRow(ctx, query, email, name).Scan(&newID)
-	if err != nil {
-		fmt.Printf("Couldn't create user: %v", err)
-		return
-	}
-
-	fmt.Printf("User created with ID: %s\n", newID)
-}
-
-func Connect(ctx context.Context) *pgxpool.Pool {
-	err := godotenv.Load("../.env") // Only used when not running in Docker
-	if err != nil {
-		fmt.Println("Couldn't find file .env, uses system variables")
-	}
-	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Printf("Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	err = pool.Ping(ctx)
-	if err != nil {
-		log.Printf("Databse unreachable: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println("Successfully connected to database!")
-	return pool
-}
-
-func GetFileName(ctx context.Context, pool *pgxpool.Pool, hash string) (string, string, error) {
-	var title, format string
-	query := "SELECT title, file_format FROM tracks WHERE file_hash = $1"
-
-	err := pool.QueryRow(ctx, query, hash).Scan(&title, &format)
-	return title, format, err
-}
-
-func GetAllTracks(ctx context.Context, pool *pgxpool.Pool) ([]TrackResponse, error) {
-	query := "SELECT file_hash, file_format, title, artist, COALESCE(duration_seconds, 0), created_at FROM tracks"
-
-	rows, err := pool.Query(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	tracks := []TrackResponse{}
-	for rows.Next() {
-		var t TrackResponse
-		// err := rows.Scan(&t.Hash, &t.Format, &t.Title, &t.Artist, &t.Size, &t.Duration, &t.TimeStamp)
-		err := rows.Scan(
-			&t.Hash,
-			&t.Format,
-			&t.Title,
-			&t.Artist,
-			&t.Duration,
-			&t.TimeStamp)
-		if err != nil {
-			continue
-		}
-		tracks = append(tracks, t)
-	}
-	return tracks, nil
 }
