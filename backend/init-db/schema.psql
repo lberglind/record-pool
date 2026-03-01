@@ -3,8 +3,16 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(256) UNIQUE NOT NULL,
+    slack_id TEXT,
     name TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE sessions (
+    session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '24 hours'
 );
 
 CREATE TABLE tracks (
@@ -25,6 +33,7 @@ CREATE TABLE track_metadata (
     track_id UUID NOT NULL REFERENCES tracks(track_id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
     bpm DECIMAL(5,2),
+    bitrate DECIMAL,
     cue_points JSONB DEFAULT '[]',
     beatgrid JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
