@@ -1,14 +1,22 @@
-import TrackCard from "@/components/TrackCard";
-import { getTracks } from "@/lib/api";
+"use client";
 
-export default async function Home() {
-    const tracks = await getTracks();
-    return (
-        <div>
-            <h1>Tracks</h1>
-            {tracks.map((track: any) => (
-                <TrackCard key={track.hash} track={track} />
-            ))}
-        </div>
-    );
+import { useEffect, useState } from "react";
+import { getCurrentUser } from "@/lib/api";
+import LoginPage from "./login/page";
+import { Tracks } from "./tracks/page";
+
+export default function Home() {
+    const [user, setUser] = useState<{ email: string } | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Check if a session cookie exists and fetch current user
+        getCurrentUser()
+            .then((data) => setUser(data))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) return <div>Loading…</div>;
+
+    return <div>{user ? <Tracks /> : <LoginPage />}</div>;
 }

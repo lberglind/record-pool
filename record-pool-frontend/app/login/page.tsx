@@ -4,49 +4,15 @@ import { useState } from "react";
 import { API_URL } from "@/lib/api";
 
 export default function LoginPage() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-
-    async function handleLogin() {
-        const options = {
-            method: "POST",
-            credentails: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username, password }),
-        }
-        const res = await fetch(`${API_URL}/login`, options);
-        if (!res.ok) {
-            alert("Login failed");
-            return;
-        }
-
-        window.location.href = "/";
-    }
-
     return (
-        <div className="max-w-md mx-auto space-y-4">
-            <h1 className="text-xl font-bold">Login</h1>
-            <input
-                className="border p-2 w-full"
-                placeholder="Username"
-                onChange={(e) => setUsername(e.target.value)}
-            />
-
-            <input
-                className="border p-2 w-full"
-                type="password"
-                placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button
-                onClick={handleLogin}
-                className="bg-black text-white p-2 w-full"
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <h1 className="text-2xl font-bold mb-6">Login To Record Pool</h1>
+            <a
+                href="http://localhost:8080/auth/slack"
+                className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800"
             >
-                Login
-            </button>
+                Login With Slack
+            </a>
         </div>
     );
 }
