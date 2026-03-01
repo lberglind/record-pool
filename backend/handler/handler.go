@@ -10,16 +10,9 @@ import (
 	"path/filepath"
 
 	db "record-pool/dbInteract"
+	core "record-pool/internal"
 	storage "record-pool/minioInteract"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/minio/minio-go/v7"
 )
-
-type Server struct {
-	DB          *pgxpool.Pool
-	MinioClient *minio.Client
-}
 
 //func Upload(ctx context.Context, pool *pgxpool.Pool, minioClient *minio.Client, filePath string) {
 //	hash, err := db.AddTrack(ctx, pool, filePath)
@@ -43,93 +36,99 @@ type Server struct {
 //	}
 //}
 
-func (s *Server) ListAllFilesHandler(w http.ResponseWriter, r *http.Request) {
-	tracks, err := db.GetAllTracks(r.Context(), s.DB)
-	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
+func ListAllFilesHandler(c *core.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tracks, err := db.GetAllTracks(r.Context(), c.DB)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
 
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(tracks)
-	if err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(tracks)
+		if err != nil {
+			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		}
 	}
 }
 
-func (s *Server) DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
-	// Get filename from query string
-	hash := r.URL.Query().Get("file")
-	if hash == "" {
-		http.Error(w, "File name required", http.StatusBadRequest)
-		return
-	}
+func DownloadFileHandler(c *core.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get filename from query string
+		hash := r.URL.Query().Get("file")
+		if hash == "" {
+			http.Error(w, "File name required", http.StatusBadRequest)
+			return
+		}
 
-	// Fetch the file from MinIO
-	object, err := storage.GetFile(r.Context(), s.MinioClient, hash)
-	if err != nil {
-		http.Error(w, "File not found", http.StatusNotFound)
-		return
-	}
-	defer func() {
-		_ = object.Close()
-	}()
+		// Fetch the file from MinIO
+		object, err := storage.GetFile(r.Context(), c.Minio, hash)
+		if err != nil {
+			http.Error(w, "File not found", http.StatusNotFound)
+			return
+		}
+		defer func() {
+			_ = object.Close()
+		}()
 
-	// Get object info needed for the headers
-	stat, err := object.Stat()
-	if err != nil {
-		http.Error(w, "File storage error", http.StatusInternalServerError)
-		return
-	}
-	name, format, err := db.GetFileName(r.Context(), s.DB, hash)
-	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
+		// Get object info needed for the headers
+		stat, err := object.Stat()
+		if err != nil {
+			http.Error(w, "File storage error", http.StatusInternalServerError)
+			return
+		}
+		name, format, err := db.GetFileName(r.Context(), c.DB, hash)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
 
-	contentType := mime.TypeByExtension(filepath.Ext(hash))
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
+		contentType := mime.TypeByExtension(filepath.Ext(hash))
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
 
-	// Set headers
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", name, format))
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", stat.Size))
+		// Set headers
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", name, format))
+		w.Header().Set("Content-Type", contentType)
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", stat.Size))
 
-	// Stream data directly to the response
-	_, err = io.Copy(w, object)
-	if err != nil {
-		log.Printf("Error streaming file: %v\n", err)
-		return
+		// Stream data directly to the response
+		_, err = io.Copy(w, object)
+		if err != nil {
+			log.Printf("Error streaming file: %v\n", err)
+			return
+		}
 	}
 }
 
-func (s *Server) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
-	const maxMemory = 10 << 20
-	if err := r.ParseMultipartForm(maxMemory); err != nil {
-		http.Error(w, "File too large or bad request", http.StatusBadRequest)
-		return
-	}
+func UploadFileHandler(c *core.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const maxMemory = 10 << 20
+		if err := r.ParseMultipartForm(maxMemory); err != nil {
+			http.Error(w, "File too large or bad request", http.StatusBadRequest)
+			return
+		}
 
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		http.Error(w, "Invalid file", http.StatusBadRequest)
-		return
-	}
-	fmt.Println(header)
-	defer file.Close()
+		file, header, err := r.FormFile("file")
+		if err != nil {
+			http.Error(w, "Invalid file", http.StatusBadRequest)
+			return
+		}
+		fmt.Println(header)
+		defer file.Close()
 
-	hash, err := db.AddTrack(r.Context(), s.DB, file, header.Size)
-	if err != nil {
-		http.Error(w, "Could not add track", http.StatusInternalServerError)
-		return
+		hash, err := db.AddTrack(r.Context(), c.DB, file, header.Size)
+		if err != nil {
+			http.Error(w, "Could not add track", http.StatusInternalServerError)
+			return
+		}
+		file.Seek(0, 0)
+		storage.Upload(r.Context(), c.Minio, hash, file, header.Size)
+		if err != nil {
+			http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
+		}
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprintf(w, "Upload Successful: %s", hash)
 	}
-	file.Seek(0, 0)
-	storage.Upload(r.Context(), s.MinioClient, hash, file, header.Size)
-	if err != nil {
-		http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
-	}
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "Upload Successful: %s", hash)
 }
