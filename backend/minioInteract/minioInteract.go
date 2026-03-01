@@ -1,12 +1,14 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log"
 	"os"
 	"strconv"
 
+	"github.com/dhowden/tag"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -92,4 +94,13 @@ func GetFile(ctx context.Context, minioClient *minio.Client, fileName string) (*
 		return nil, err
 	}
 	return object, err
+}
+
+func uploadTrackPicture(ctx context.Context, minioClient *minio.Client, name string, pic *tag.Picture) {
+	bucket := "album-cover"
+	reader := bytes.NewReader(pic.Data)
+	size := int64(len(pic.Data))
+	minioClient.PutObject(ctx, bucket, name, reader, size, minio.PutObjectOptions{
+		ContentType: pic.MIMEType,
+	})
 }
