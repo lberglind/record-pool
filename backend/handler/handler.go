@@ -115,7 +115,6 @@ func UploadFileHandler(c *core.Container) http.HandlerFunc {
 			http.Error(w, "Invalid file", http.StatusBadRequest)
 			return
 		}
-		fmt.Println(header)
 		defer file.Close()
 
 		hash, err := db.AddTrack(r.Context(), c.DB, file, header.Size)
@@ -124,7 +123,7 @@ func UploadFileHandler(c *core.Container) http.HandlerFunc {
 			return
 		}
 		file.Seek(0, 0)
-		storage.Upload(r.Context(), c.Minio, hash, file, header.Size)
+		err = storage.Upload(r.Context(), c.Minio, hash, file, header.Size)
 		if err != nil {
 			http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
 		}

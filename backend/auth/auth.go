@@ -128,10 +128,10 @@ func SlackCallbackHandler(c *core.Container) http.HandlerFunc {
 		}
 		fmt.Printf("DEBUG: User ID: %s, Email: %s, Name: %s, RealName: %s\n", user.ID, user.Profile.Email, user.Name, user.Profile.RealName)
 
-		// For PoC, Later store in database
 		sessionID, err := db.AddUser(r.Context(), c.DB, user.Profile.Email, user.Name)
 		if err != nil {
 			http.Error(w, "Failed the database checks: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		http.SetCookie(w, &http.Cookie{

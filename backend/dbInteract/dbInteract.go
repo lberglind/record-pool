@@ -86,7 +86,7 @@ func GetEmailFromSession(ctx context.Context, pool *pgxpool.Pool, session string
 
 	query := `
 		SELECT u.email FROM users u
-		JOIN sessions s ON u.user_id == s.user_id
+		JOIN sessions s ON u.user_id = s.user_id
 		WHERE s.session_id = $1
 		AND s.expires > NOW()
 		`
