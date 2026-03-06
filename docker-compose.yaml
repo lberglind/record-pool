@@ -1,46 +1,12 @@
 services:
-#  backend:
-#    build: ./backend
-#    container_name: backend
-#    ports:
-#      - "8080:8080"
-#    env_file:
-#      - .env
-#    #environment:
-#    #  -  DATABASE_URL=postgres://admin:password@database:5432/recordpool
-#    #  -  MINIO_ENDPOINT=localhost:9000
-#    #  -  MINIO_ROOT_USER=admin
-#    #  -  MINIO_ROOT_PASSWORD=password
-#    #  -  MINIO_USE_SLL=false
-#    #  -  MINIO_BUCKET_TRACKS=recordpool
-#    depends_on:
-#      database:
-#        condition: service_healthy
-#      minio:
-#        condition: service_started
-
-#  frontend:
-#    image: node:20
-#    container_name: frontend
-#    working_dir: /app
-#    volumes:
-#      - ./frontend:/app
-#      - /app/node_modules
-#    ports:
-#      - "5173:5173"
-#    entrypoint: [sh, -c, "npm install && exec npm run dev -- --host 0.0.0.0"]
-#    environment:
-#      - VITE_API_URL=http://localhost:8080
-
-
   database:
     image: postgres:15-alpine
     container_name: recordpool_db
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: recordpool
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
       TZ: CET
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -48,7 +14,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d recordpool"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -58,8 +24,8 @@ services:
     container_name: recordpool_minio
     restart: always
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: password
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000" # API-Port
       - "9001:9001" # Web-GUI-port
@@ -67,11 +33,6 @@ services:
     volumes:
       - minio_data:/data
 
-
 volumes:
   postgres_data:
   minio_data:
-
-
-
-
