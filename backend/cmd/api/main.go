@@ -7,11 +7,10 @@ import (
 	"net/http"
 	"os"
 	"record-pool/auth"
-	"record-pool/handler"
+	handler "record-pool/handler"
 	core "record-pool/internal"
 
-	db "record-pool/dbInteract"
-	storage "record-pool/minioInteract"
+	storage "record-pool/internal/storage"
 
 	"github.com/joho/godotenv"
 )
@@ -24,7 +23,7 @@ func main() {
 
 	// Initialize dependencies
 	ctx := context.Background()
-	pool := db.Connect(ctx)
+	pool := storage.Connect(ctx)
 	defer pool.Close()
 
 	minioClient := storage.Init()

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	db "record-pool/dbInteract"
 	core "record-pool/internal"
+	"record-pool/internal/storage"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -128,7 +128,7 @@ func SlackCallbackHandler(c *core.Container) http.HandlerFunc {
 		}
 		fmt.Printf("DEBUG: User ID: %s, Email: %s, Name: %s, RealName: %s\n", user.ID, user.Profile.Email, user.Name, user.Profile.RealName)
 
-		sessionID, err := db.AddUser(r.Context(), c.DB, user.Profile.Email, user.Name)
+		sessionID, err := storage.AddUser(r.Context(), c.DB, user.Profile.Email, user.Name)
 		if err != nil {
 			http.Error(w, "Failed the database checks: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -158,7 +158,7 @@ func MeHandler(c *core.Container) http.HandlerFunc {
 
 		sessionID := cookie.Value
 
-		email, err := db.GetEmailFromSession(r.Context(), c.DB, sessionID)
+		email, err := storage.GetEmailFromSession(r.Context(), c.DB, sessionID)
 
 		fmt.Println(email)
 		if err != nil {

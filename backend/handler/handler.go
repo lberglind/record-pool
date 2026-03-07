@@ -9,36 +9,13 @@ import (
 	"net/http"
 	"path/filepath"
 
-	db "record-pool/dbInteract"
 	core "record-pool/internal"
-	storage "record-pool/minioInteract"
+	"record-pool/internal/storage"
 )
-
-//func Upload(ctx context.Context, pool *pgxpool.Pool, minioClient *minio.Client, filePath string) {
-//	hash, err := db.AddTrack(ctx, pool, filePath)
-//	if err != nil {
-//		log.Printf("Could not insert track in database: %s\n", err)
-//	} else {
-//		storage.UploadFile(ctx, minioClient, hash, filePath)
-//	}
-//}
-
-//func (s *Server) ListFileHandler(w http.ResponseWriter, r *http.Request) {
-//	files, err := storage.FetchAllFilenames(r.Context(), s.MinioClient)
-//	if err != nil {
-//		http.Error(w, "Failed to fetch files from storage", http.StatusInternalServerError)
-//		return
-//	}
-//	w.Header().Set("Content-Type", "application/json")
-//	err = json.NewEncoder(w).Encode(files)
-//	if err != nil {
-//		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
-//	}
-//}
 
 func ListAllFilesHandler(c *core.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tracks, err := db.GetAllTracks(r.Context(), c.DB)
+		tracks, err := storage.GetAllTracks(r.Context(), c.DB)
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
@@ -77,7 +54,7 @@ func DownloadFileHandler(c *core.Container) http.HandlerFunc {
 			http.Error(w, "File storage error", http.StatusInternalServerError)
 			return
 		}
-		name, format, err := db.GetFileName(r.Context(), c.DB, hash)
+		name, format, err := storage.GetFileName(r.Context(), c.DB, hash)
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
@@ -117,7 +94,7 @@ func UploadFileHandler(c *core.Container) http.HandlerFunc {
 		}
 		defer file.Close()
 
-		hash, err := db.AddTrack(r.Context(), c.DB, file, header.Size)
+		hash, err := storage.AddTrack(r.Context(), c.DB, file, header.Size)
 		if err != nil {
 			http.Error(w, "Could not add track", http.StatusInternalServerError)
 			return
