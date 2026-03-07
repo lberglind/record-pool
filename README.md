@@ -25,7 +25,10 @@ ngrok and Caddy for reverse proxy during development (needed for slack authentic
 
 I currently use tmux to run the different scripts in different windows for dev purposes.
 
-- Set up environment variables. Can be found in `.env_example`
+- Set up environment variables. Can be found in `.env_example`. All environment variables
+should at the moment be in the root directory except for `NEXT_PUBLIC_API_URL` which should
+be in frontend/.env
+
 
 - Run docker containers: `$ docker compose up -d`
 
@@ -37,7 +40,7 @@ $ go run main.go
 
 - Start frontend:
 ```
-$ cd record-pool-frontend/
+$ cd frontend/
 $ npm install
 $ npm run dev
 ```
@@ -49,7 +52,3 @@ $ ngrok http 8000
 ```
 
 The project can now be accessed through your personal ngrok link
-
-
-
-
