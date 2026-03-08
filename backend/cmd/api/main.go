@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"record-pool/auth"
 	handler "record-pool/handler"
 	core "record-pool/internal"
 
+	"record-pool/internal/slack"
 	storage "record-pool/internal/storage"
 
 	"github.com/joho/godotenv"
@@ -34,15 +34,15 @@ func main() {
 		Minio: minioClient,
 	}
 
-	auth.Init()
+	slackConfig := slack.Init()
 
 	// Map URLs to functions
 	http.HandleFunc("/tracks", enableCORS(handler.ListAllFilesHandler(container)))
 	http.HandleFunc("/download", enableCORS(handler.DownloadFileHandler(container)))
 	http.HandleFunc("/upload", enableCORS(handler.UploadFileHandler(container)))
-	http.HandleFunc("/auth/slack", enableCORS(auth.SlackLogInHandler))
-	http.HandleFunc("/auth/slack/callback", enableCORS(auth.SlackCallbackHandler(container)))
-	http.HandleFunc("/me", enableCORS(auth.MeHandler(container)))
+	http.HandleFunc("/auth/slack", enableCORS(slack.SlackLogInHandler(slackConfig)))
+	http.HandleFunc("/auth/slack/callback", enableCORS(handler.SlackCallbackHandler(container, slackConfig)))
+	http.HandleFunc("/me", enableCORS(handler.MeHandler(container)))
 
 	// Execution. Keep processes alive
 	fmt.Println("Backend is live on http://localhost:8080")
