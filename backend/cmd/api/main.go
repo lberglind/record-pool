@@ -11,6 +11,7 @@ import (
 
 	"record-pool/internal/slack"
 	storage "record-pool/internal/storage"
+	"record-pool/internal/storage/postgres"
 
 	"github.com/joho/godotenv"
 )
@@ -26,6 +27,9 @@ func main() {
 	pool := storage.Connect(ctx)
 	defer pool.Close()
 
+	trackRepo := postgres.NewTrackRepo(pool)
+	trackHandlers := handler.TrackHandler{Repo: trackRepo}
+
 	minioClient := storage.Init()
 
 	// Create shared container
@@ -37,7 +41,7 @@ func main() {
 	slackConfig := slack.Init()
 
 	// Map URLs to functions
-	http.HandleFunc("/tracks", enableCORS(handler.ListAllFilesHandler(container)))
+	http.HandleFunc("/tracks", enableCORS(trackHandlers.ListAllTracks()))
 	http.HandleFunc("/download", enableCORS(handler.DownloadFileHandler(container)))
 	http.HandleFunc("/upload", enableCORS(handler.UploadFileHandler(container)))
 	http.HandleFunc("/auth/slack", enableCORS(slack.SlackLogInHandler(slackConfig)))
