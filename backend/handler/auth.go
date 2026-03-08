@@ -1,55 +1,42 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
-	core "record-pool/internal"
-	"record-pool/internal/slack"
-	"record-pool/internal/storage"
+	"record-pool/internal/domain"
+	"record-pool/internal/service"
 	"time"
-
-	"golang.org/x/oauth2"
 )
 
-func SlackCallbackHandler(c *core.Container, cfg *oauth2.Config) http.HandlerFunc {
+type AuthHandler struct {
+	Users    domain.UserRepository
+	Sessions domain.SessionRepository
+	Auth     service.SlackAuth
+}
+
+func (h *AuthHandler) SlackCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
 		if code == "" {
 			http.Error(w, "No code in request", http.StatusBadRequest)
 			return
 		}
+		authUser, err := h.Auth.UserFromCode(r.Context(), code)
 
-		token, err := cfg.Exchange(r.Context(), code)
 		if err != nil {
-			http.Error(w, "Failed to exchange token "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		raw, ok := token.Extra("authed_user").(map[string]any)
-		if !ok {
-			http.Error(w, "Could not find user token", 500)
+			http.Error(w, "Auth failed: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		userAccessToken, ok := raw["access_token"].(string)
-		if !ok {
-			http.Error(w, "User Token is missing", 500)
-			return
-		}
-
-		userID, _ := raw["id"].(string)
-
-		user, err := slack.GetSlackUserInfo(userAccessToken, userID)
-		if err != nil {
-			http.Error(w, "Failer to get user info: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Printf("DEBUG: User ID: %s, Email: %s, Name: %s, RealName: %s\n", user.ID, user.Profile.Email, user.Name, user.Profile.RealName)
-
-		sessionID, err := storage.AddUser(r.Context(), c.DB, user.Profile.Email, user.Name)
+		userID, err := h.Users.UpsertUser(r.Context(), authUser.Email, authUser.Name)
 		if err != nil {
 			http.Error(w, "Failed the database checks: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		sessionID, err := h.Sessions.CreateSession(r.Context(), userID)
+		if err != nil {
+			http.Error(w, "Session creation failed: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -67,27 +54,9 @@ func SlackCallbackHandler(c *core.Container, cfg *oauth2.Config) http.HandlerFun
 	}
 }
 
-func MeHandler(c *core.Container) http.HandlerFunc {
+func (h *AuthHandler) SlackLogIn() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session")
-		if err != nil {
-			http.Error(w, "Not logged in", http.StatusUnauthorized)
-			return
-		}
-
-		sessionID := cookie.Value
-
-		email, err := storage.GetEmailFromSession(r.Context(), c.DB, sessionID)
-
-		fmt.Println(email)
-		if err != nil {
-			http.Error(w, "Invalid session", http.StatusUnauthorized)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"email": email,
-		})
+		url := h.Auth.AuthCodeURL("random-state-string")
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	}
 }

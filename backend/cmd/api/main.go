@@ -27,8 +27,24 @@ func main() {
 	pool := storage.Connect(ctx)
 	defer pool.Close()
 
+	// Repos
 	trackRepo := postgres.NewTrackRepo(pool)
+	userRepo := postgres.NewUserRepo(pool)
+	sessionRepo := postgres.NewSessionRepo(pool)
+
+	// Slack auth service
+	slackConfig := slack.Init()
+	slackAuth := slack.NewAuthService(slackConfig, http.DefaultClient)
+
+	// Handlers
 	trackHandlers := handler.TrackHandler{Repo: trackRepo}
+	sessionHandlers := handler.SessionHandler{Repo: sessionRepo}
+
+	authHandlers := handler.AuthHandler{
+		Users:    userRepo,
+		Sessions: sessionRepo,
+		Auth:     slackAuth,
+	}
 
 	minioClient := storage.Init()
 
@@ -38,15 +54,13 @@ func main() {
 		Minio: minioClient,
 	}
 
-	slackConfig := slack.Init()
-
 	// Map URLs to functions
 	http.HandleFunc("/tracks", enableCORS(trackHandlers.ListAllTracks()))
 	http.HandleFunc("/download", enableCORS(handler.DownloadFileHandler(container)))
 	http.HandleFunc("/upload", enableCORS(handler.UploadFileHandler(container)))
-	http.HandleFunc("/auth/slack", enableCORS(slack.SlackLogInHandler(slackConfig)))
-	http.HandleFunc("/auth/slack/callback", enableCORS(handler.SlackCallbackHandler(container, slackConfig)))
-	http.HandleFunc("/me", enableCORS(handler.MeHandler(container)))
+	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))
+	http.HandleFunc("/auth/slack/callback", enableCORS(authHandlers.SlackCallback()))
+	http.HandleFunc("/me", enableCORS(sessionHandlers.Me()))
 
 	// Execution. Keep processes alive
 	fmt.Println("Backend is live on http://localhost:8080")
