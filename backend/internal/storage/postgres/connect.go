@@ -11,7 +11,6 @@ import (
 
 func Connect(ctx context.Context) *pgxpool.Pool {
 	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
-	fmt.Println(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Printf("Unable to connect to database: %v\n", err)
 		os.Exit(1)

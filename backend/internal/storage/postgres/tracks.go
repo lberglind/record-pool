@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"record-pool/internal/domain"
 	"strings"
@@ -96,7 +95,7 @@ func (r *TrackRepo) AddTrack(ctx context.Context, file multipart.File, size int6
 	var trackID string
 	err = r.pool.QueryRow(ctx, query, fileHash, format, minioPath, title, artist, size).Scan(&trackID)
 	if err != nil {
-		log.Printf("Error inserting track in tracks: %s\n", err)
+		return "", fmt.Errorf("Error inserting track in tracks")
 	} else {
 		fmt.Printf("Track: %s inserted.\n", title)
 	}

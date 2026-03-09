@@ -96,7 +96,11 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 			http.Error(w, "Could not add track", http.StatusInternalServerError)
 			return
 		}
-		file.Seek(0, 0)
+		_, err = file.Seek(0, 0)
+		if err != nil {
+			http.Error(w, "Failed to process file", http.StatusInternalServerError)
+			return
+		}
 		err = h.Store.Upload(r.Context(), hash, file, header.Size)
 		if err != nil {
 			http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
