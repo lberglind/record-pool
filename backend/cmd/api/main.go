@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"record-pool/handler"
+	"record-pool/middleware"
 
 	"record-pool/internal/slack"
 	"record-pool/internal/storage/minio"
@@ -50,15 +51,18 @@ func main() {
 	}
 
 	// Map API Endpoints to functions
-	http.HandleFunc("/tracks", enableCORS(trackHandlers.ListAllTracks()))
-	http.HandleFunc("/download", enableCORS(trackHandlers.Download()))
-	http.HandleFunc("/upload", enableCORS(trackHandlers.Upload()))
+	// Protected Routes
+	http.HandleFunc("/tracks", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.ListAllTracks())))
+	http.HandleFunc("/download", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Download())))
+	http.HandleFunc("/upload", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Upload())))
+
+	// Public Routes
 	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))
 	http.HandleFunc("/auth/slack/callback", enableCORS(authHandlers.SlackCallback()))
 	http.HandleFunc("/me", enableCORS(sessionHandlers.Me()))
 
 	// Execution. Keep processes alive
-	log.Println("Backend is live on http://localhost:8080")
+	log.Println("Backend is live on port 8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
