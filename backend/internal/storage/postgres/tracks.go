@@ -3,8 +3,9 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
 	"record-pool/internal/domain"
-	"record-pool/internal/storage/track"
+	"record-pool/internal/track"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -62,8 +63,7 @@ func (r *TrackRepo) AddTrack(ctx context.Context, trackData track.Metadata, size
 	_, err := r.pool.Exec(ctx, query, trackData.Hash, trackData.FileType, trackData.Title, trackData.Artist, size)
 	if err != nil {
 		return fmt.Errorf("Error inserting track: %s: %w", trackData.Title, err)
-	} else {
-		fmt.Printf("Track: %s inserted.\n", trackData.Title)
 	}
+	log.Printf("Track: %s inserted.\n", trackData.Title)
 	return nil
 }

@@ -2,7 +2,7 @@ package domain
 
 import (
 	"context"
-	"record-pool/internal/storage/track"
+	"record-pool/internal/track"
 	"time"
 )
 

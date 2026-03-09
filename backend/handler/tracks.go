@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"record-pool/internal/domain"
-	"record-pool/internal/storage/track"
+	"record-pool/internal/track"
 )
 
 type TrackHandler struct {
@@ -93,6 +93,10 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 		defer file.Close()
 
 		trackData, err := track.ExtractMetadata(file)
+		if err != nil {
+			http.Error(w, "Could not read track metadata", http.StatusBadRequest)
+			return
+		}
 		err = h.Repo.AddTrack(r.Context(), trackData, header.Size)
 		if err != nil {
 			http.Error(w, "Could not add track: "+err.Error(), http.StatusInternalServerError)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +17,7 @@ import (
 func main() {
 	err := godotenv.Load("../.env")
 	if err != nil {
-		fmt.Println("Couldn't find file .env, uses system variables")
+		log.Println("Couldn't find file .env, uses system variables")
 	}
 
 	// Initialize dependencies
@@ -59,7 +58,7 @@ func main() {
 	http.HandleFunc("/me", enableCORS(sessionHandlers.Me()))
 
 	// Execution. Keep processes alive
-	fmt.Println("Backend is live on http://localhost:8080")
+	log.Println("Backend is live on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}

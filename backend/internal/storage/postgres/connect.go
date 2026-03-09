@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -17,9 +16,9 @@ func Connect(ctx context.Context) *pgxpool.Pool {
 	}
 	err = pool.Ping(ctx)
 	if err != nil {
-		log.Printf("Databse unreachable: %v\n", err)
+		log.Printf("Database unreachable: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("Successfully connected to database!")
+	log.Println("Successfully connected to database!")
 	return pool
 }
