@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"mime/multipart"
 	"time"
 )
 
@@ -17,4 +18,5 @@ type Track struct {
 type TrackRepository interface {
 	ListAllTracks(ctx context.Context) ([]Track, error)
 	GetNameAndFormat(ctx context.Context, hash string) (title, format string, err error)
+	AddTrack(ctx context.Context, file multipart.File, size int64) (string, error)
 }

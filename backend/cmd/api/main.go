@@ -6,38 +6,42 @@ import (
 	"log"
 	"net/http"
 	"os"
-	handler "record-pool/handler"
-	core "record-pool/internal"
+	"record-pool/handler"
 
 	"record-pool/internal/slack"
-	storage "record-pool/internal/storage"
+	"record-pool/internal/storage/minio"
 	"record-pool/internal/storage/postgres"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load("../.env") // Only used when not running in Docker
+	err := godotenv.Load("../.env")
 	if err != nil {
 		fmt.Println("Couldn't find file .env, uses system variables")
 	}
 
 	// Initialize dependencies
 	ctx := context.Background()
-	pool := storage.Connect(ctx)
+	pool := postgres.Connect(ctx)
 	defer pool.Close()
+	minioClient := minio.NewClient()
 
-	// Repos
+	// Repos and storage
 	trackRepo := postgres.NewTrackRepo(pool)
 	userRepo := postgres.NewUserRepo(pool)
 	sessionRepo := postgres.NewSessionRepo(pool)
+	trackStorage := minio.NewObjectStore(minioClient)
 
 	// Slack auth service
-	slackConfig := slack.Init()
+	slackConfig := slack.NewConfig()
 	slackAuth := slack.NewAuthService(slackConfig, http.DefaultClient)
 
 	// Handlers
-	trackHandlers := handler.TrackHandler{Repo: trackRepo}
+	trackHandlers := handler.TrackHandler{
+		Repo:  trackRepo,
+		Store: trackStorage,
+	}
 	sessionHandlers := handler.SessionHandler{Repo: sessionRepo}
 
 	authHandlers := handler.AuthHandler{
@@ -46,18 +50,10 @@ func main() {
 		Auth:     slackAuth,
 	}
 
-	minioClient := storage.Init()
-
-	// Create shared container
-	container := &core.Container{
-		DB:    pool,
-		Minio: minioClient,
-	}
-
-	// Map URLs to functions
+	// Map API Endpoints to functions
 	http.HandleFunc("/tracks", enableCORS(trackHandlers.ListAllTracks()))
-	http.HandleFunc("/download", enableCORS(handler.DownloadFileHandler(container)))
-	http.HandleFunc("/upload", enableCORS(handler.UploadFileHandler(container)))
+	http.HandleFunc("/download", enableCORS(trackHandlers.Download()))
+	http.HandleFunc("/upload", enableCORS(trackHandlers.Upload()))
 	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))
 	http.HandleFunc("/auth/slack/callback", enableCORS(authHandlers.SlackCallback()))
 	http.HandleFunc("/me", enableCORS(sessionHandlers.Me()))

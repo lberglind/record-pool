@@ -40,6 +40,19 @@ func NewAuthService(oauth *oauth2.Config, httpClient *http.Client) *AuthService 
 	}
 }
 
+func NewConfig() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     os.Getenv("SLACK_CLIENT_ID"),
+		ClientSecret: os.Getenv("SLACK_CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("REDIRECT_URL"),
+		Scopes:       []string{"users:read", "users:read.email"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://slack.com/oauth/v2/authorize",
+			TokenURL: "https://slack.com/api/oauth.v2.access",
+		},
+	}
+}
+
 func (s *AuthService) AuthCodeURL(state string) string {
 	return s.OAuth.AuthCodeURL(
 		state,
@@ -66,10 +79,10 @@ func (s *AuthService) UserFromCode(ctx context.Context, code string) (*service.A
 	if userID == "" {
 		return nil, fmt.Errorf("missing authed_user id")
 	}
-	return s.GetUserInfo(ctx, userAccessToken, userID)
+	return s.getUserInfo(userAccessToken, userID)
 }
 
-func (s *AuthService) GetUserInfo(ctx context.Context, accessToken, userID string) (*service.AuthUser, error) {
+func (s *AuthService) getUserInfo(accessToken, userID string) (*service.AuthUser, error) {
 	req, err := http.NewRequest("GET",
 		fmt.Sprintf("https://slack.com/api/users.info?user=%s", userID),
 		nil,
@@ -100,17 +113,4 @@ func (s *AuthService) GetUserInfo(ctx context.Context, accessToken, userID strin
 		Name:  info.User.Name,
 	}, nil
 
-}
-
-func Init() *oauth2.Config {
-	return &oauth2.Config{
-		ClientID:     os.Getenv("SLACK_CLIENT_ID"),
-		ClientSecret: os.Getenv("SLACK_CLIENT_SECRET"),
-		RedirectURL:  os.Getenv("REDIRECT_URL"),
-		Scopes:       []string{"users:read", "users:read.email"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://slack.com/oauth/v2/authorize",
-			TokenURL: "https://slack.com/api/oauth.v2.access",
-		},
-	}
 }

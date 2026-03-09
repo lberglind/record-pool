@@ -11,5 +11,4 @@ type AuthUser struct {
 type SlackAuth interface {
 	AuthCodeURL(state string) string
 	UserFromCode(ctx context.Context, code string) (*AuthUser, error)
-	GetUserInfo(ctx context.Context, token, id string) (*AuthUser, error)
 }
