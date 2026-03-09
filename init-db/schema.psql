@@ -19,7 +19,6 @@ CREATE TABLE tracks (
     track_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     file_hash TEXT UNIQUE NOT NULL,
     file_format VARCHAR(10) NOT NULL,
-    file_path TEXT NOT NULL,
     title TEXT,
     artist TEXT,
     size DECIMAL,

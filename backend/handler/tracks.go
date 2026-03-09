@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"record-pool/internal/domain"
+	"record-pool/internal/storage/track"
 )
 
 type TrackHandler struct {
@@ -91,9 +92,10 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 		}
 		defer file.Close()
 
-		hash, err := h.Repo.AddTrack(r.Context(), file, header.Size)
+		trackData, err := track.ExtractMetadata(file)
+		err = h.Repo.AddTrack(r.Context(), trackData, header.Size)
 		if err != nil {
-			http.Error(w, "Could not add track", http.StatusInternalServerError)
+			http.Error(w, "Could not add track: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		_, err = file.Seek(0, 0)
@@ -101,12 +103,12 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 			http.Error(w, "Failed to process file", http.StatusInternalServerError)
 			return
 		}
-		err = h.Store.Upload(r.Context(), hash, file, header.Size)
+		err = h.Store.Upload(r.Context(), trackData.Hash, file, header.Size)
 		if err != nil {
 			http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, "Upload Successful: %s", hash)
+		fmt.Fprintf(w, "Upload Successful: %s", trackData.Hash)
 	}
 }

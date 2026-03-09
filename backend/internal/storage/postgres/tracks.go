@@ -2,15 +2,10 @@ package postgres
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"record-pool/internal/domain"
-	"strings"
+	"record-pool/internal/storage/track"
 
-	"github.com/dhowden/tag"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -58,46 +53,17 @@ func (r *TrackRepo) GetNameAndFormat(ctx context.Context, hash string) (string, 
 
 }
 
-func (r *TrackRepo) AddTrack(ctx context.Context, file multipart.File, size int64) (string, error) {
-	// 1. Hash the file
-	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
-	}
-	fileHash := hex.EncodeToString(hash.Sum(nil))
+func (r *TrackRepo) AddTrack(ctx context.Context, trackData track.Metadata, size int64) error {
 
-	// 2. Reset file pointer and get Tags
-	_, err := file.Seek(0, 0)
-	if err != nil {
-		return "", fmt.Errorf("Failed to reset file pointer")
-	}
-
-	m, err := tag.ReadFrom(file)
-	if err != nil {
-		return "", fmt.Errorf("Failed to read tags from file")
-	}
-	title := m.Title()
-	artist := m.Artist()
-	format := strings.ToLower(string(m.FileType()))
-
-	// 3. Reset file pointer and get duration
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		return "", fmt.Errorf("Failed to reset file pointer")
-	}
-
-	// 4. Insert into database
-	minioPath := fmt.Sprintf("tracks/%s.%s", fileHash, format)
 	query := `INSERT INTO tracks 
-	(file_hash, file_format, file_path, title, artist, size)
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING track_id`
+	(file_hash, file_format, title, artist, size)
+	VALUES ($1, $2, $3, $4, $5)`
 
-	var trackID string
-	err = r.pool.QueryRow(ctx, query, fileHash, format, minioPath, title, artist, size).Scan(&trackID)
+	_, err := r.pool.Exec(ctx, query, trackData.Hash, trackData.FileType, trackData.Title, trackData.Artist, size)
 	if err != nil {
-		return "", fmt.Errorf("Error inserting track in tracks")
+		return fmt.Errorf("Error inserting track: %s: %w", trackData.Title, err)
 	} else {
-		fmt.Printf("Track: %s inserted.\n", title)
+		fmt.Printf("Track: %s inserted.\n", trackData.Title)
 	}
-	return fileHash, nil
+	return nil
 }
