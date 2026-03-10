@@ -8,6 +8,7 @@ import (
 	"record-pool/handler"
 	"record-pool/middleware"
 
+	"record-pool/internal/service"
 	"record-pool/internal/slack"
 	"record-pool/internal/storage/minio"
 	"record-pool/internal/storage/postgres"
@@ -32,17 +33,24 @@ func main() {
 	userRepo := postgres.NewUserRepo(pool)
 	sessionRepo := postgres.NewSessionRepo(pool)
 	metadataRepo := postgres.NewTrackMetadataRepo(pool)
-
+	stagingRepo := postgres.NewXMLStagingRepo(pool)
 	trackStorage := minio.NewObjectStore(minioClient)
 
-	// Slack auth service
+	// Services
 	slackConfig := slack.NewConfig()
 	slackAuth := slack.NewAuthService(slackConfig, http.DefaultClient)
+
+	xmlSync := &service.XMLSyncService{
+		Staging:  stagingRepo,
+		Metadata: metadataRepo,
+	}
 
 	// Handlers
 	trackHandlers := handler.TrackHandler{
 		Repo:         trackRepo,
 		MetadataRepo: metadataRepo,
+		StagingRepo:  stagingRepo,
+		XMLSync:      xmlSync,
 		Store:        trackStorage,
 	}
 	sessionHandlers := handler.SessionHandler{Repo: sessionRepo}
@@ -58,6 +66,7 @@ func main() {
 	http.HandleFunc("/tracks", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.ListAllTracks())))
 	http.HandleFunc("/download", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Download())))
 	http.HandleFunc("/upload", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Upload())))
+	http.HandleFunc("/upload/xml", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.UploadXML())))
 
 	// Public Routes
 	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))

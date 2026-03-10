@@ -26,6 +26,7 @@ type Track struct {
 	Size       int        `xml:"Size,attr"`
 	Duration   int        `xml:"TotalTime,attr"`
 	Year       int        `xml:"Year,attr"`
+	Composer   string     `xml:"Composer,attr"`
 	BPM        float64    `xml:"AverageBpm,attr"`
 	DateAdded  string     `xml:"DateAdded,attr"`
 	BitRate    int        `xml:"BitRate,attr"`

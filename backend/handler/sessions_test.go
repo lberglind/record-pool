@@ -10,19 +10,22 @@ import (
 
 	"record-pool/handler"
 	"record-pool/internal/domain"
+
+	"github.com/google/uuid"
 )
 
 var _ domain.SessionRepository = &mockSessionRepo{}
 
 type mockSessionRepo struct {
 	email         string
-	emailErr      error
+	userID        uuid.UUID
+	userErr       error
 	createSession string
 	createErr     error
 }
 
-func (m *mockSessionRepo) EmailFromSession(ctx context.Context, session string) (string, error) {
-	return m.email, m.emailErr
+func (m *mockSessionRepo) UserFromSession(ctx context.Context, session string) (string, uuid.UUID, error) {
+	return m.email, m.userID, m.userErr
 }
 
 func (m *mockSessionRepo) CreateSession(ctx context.Context, userID string) (string, error) {
@@ -43,7 +46,7 @@ func TestMe_NoCookie_Returns401(t *testing.T) {
 
 func TestMe_InvalidSession_Returns401(t *testing.T) {
 	h := &handler.SessionHandler{
-		Repo: &mockSessionRepo{emailErr: errors.New("session not found")},
+		Repo: &mockSessionRepo{userErr: errors.New("session not found")},
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/me", nil)
