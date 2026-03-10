@@ -68,7 +68,9 @@ func main() {
 
 	// Map API Endpoints to functions
 	// Protected Routes
+
 	http.HandleFunc("/tracks", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.ListAllTracks())))
+	http.HandleFunc("/tracks/page", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.ListTrackPage())))
 	http.HandleFunc("/download", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Download())))
 	http.HandleFunc("/upload", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Upload())))
 	http.HandleFunc("/upload/xml", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.UploadXML())))

@@ -17,6 +17,7 @@ import (
 	"record-pool/internal/track"
 	"record-pool/middleware"
 	"record-pool/parser"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,7 +35,7 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tracks, err := h.Repo.ListAllTracks(r.Context())
 		if err != nil {
-			http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Database error: ", http.StatusInternalServerError)
 			return
 		}
 
@@ -43,6 +44,40 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
 		}
+	}
+}
+
+func (h *TrackHandler) ListTrackPage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		date := r.URL.Query().Get("date")
+		hash := r.URL.Query().Get("hash")
+		limitStr := r.URL.Query().Get("limit")
+		limit := 50
+		if limitStr != "" {
+			if parsed, err := strconv.Atoi(limitStr); err == nil && parsed > 0 {
+				limit = min(parsed, 200)
+			}
+		}
+		var cursor *time.Time
+		if date != "" {
+			t, err := time.Parse(time.RFC3339, date)
+			if err != nil {
+				http.Error(w, "Invalid date format, expected RFC3339", http.StatusBadRequest)
+				return
+			}
+			cursor = &t
+		}
+		cursorHash := ""
+		if cursor != nil {
+			cursorHash = hash
+		}
+		tracks, err := h.Repo.ListTrackPage(r.Context(), cursor, cursorHash, limit)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(tracks)
 	}
 }
 
