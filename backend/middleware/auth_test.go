@@ -8,16 +8,19 @@ import (
 	"testing"
 
 	"record-pool/middleware"
+
+	"github.com/google/uuid"
 )
 
 // mockSessionRepo satisfies domain.SessionRepository
 type mockSessionRepo struct {
-	email    string
-	emailErr error
+	email   string
+	userID  uuid.UUID
+	userErr error
 }
 
-func (m *mockSessionRepo) EmailFromSession(_ context.Context, _ string) (string, error) {
-	return m.email, m.emailErr
+func (m *mockSessionRepo) UserFromSession(_ context.Context, _ string) (string, uuid.UUID, error) {
+	return m.email, m.userID, m.userErr
 }
 
 func (m *mockSessionRepo) CreateSession(_ context.Context, _ string) (string, error) {
@@ -44,7 +47,7 @@ func TestRequireAuth_InvalidSession_Returns401(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	repo := &mockSessionRepo{emailErr: errors.New("session not found")}
+	repo := &mockSessionRepo{userErr: errors.New("session not found")}
 	handler := middleware.RequireAuth(repo, next)
 
 	req := httptest.NewRequest(http.MethodGet, "/tracks", nil)
