@@ -6,7 +6,9 @@ import (
 	"log"
 	"record-pool/internal/domain"
 	"record-pool/internal/track"
+	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -65,4 +67,46 @@ func (r *TrackRepo) AddTrack(ctx context.Context, trackData track.Metadata, size
 	}
 	log.Printf("Track: %s inserted.\n", trackData.Title)
 	return nil
+}
+
+func (r *TrackRepo) ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash string, limit int) ([]domain.Track, error) {
+	var rows pgx.Rows
+	var err error
+
+	if lpDate == nil || lpHash == "" {
+		query := `SELECT hash, file_format, title, artist, created_at 
+			FROM TRACKS ORDER BY created_at DESC, hash DESC LIMIT $1`
+		rows, err = r.pool.Query(ctx, query, limit)
+	} else {
+		query := `SELECT hash, file_format, title, artist, created_at 
+		FROM tracks
+		WHERE (created_at, hash) < ($1, $2)
+		ORDER BY created_at DESC, hash DESC
+		LIMIT $3`
+		rows, err = r.pool.Query(ctx, query, lpDate, lpHash, limit)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tracks := []domain.Track{}
+	for rows.Next() {
+		var t domain.Track
+		err := rows.Scan(
+			&t.Hash,
+			&t.Format,
+			&t.Title,
+			&t.Artist,
+			&t.CreatedAt)
+		if err != nil {
+			continue
+		}
+		tracks = append(tracks, t)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+	return tracks, nil
 }

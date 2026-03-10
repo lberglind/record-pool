@@ -18,4 +18,5 @@ type TrackRepository interface {
 	ListAllTracks(ctx context.Context) ([]Track, error)
 	GetNameAndFormat(ctx context.Context, hash string) (title, format string, err error)
 	AddTrack(ctx context.Context, track track.Metadata, size int64) error
+	ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash string, limit int) ([]Track, error)
 }

@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"record-pool/handler"
 	"record-pool/internal/domain"
@@ -31,6 +32,13 @@ type mockTrackRepo struct {
 }
 
 func (m *mockTrackRepo) ListAllTracks(ctx context.Context) ([]domain.Track, error) {
+	if m.addTrackErr != nil { // reuse field for list error if needed
+		return nil, m.addTrackErr
+	}
+	return m.tracks, nil
+}
+
+func (m *mockTrackRepo) ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash string, limit int) ([]domain.Track, error) {
 	if m.addTrackErr != nil { // reuse field for list error if needed
 		return nil, m.addTrackErr
 	}
