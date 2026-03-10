@@ -31,6 +31,8 @@ func main() {
 	trackRepo := postgres.NewTrackRepo(pool)
 	userRepo := postgres.NewUserRepo(pool)
 	sessionRepo := postgres.NewSessionRepo(pool)
+	metadataRepo := postgres.NewTrackMetadataRepo(pool)
+
 	trackStorage := minio.NewObjectStore(minioClient)
 
 	// Slack auth service
@@ -39,8 +41,9 @@ func main() {
 
 	// Handlers
 	trackHandlers := handler.TrackHandler{
-		Repo:  trackRepo,
-		Store: trackStorage,
+		Repo:         trackRepo,
+		MetadataRepo: metadataRepo,
+		Store:        trackStorage,
 	}
 	sessionHandlers := handler.SessionHandler{Repo: sessionRepo}
 

@@ -1,0 +1,106 @@
+package postgres
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"record-pool/internal/domain"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type TrackMetadataRepo struct {
+	pool *pgxpool.Pool
+}
+
+func NewTrackMetadataRepo(pool *pgxpool.Pool) *TrackMetadataRepo {
+	return &TrackMetadataRepo{pool: pool}
+}
+
+func (r *TrackMetadataRepo) Upsert(ctx context.Context, meta domain.TrackMetadata) error {
+	cuePoints, err := json.Marshal(meta.CuePoints)
+	if err != nil {
+		return fmt.Errorf("failed to marshal cue points: %w", err)
+	}
+	beatgrid, err := json.Marshal(meta.Beatgrid)
+	if err != nil {
+		return fmt.Errorf("failed to marshal beatgrid: %w", err)
+	}
+
+	query := `INSERT INTO track_metadata (track_hash, uploaded_by, bpm, bitrate, cue_points, beatgrid)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (track_hash, uploaded_by)
+		DO UPDATE SET
+			bpm = EXCLUDED.bpm,
+			bitrate = EXCLUDED.bitrate,
+			cue_points = EXCLUDED.cue_points,
+			beatgrid = EXCLUDED.beatgrid,
+			createdAt = NOW()`
+	_, err = r.pool.Exec(ctx, query,
+		meta.TrackHash,
+		meta.UploadedBy,
+		meta.BPM,
+		meta.BitRate,
+		cuePoints,
+		beatgrid,
+	)
+	return err
+}
+
+func (r *TrackMetadataRepo) GetForTrack(ctx context.Context, trackHash string, uploadedBy uuid.UUID) (*domain.TrackMetadata, error) {
+	query := `SELECT * FROM track_metadata WHERE track = $1 AND uploaded_by = $2`
+
+	row := r.pool.QueryRow(ctx, query, trackHash, uploadedBy)
+	return scanMetadata(row)
+}
+
+func (r *TrackMetadataRepo) ListUploadersForTrack(ctx context.Context, trackHash string) ([]domain.TrackMetadata, error) {
+	query := `SELECT * FROM track_metadata WHERE track_hash = $1 ORDER BY created_at DESC`
+	rows, err := r.pool.Query(ctx, query, trackHash)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []domain.TrackMetadata
+	for rows.Next() {
+		meta, err := scanMetadata(rows)
+		if err != nil {
+			continue
+		}
+		results = append(results, *meta)
+	}
+	return results, nil
+}
+
+type scanner interface {
+	Scan(dest ...any) error
+}
+
+func scanMetadata(row scanner) (*domain.TrackMetadata, error) {
+	var meta domain.TrackMetadata
+	var rawCuePoints, rawBeatgrid []byte
+
+	err := row.Scan(
+		&meta.TrackHash,
+		&meta.UploadedBy,
+		&meta.BPM,
+		&meta.BitRate,
+		&rawBeatgrid,
+		&rawCuePoints,
+		&meta.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(rawCuePoints, &meta.CuePoints); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cue points: %w", err)
+	}
+	if err := json.Unmarshal(rawBeatgrid, &meta.Beatgrid); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal beatgrid: %w", err)
+	}
+
+	return &meta, nil
+}

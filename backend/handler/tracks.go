@@ -13,8 +13,9 @@ import (
 )
 
 type TrackHandler struct {
-	Repo  domain.TrackRepository
-	Store domain.ObjectStore
+	Repo         domain.TrackRepository
+	MetadataRepo domain.TrackMetadataRepository
+	Store        domain.ObjectStore
 }
 
 func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
