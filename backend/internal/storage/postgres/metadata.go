@@ -35,20 +35,20 @@ func (r *TrackMetadataRepo) Upsert(ctx context.Context, meta domain.TrackMetadat
 		ON CONFLICT (track_hash, uploaded_by)
 		DO UPDATE SET
 			bpm = EXCLUDED.bpm,
-			tonality = EXCLUDED.tonality
-			duration = EXCLUDED.duration
-			album = EXCLUDED.album
-			comments = EXCLUDED.comments
-			remixer = EXCLUDED.remixer
-			label = EXCLUDED.label
-			mix = EXCLUDED.mix
-			genre = EXCLUDED.genre
-			year = EXCLUDED.year
-			composer = EXCLUDED.composer
-			sample_rate = EXCLUDED.sample_rate
-			date_added = EXCLUDED.date_added
-			play_count = EXCLUDED.play_count
-			rating = EXCLUDED.rating
+			tonality = EXCLUDED.tonality,
+			duration_seconds = EXCLUDED.duration_seconds,
+			album = EXCLUDED.album,
+			comments = EXCLUDED.comments,
+			remixer = EXCLUDED.remixer,
+			label = EXCLUDED.label,
+			mix = EXCLUDED.mix,
+			genre = EXCLUDED.genre,
+			year = EXCLUDED.year,
+			composer = EXCLUDED.composer,
+			sample_rate = EXCLUDED.sample_rate,
+			date_added = EXCLUDED.date_added,
+			play_count = EXCLUDED.play_count,
+			rating = EXCLUDED.rating,
 			bitrate = EXCLUDED.bitrate,
 			cue_points = EXCLUDED.cue_points,
 			beatgrid = EXCLUDED.beatgrid,

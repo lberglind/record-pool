@@ -24,11 +24,11 @@ func (s *XMLSyncService) TrySync(ctx context.Context, uploadedBy uuid.UUID) {
 	for _, e := range entries {
 		if err := s.PromoteToMetadata(ctx, e, e.TrackHash); err != nil {
 			log.Printf("xml sync: failed to promote entry %d: %v\n", e.ID, err)
-			return
+			continue
 		}
 		if err := s.Staging.MarkSynced(ctx, e.ID, e.TrackHash); err != nil {
 			log.Printf("xml sync: failed to mark entry %d as synced: %v", e.ID, err)
-			return
+			continue
 		}
 	}
 }
