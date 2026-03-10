@@ -31,7 +31,7 @@ func (r *XMLStagingRepo) UpsertBatch(ctx context.Context, entries []domain.XMLSt
 		}
 
 		query := `INSERT INTO xml_staging
-			(uploaded_by, rekordbox_id, title, artist, location, bpm, tonality, duration, album,
+			(uploaded_by, rekordbox_id, title, artist, location, bpm, tonality, duration_seconds, album,
 			comments, remixer, label, mix, genre, size, year, composer, sample_rate, date_added, play_count,
 			rating, bitrate, cue_points, beatgrid)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 
@@ -42,7 +42,7 @@ func (r *XMLStagingRepo) UpsertBatch(ctx context.Context, entries []domain.XMLSt
 				location    = EXCLUDED.location,
 				bpm         = EXCLUDED.bpm,
 				tonality    = EXCLUDED.tonality,
-				duration    = EXCLUDED.duration,
+				duration_seconds    = EXCLUDED.duration_seconds,
 				album       = EXCLUDED.album,
 				comments    = EXCLUDED.comments,
 				remixer     = EXCLUDED.remixer,
@@ -97,7 +97,7 @@ func (r *XMLStagingRepo) UpsertBatch(ctx context.Context, entries []domain.XMLSt
 
 func (r *XMLStagingRepo) FindUnmatchedByTitleArtistSize(ctx context.Context, uploadedBy uuid.UUID) ([]domain.XMLStagingEntry, error) {
 	query := `SELECT s.id, s.uploaded_by, s.rekordbox_id, s.title, s.artist, s.location,
-           s.bpm, s.tonality, s.duration, s.album, s.comments, s.remixer, s.label,
+           s.bpm, s.tonality, s.duration_seconds, s.album, s.comments, s.remixer, s.label,
            s.mix, s.genre, s.size, s.year, s.composer, s.sample_rate, s.date_added,
            s.play_count, s.rating, s.bitrate, s.cue_points, s.beatgrid,
            s.synced_at, s.created_at, t.hash

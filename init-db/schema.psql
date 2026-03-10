@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS playlists (
 
 CREATE TABLE IF NOT EXISTS playlist_tracks (
     playlist_id UUID REFERENCES playlists(playlist_id) ON DELETE CASCADE,
-    track_id UUID REFERENCES tracks(hash) ON DELETE CASCADE,
+    track_hash TEXT REFERENCES tracks(hash) ON DELETE CASCADE,
     added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY(playlist_id, track_id)
 );

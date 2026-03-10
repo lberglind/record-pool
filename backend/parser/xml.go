@@ -23,7 +23,7 @@ type Track struct {
 	Artist     string     `xml:"Artist,attr"`
 	Album      string     `xml:"Album,attr"`
 	Genre      string     `xml:"Genre,attr"`
-	Size       string     `xml:"Size,attr"`
+	Size       int        `xml:"Size,attr"`
 	Duration   int        `xml:"TotalTime,attr"`
 	Year       int        `xml:"Year,attr"`
 	BPM        float64    `xml:"AverageBpm,attr"`

@@ -25,7 +25,7 @@ type XMLStagingEntry struct {
 	Label      string
 	Mix        string
 	Genre      string
-	Size       string
+	Size       int
 	Year       int
 	Composer   string
 	SampleRate int

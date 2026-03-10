@@ -16,7 +16,7 @@ type XMLSyncService struct {
 // TrySync is called when a new audio file or XML has been uploaded.
 // It looks for any staged XML entries for the user that matches the filename
 // and promotes them to track_metadata
-func (s *XMLSyncService) TrySync(ctx context.Context, uploadedBy uuid.UUID, trackHash string) {
+func (s *XMLSyncService) TrySync(ctx context.Context, uploadedBy uuid.UUID) {
 	entries, err := s.Staging.FindUnmatchedByTitleArtistSize(ctx, uploadedBy)
 	if err != nil {
 		log.Printf("xml sync: failed to query staging: %v\n", err)
@@ -24,9 +24,11 @@ func (s *XMLSyncService) TrySync(ctx context.Context, uploadedBy uuid.UUID, trac
 	for _, e := range entries {
 		if err := s.PromoteToMetadata(ctx, e, e.TrackHash); err != nil {
 			log.Printf("xml sync: failed to promote entry %d: %v\n", e.ID, err)
+			return
 		}
 		if err := s.Staging.MarkSynced(ctx, e.ID, e.TrackHash); err != nil {
 			log.Printf("xml sync: failed to mark entry %d as synced: %v", e.ID, err)
+			return
 		}
 	}
 }
