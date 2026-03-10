@@ -2,10 +2,12 @@ package minio
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 )
 
@@ -36,4 +38,12 @@ func (s *ObjectStore) GetTrack(ctx context.Context, fileName string) (io.ReadClo
 		return nil, 0, err
 	}
 	return object, stat.Size, nil
+}
+
+func (s *ObjectStore) UploadCollectionXML(ctx context.Context, userID uuid.UUID, reader io.Reader, size int64) error {
+	bucketName := "xmlcollections"
+	objectName := fmt.Sprintf("%s.xml", userID)
+	contentType := "application/xml"
+	_, err := s.Client.PutObject(ctx, bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: contentType})
+	return err
 }

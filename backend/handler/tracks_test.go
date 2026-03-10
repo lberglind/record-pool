@@ -13,6 +13,8 @@ import (
 	"record-pool/handler"
 	"record-pool/internal/domain"
 	"record-pool/internal/track"
+
+	"github.com/google/uuid"
 )
 
 // Compile-time interface checks — will tell you exactly what's missing
@@ -59,6 +61,10 @@ func (m *mockObjectStore) GetTrack(ctx context.Context, fileName string) (io.Rea
 		return nil, 0, m.getTrackErr
 	}
 	return io.NopCloser(strings.NewReader(m.body)), m.size, nil
+}
+
+func (m *mockObjectStore) UploadCollectionXML(ctx context.Context, userID uuid.UUID, reader io.Reader, size int64) error {
+	return nil
 }
 
 // --- ListAllTracks ---

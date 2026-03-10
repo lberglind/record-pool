@@ -11,7 +11,6 @@ type Track struct {
 	Format    string    `json:"format"`
 	Title     string    `json:"title"`
 	Artist    string    `json:"artist"`
-	Duration  float64   `json:"duration"`
 	CreatedAt time.Time `json:"timeStamp"`
 }
 

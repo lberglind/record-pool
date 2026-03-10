@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(256) UNIQUE NOT NULL,
     slack_id TEXT,
@@ -8,37 +8,82 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE sessions (
+CREATE TABLE IF NOT EXISTS sessions (
     session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     expires TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '24 hours'
 );
 
-CREATE TABLE tracks (
-    track_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    file_hash TEXT UNIQUE NOT NULL,
+CREATE TABLE IF NOT EXISTS tracks (
+    hash TEXT UNIQUE PRIMARY KEY NOT NULL,
     file_format VARCHAR(10) NOT NULL,
     title TEXT,
     artist TEXT,
     size DECIMAL,
     is_public BOOLEAN DEFAULT true,
-    duration_seconds DECIMAL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE track_metadata (
-    version_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    track_id UUID NOT NULL REFERENCES tracks(track_id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
+CREATE TABLE IF NOT EXISTS track_metadata (
+    track_hash TEXT NOT NULL REFERENCES tracks(hash) ON DELETE CASCADE,
+    uploaded_by UUID REFERENCES users(user_id) ON DELETE SET NULL,
     bpm DECIMAL(5,2),
-    bitrate DECIMAL,
+    tonality TEXT,
+    size INT,
+    duration_seconds INT,
+    album TEXT,
+    comments TEXT,
+    remixer TEXT,
+    label TEXT,
+    mix TEXT,
+    genre TEXT,
+    year SMALLINT,
+    composer TEXT,
+    sample_rate INT,
+    date_added DATE,
+    play_count INT DEFAULT 0,
+    rating SMALLINT DEFAULT 0,
+    bitrate INT,
     cue_points JSONB DEFAULT '[]',
-    beatgrid JSONB DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    beatgrid JSONB DEFAULT '[]',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (track_hash, uploaded_by)
 );
 
-CREATE TABLE playlists (
+CREATE TABLE IF NOT EXISTS xml_staging (
+    id  SERIAL PRIMARY KEY,
+    uploaded_by UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    rekordbox_id INT NOT NULL, -- TrackID from the XML. Unique within a user's collection.
+    title TEXT NOT NULL,
+    artist TEXT NOT NULL,
+    location TEXT NOT NULL, -- Original file path
+    bpm DECIMAL(5,2),
+    tonality TEXT,
+    size INT,
+    duration_seconds INT,
+    album TEXT,
+    comments TEXT,
+    remixer TEXT,
+    label TEXT,
+    mix TEXT,
+    genre TEXT,
+    year SMALLINT,
+    composer TEXT,
+    sample_rate INT,
+    date_added DATE,
+    play_count INT DEFAULT 0,
+    rating SMALLINT DEFAULT 0,
+    bitrate INT,
+    cue_points JSONB DEFAULT '[]',
+    beatgrid JSONB DEFAULT '[]',
+    track_hash  TEXT REFERENCES tracks(hash) ON DELETE SET NULL,
+    synced_at TIMESTAMPTZ, 
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (uploaded_by, rekordbox_id)
+);
+
+CREATE TABLE IF NOT EXISTS playlists (
     playlist_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -46,9 +91,9 @@ CREATE TABLE playlists (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE playlist_tracks (
+CREATE TABLE IF NOT EXISTS playlist_tracks (
     playlist_id UUID REFERENCES playlists(playlist_id) ON DELETE CASCADE,
-    track_id UUID REFERENCES tracks(track_id) ON DELETE CASCADE,
+    track_hash TEXT REFERENCES tracks(hash) ON DELETE CASCADE,
     added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    PRIMARY KEY(playlist_id, track_id)
+    PRIMARY KEY(playlist_id, track_hash)
 );

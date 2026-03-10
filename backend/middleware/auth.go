@@ -9,6 +9,7 @@ import (
 type contextKey string
 
 const EmailContextKey contextKey = "email"
+const UserIDContextKey contextKey = "userID"
 
 func RequireAuth(repo domain.SessionRepository, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -17,13 +18,14 @@ func RequireAuth(repo domain.SessionRepository, next http.HandlerFunc) http.Hand
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		email, err := repo.EmailFromSession(r.Context(), cookie.Value)
+		email, userID, err := repo.UserFromSession(r.Context(), cookie.Value)
 		if err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), EmailContextKey, email)
+		ctx = context.WithValue(ctx, UserIDContextKey, userID)
 		next(w, r.WithContext(ctx))
 	}
 }

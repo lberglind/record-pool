@@ -33,3 +33,33 @@ export async function getCurrentUser() {
   if (!res.ok) return null;
   return res.json();
 }
+
+
+export async function uploadTrack(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_URL}/upload`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+  });
+  
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return text;
+}
+
+export async function uploadXML(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_URL}/upload/xml`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return text;
+}

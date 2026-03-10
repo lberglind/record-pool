@@ -20,7 +20,7 @@ func (h *SessionHandler) Me() http.HandlerFunc {
 
 		sessionID := cookie.Value
 
-		email, err := h.Repo.EmailFromSession(r.Context(), sessionID)
+		email, userID, err := h.Repo.UserFromSession(r.Context(), sessionID)
 
 		if err != nil {
 			http.Error(w, "Invalid session", http.StatusUnauthorized)
@@ -29,7 +29,8 @@ func (h *SessionHandler) Me() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
-			"email": email,
+			"email":  email,
+			"userID": userID.String(),
 		})
 	}
 }
