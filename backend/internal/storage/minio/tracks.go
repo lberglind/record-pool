@@ -41,7 +41,7 @@ func (s *ObjectStore) GetTrack(ctx context.Context, fileName string) (io.ReadClo
 }
 
 func (s *ObjectStore) UploadCollectionXML(ctx context.Context, userID uuid.UUID, reader io.Reader, size int64) error {
-	bucketName := "XMLCollections"
+	bucketName := "xmlcollections"
 	objectName := fmt.Sprintf("%s.xml", userID)
 	contentType := "application/xml"
 	_, err := s.Client.PutObject(ctx, bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: contentType})
