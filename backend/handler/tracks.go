@@ -161,7 +161,7 @@ func (h *TrackHandler) BatchUpload() http.HandlerFunc {
 		mr := multipart.NewReader(r.Body, params["boundary"])
 		for {
 			part, err := mr.NextPart()
-			if err != io.EOF {
+			if err == io.EOF {
 				break
 			}
 			if err != nil {
@@ -210,7 +210,7 @@ func (h *TrackHandler) BatchUpload() http.HandlerFunc {
 			if err := h.Repo.AddTrack(r.Context(), trackData, size); err != nil {
 				tmp.Close()
 				os.Remove(tmp.Name())
-				results = append(results, result{Name: filename, Error: "err.Error"})
+				results = append(results, result{Name: filename, Error: err.Error()})
 				continue
 			}
 			if _, err := tmp.Seek(0, 0); err != nil {
