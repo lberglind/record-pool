@@ -50,6 +50,32 @@ export async function uploadTrack(file: File) {
   return text;
 }
 
+export async function batchUpload(files: File[]): Promise<BatchResult[]> {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append("files", file);
+  }
+  const res = await fetch(`${API_URL}/upload/batch`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  try {
+    const data = JSON.parse(text);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+export type BatchResult = {
+  name: string;
+  hash?: string;
+  error?: string;
+};
+
 export async function uploadXML(file: File) {
   const formData = new FormData();
   formData.append("file", file);
