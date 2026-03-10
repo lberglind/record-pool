@@ -77,6 +77,7 @@ func (r *XMLStagingRepo) UpsertBatch(ctx context.Context, entries []domain.XMLSt
 			e.Label,
 			e.Mix,
 			e.Genre,
+			e.Size,
 			e.Year,
 			e.Composer,
 			e.SampleRate,
@@ -99,7 +100,7 @@ func (r *XMLStagingRepo) FindUnmatchedByTitleArtistSize(ctx context.Context, upl
            s.bpm, s.tonality, s.duration, s.album, s.comments, s.remixer, s.label,
            s.mix, s.genre, s.size, s.year, s.composer, s.sample_rate, s.date_added,
            s.play_count, s.rating, s.bitrate, s.cue_points, s.beatgrid,
-           s.track_hash, s.synced_at, s.created_at, t.track_hash
+           s.synced_at, s.created_at, t.hash
 		FROM xml_staging s JOIN tracks t 
 		ON LOWER(s.title) = LOWER(t.title) AND LOWER(s.artist) = LOWER(t.artist) AND s.size = t.size
 		WHERE s.uploaded_by = $1 AND s.track_hash IS NULL ORDER BY s.created_at DESC`

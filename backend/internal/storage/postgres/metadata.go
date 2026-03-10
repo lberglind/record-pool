@@ -36,7 +36,7 @@ func (r *TrackMetadataRepo) Upsert(ctx context.Context, meta domain.TrackMetadat
 			bitrate = EXCLUDED.bitrate,
 			cue_points = EXCLUDED.cue_points,
 			beatgrid = EXCLUDED.beatgrid,
-			createdAt = NOW()`
+			created_at = NOW()`
 	_, err = r.pool.Exec(ctx, query,
 		meta.TrackHash,
 		meta.UploadedBy,
@@ -49,14 +49,16 @@ func (r *TrackMetadataRepo) Upsert(ctx context.Context, meta domain.TrackMetadat
 }
 
 func (r *TrackMetadataRepo) GetForTrack(ctx context.Context, trackHash string, uploadedBy uuid.UUID) (*domain.TrackMetadata, error) {
-	query := `SELECT * FROM track_metadata WHERE track = $1 AND uploaded_by = $2`
+	query := `SELECT track_hash, uploaded_by, bpm, tonality, duration_seconds, album, comments, remixer,
+	label, mix, genre, year, composer, sample_rate, date_added, play_count, rating, bitrate, cue_points, beatgrid, created_at
+	FROM track_metadata WHERE track_hash = $1 AND uploaded_by = $2`
 
 	row := r.pool.QueryRow(ctx, query, trackHash, uploadedBy)
 	return scanMetadata(row)
 }
 
 func (r *TrackMetadataRepo) ListUploadersForTrack(ctx context.Context, trackHash string) ([]domain.TrackMetadata, error) {
-	query := `SELECT * FROM track_metadata WHERE track_hash = $1 ORDER BY created_at DESC`
+	query := `SELECT uploaded_by FROM track_metadata WHERE track_hash = $1 ORDER BY created_at DESC`
 	rows, err := r.pool.Query(ctx, query, trackHash)
 	if err != nil {
 		return nil, err
@@ -66,7 +68,7 @@ func (r *TrackMetadataRepo) ListUploadersForTrack(ctx context.Context, trackHash
 	var results []domain.TrackMetadata
 	for rows.Next() {
 		meta, err := scanMetadata(rows)
-		if err != nil {
+		if err == nil {
 			continue
 		}
 		results = append(results, *meta)
@@ -86,9 +88,23 @@ func scanMetadata(row scanner) (*domain.TrackMetadata, error) {
 		&meta.TrackHash,
 		&meta.UploadedBy,
 		&meta.BPM,
+		&meta.Tonality,
+		&meta.Duration,
+		&meta.Album,
+		&meta.Comments,
+		&meta.Remixer,
+		&meta.Label,
+		&meta.Mix,
+		&meta.Genre,
+		&meta.Year,
+		&meta.Composer,
+		&meta.SampleRate,
+		&meta.DateAdded,
+		&meta.PlayCount,
+		&meta.Rating,
 		&meta.BitRate,
-		&rawBeatgrid,
 		&rawCuePoints,
+		&rawBeatgrid,
 		&meta.CreatedAt,
 	)
 	if err != nil {

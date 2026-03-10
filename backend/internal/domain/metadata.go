@@ -18,7 +18,7 @@ type TrackMetadata struct {
 	Label      string     `json:"label"`
 	Mix        string     `json:"mix"`
 	Genre      string     `json:"genre"`
-	Size       string     `json:"size"`
+	Size       int        `json:"size"`
 	Year       int        `json:"year"`
 	Composer   string     `json:"composer"`
 	SampleRate int        `json:"sampleRate"`
