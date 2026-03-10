@@ -73,6 +73,7 @@ func main() {
 	http.HandleFunc("/upload", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Upload())))
 	http.HandleFunc("/upload/xml", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.UploadXML())))
 	http.HandleFunc("/profile", enableCORS(middleware.RequireAuth(sessionRepo, profileHandlers.GetProfile())))
+	http.HandleFunc("/upload/batch", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.BatchUpload())))
 
 	// Public Routes
 	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))
