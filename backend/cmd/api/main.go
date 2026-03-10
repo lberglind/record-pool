@@ -34,6 +34,7 @@ func main() {
 	sessionRepo := postgres.NewSessionRepo(pool)
 	metadataRepo := postgres.NewTrackMetadataRepo(pool)
 	stagingRepo := postgres.NewXMLStagingRepo(pool)
+	profileRepo := postgres.NewProfileRepo(pool)
 	trackStorage := minio.NewObjectStore(minioClient)
 
 	// Services
@@ -61,12 +62,17 @@ func main() {
 		Auth:     slackAuth,
 	}
 
+	profileHandlers := handler.ProfileHandler{
+		Repo: profileRepo,
+	}
+
 	// Map API Endpoints to functions
 	// Protected Routes
 	http.HandleFunc("/tracks", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.ListAllTracks())))
 	http.HandleFunc("/download", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Download())))
 	http.HandleFunc("/upload", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.Upload())))
 	http.HandleFunc("/upload/xml", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.UploadXML())))
+	http.HandleFunc("/profile", enableCORS(middleware.RequireAuth(sessionRepo, profileHandlers.GetProfile())))
 
 	// Public Routes
 	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))
