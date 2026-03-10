@@ -8,7 +8,9 @@ import (
 	"io"
 	"log"
 	"mime"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 	"record-pool/internal/domain"
 	"record-pool/internal/service"
@@ -133,6 +135,107 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 		fmt.Fprintf(w, "Upload Successful: %s", trackData.Hash)
+	}
+}
+
+func (h *TrackHandler) BatchUpload() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
+		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		mediatype, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		if err != nil || mediatype != "multipart/form-data" {
+			http.Error(w, "Expected multipart/form-data", http.StatusBadRequest)
+			return
+		}
+		type result struct {
+			Name  string `json:"name"`
+			Hash  string `json:"hash,omitempty"`
+			Error string `json:"error,omitempty"`
+		}
+		var results []result
+
+		mr := multipart.NewReader(r.Body, params["boundary"])
+		for {
+			part, err := mr.NextPart()
+			if err != io.EOF {
+				break
+			}
+			if err != nil {
+				http.Error(w, "Failed to read multipart stream", http.StatusBadRequest)
+				return
+			}
+
+			if part.FormName() != "files" {
+				part.Close()
+				continue
+			}
+
+			filename := part.FileName()
+
+			tmp, err := os.CreateTemp("", "upload-*")
+			if err != nil {
+				part.Close()
+				results = append(results, result{Name: filename, Error: "Server Error creating temp file"})
+				continue
+			}
+
+			size, err := io.Copy(tmp, part)
+			part.Close()
+			if err != nil {
+				tmp.Close()
+				os.Remove(tmp.Name())
+				results = append(results, result{Name: filename, Error: "failed to recieve file"})
+				continue
+			}
+
+			if _, err := tmp.Seek(0, 0); err != nil {
+				tmp.Close()
+				os.Remove(tmp.Name())
+				results = append(results, result{Name: filename, Error: "seek failed"})
+				continue
+			}
+
+			trackData, err := track.ExtractMetadata(tmp)
+			if err != nil {
+				tmp.Close()
+				os.Remove(tmp.Name())
+				results = append(results, result{Name: filename, Error: "could not read metadata"})
+				continue
+			}
+
+			if err := h.Repo.AddTrack(r.Context(), trackData, size); err != nil {
+				tmp.Close()
+				os.Remove(tmp.Name())
+				results = append(results, result{Name: filename, Error: "err.Error"})
+				continue
+			}
+			if _, err := tmp.Seek(0, 0); err != nil {
+				tmp.Close()
+				os.Remove(tmp.Name())
+				results = append(results, result{Name: filename, Error: "seek failed before upload"})
+				continue
+			}
+
+			if err := h.Store.Upload(r.Context(), trackData.Hash, tmp, size); err != nil {
+				tmp.Close()
+				os.Remove(tmp.Name())
+				results = append(results, result{Name: filename, Error: "storage failed"})
+				continue
+			}
+			tmp.Close()
+			os.Remove(tmp.Name())
+			results = append(results, result{Name: filename, Hash: trackData.Hash})
+		}
+
+		go h.XMLSync.TrySync(context.Background(), userID)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusMultiStatus)
+		json.NewEncoder(w).Encode(results)
 	}
 }
 
