@@ -10,6 +10,7 @@ export default function NavBar() {
             <div className="flex gap-4">
                 <Link href="/">Tracks</Link>
                 <Link href="/upload">Upload</Link>
+                <Link href="/profile">Profile</Link>
             </div>
         </nav>
     );

@@ -63,3 +63,12 @@ export async function uploadXML(file: File) {
   if (!res.ok) throw new Error(text);
   return text;
 }
+
+export async function getProfile() {
+  const res = await fetch(`${API_URL}/profile`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to load profile");
+  return res.json();
+}
+
