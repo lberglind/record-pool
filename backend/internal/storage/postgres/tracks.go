@@ -19,7 +19,7 @@ func NewTrackRepo(pool *pgxpool.Pool) *TrackRepo {
 }
 
 func (r *TrackRepo) ListAllTracks(ctx context.Context) ([]domain.Track, error) {
-	query := "SELECT file_hash, file_format, title, artist, COALESCE(duration_seconds, 0), created_at FROM tracks"
+	query := "SELECT hash, file_format, title, artist, created_at FROM tracks"
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
@@ -35,7 +35,6 @@ func (r *TrackRepo) ListAllTracks(ctx context.Context) ([]domain.Track, error) {
 			&t.Format,
 			&t.Title,
 			&t.Artist,
-			&t.Duration,
 			&t.CreatedAt)
 		if err != nil {
 			continue
@@ -47,7 +46,7 @@ func (r *TrackRepo) ListAllTracks(ctx context.Context) ([]domain.Track, error) {
 
 func (r *TrackRepo) GetNameAndFormat(ctx context.Context, hash string) (string, string, error) {
 	var title, format string
-	query := "SELECT title, file_format FROM tracks WHERE file_hash = $1"
+	query := "SELECT title, file_format FROM tracks WHERE hash = $1"
 
 	err := r.pool.QueryRow(ctx, query, hash).Scan(&title, &format)
 	return title, format, err
@@ -57,7 +56,7 @@ func (r *TrackRepo) GetNameAndFormat(ctx context.Context, hash string) (string, 
 func (r *TrackRepo) AddTrack(ctx context.Context, trackData track.Metadata, size int64) error {
 
 	query := `INSERT INTO tracks 
-	(file_hash, file_format, title, artist, size)
+	(hash, file_format, title, artist, size)
 	VALUES ($1, $2, $3, $4, $5)`
 
 	_, err := r.pool.Exec(ctx, query, trackData.Hash, trackData.FileType, trackData.Title, trackData.Artist, size)

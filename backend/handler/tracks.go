@@ -32,7 +32,7 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tracks, err := h.Repo.ListAllTracks(r.Context())
 		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
+			http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 

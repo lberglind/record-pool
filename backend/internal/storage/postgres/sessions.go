@@ -35,7 +35,7 @@ func (r *SessionRepo) UserFromSession(ctx context.Context, session string) (stri
 	var userID uuid.UUID
 
 	query := `
-		SELECT u.email u.user_id FROM users u
+		SELECT u.email, u.user_id FROM users u
 		JOIN sessions s ON u.user_id = s.user_id
 		WHERE s.session_id = $1
 		AND s.expires > NOW()

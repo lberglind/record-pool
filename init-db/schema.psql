@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS track_metadata (
     uploaded_by UUID REFERENCES users(user_id) ON DELETE SET NULL,
     bpm DECIMAL(5,2),
     tonality TEXT,
+    size INT,
     duration_seconds INT,
     album TEXT,
     comments TEXT,
@@ -59,6 +60,7 @@ CREATE TABLE IF NOT EXISTS xml_staging (
     location TEXT NOT NULL, -- Original file path
     bpm DECIMAL(5,2),
     tonality TEXT,
+    size INT,
     duration_seconds INT,
     album TEXT,
     comments TEXT,
