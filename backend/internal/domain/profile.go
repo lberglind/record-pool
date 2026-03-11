@@ -2,17 +2,9 @@ package domain
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
-
-type Playlist struct {
-	PlaylistID uuid.UUID `json:"playlistID"`
-	Name       string    `json:"name"`
-	CreatedAt  time.Time `json:"createdAt"`
-	Tracks     []Track   `json:"tracks"`
-}
 
 type ProfileData struct {
 	Email     string          `json:"email"`

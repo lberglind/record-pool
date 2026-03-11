@@ -166,7 +166,7 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 			return
 		}
 
-		go h.XMLSync.TrySync(context.Background(), userID)
+		go h.XMLSync.TrySync(context.Background(), userID, nil)
 
 		w.WriteHeader(http.StatusCreated)
 		fmt.Fprintf(w, "Upload Successful: %s", trackData.Hash)
@@ -266,7 +266,7 @@ func (h *TrackHandler) BatchUpload() http.HandlerFunc {
 			results = append(results, result{Name: filename, Hash: trackData.Hash})
 		}
 
-		go h.XMLSync.TrySync(context.Background(), userID)
+		go h.XMLSync.TrySync(context.Background(), userID, nil)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusMultiStatus)
@@ -378,7 +378,7 @@ func (h *TrackHandler) UploadXML() http.HandlerFunc {
 		}
 
 		// Kick off sync in the background
-		go h.XMLSync.TrySync(context.Background(), userID)
+		go h.XMLSync.TrySync(context.Background(), userID, rb)
 		w.WriteHeader(http.StatusCreated)
 		fmt.Fprintf(w, "Imported %d tracks", len(entries))
 	}
