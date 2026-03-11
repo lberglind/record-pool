@@ -57,10 +57,14 @@ func (r *TrackRepo) GetNameAndFormat(ctx context.Context, hash string) (string, 
 
 func (r *TrackRepo) AddTrack(ctx context.Context, trackData track.Metadata, size int64) error {
 
-	query := `INSERT INTO tracks 
-	(hash, file_format, title, artist, size)
-	VALUES ($1, $2, $3, $4, $5)`
-
+	query := `INSERT INTO tracks (hash, file_format, title, artist, size)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (hash) 
+		DO UPDATE SET 
+    title = EXCLUDED.title,
+    artist = EXCLUDED.artist,
+    size = EXCLUDED.size,
+    file_format = EXCLUDED.file_format`
 	_, err := r.pool.Exec(ctx, query, trackData.Hash, trackData.FileType, trackData.Title, trackData.Artist, size)
 	if err != nil {
 		return fmt.Errorf("Error inserting track: %s: %w", trackData.Title, err)

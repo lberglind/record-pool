@@ -9,7 +9,7 @@ import (
 
 type Playlist struct {
 	PlaylistID uuid.UUID  `json:"playlistID"`
-	ParentID   uuid.UUID  `json:"parentID"`
+	ParentID   *uuid.UUID `json:"parentID"`
 	Name       string     `json:"name"`
 	IsFolder   bool       `json:"isFolder"`
 	Position   int        `json:"position"`

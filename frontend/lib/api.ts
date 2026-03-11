@@ -133,3 +133,67 @@ export async function getTrackPage(cursor?: { date: string; hash: string }): Pro
 
   return { tracks, nextCursor };
 }
+
+// ---- Playlist types ----
+
+export type Playlist = {
+  playlistID: string;
+  parentID?: string;
+  name: string;
+  isFolder: boolean;
+  position: number;
+  imported: boolean;
+  createdAt: string;
+  children: Playlist[];
+  tracks: Track[];
+};
+
+// ---- Playlist API calls ----
+
+export async function getPlaylists(): Promise<Playlist[]> {
+  const res = await fetch(`${API_URL}/playlists`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to load playlists");
+  return res.json();
+}
+
+export async function createPlaylist(name: string, isFolder: boolean, parentId?: string): Promise<Playlist> {
+  const res = await fetch(`${API_URL}/playlists/create`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, isFolder, parentId }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return JSON.parse(text);
+}
+
+export async function deletePlaylist(playlistId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/playlists/${playlistId}/delete`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to delete playlist");
+}
+
+export async function addTrackToPlaylist(playlistId: string, trackHash: string): Promise<void> {
+  const res = await fetch(`${API_URL}/playlists/${playlistId}/tracks/add`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ trackHash }),
+  });
+  if (!res.ok) throw new Error("Failed to add track to playlist");
+}
+
+export async function removeTrackFromPlaylist(playlistId: string, trackHash: string): Promise<void> {
+  const res = await fetch(`${API_URL}/playlists/${playlistId}/tracks/remove`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ trackHash }),
+  });
+  if (!res.ok) throw new Error("Failed to remove track from playlist");
+}

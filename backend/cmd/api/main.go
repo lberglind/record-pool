@@ -35,6 +35,7 @@ func main() {
 	metadataRepo := postgres.NewTrackMetadataRepo(pool)
 	stagingRepo := postgres.NewXMLStagingRepo(pool)
 	profileRepo := postgres.NewProfileRepo(pool)
+	playlistRepo := postgres.NewPlaylistRepo(pool)
 	trackStorage := minio.NewObjectStore(minioClient)
 
 	// Services
@@ -42,8 +43,9 @@ func main() {
 	slackAuth := slack.NewAuthService(slackConfig, http.DefaultClient)
 
 	xmlSync := &service.XMLSyncService{
-		Staging:  stagingRepo,
-		Metadata: metadataRepo,
+		Staging:   stagingRepo,
+		Metadata:  metadataRepo,
+		Playlists: playlistRepo,
 	}
 
 	// Handlers
@@ -66,6 +68,10 @@ func main() {
 		Repo: profileRepo,
 	}
 
+	playlistHandlers := handler.PlaylistHandler{
+		Repo: playlistRepo,
+	}
+
 	// Map API Endpoints to functions
 	// Protected Routes
 
@@ -76,6 +82,14 @@ func main() {
 	http.HandleFunc("/upload/xml", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.UploadXML())))
 	http.HandleFunc("/profile", enableCORS(middleware.RequireAuth(sessionRepo, profileHandlers.GetProfile())))
 	http.HandleFunc("/upload/batch", enableCORS(middleware.RequireAuth(sessionRepo, trackHandlers.BatchUpload())))
+
+	// Playlist routes
+	http.HandleFunc("/playlists", enableCORS(middleware.RequireAuth(sessionRepo, playlistHandlers.GetTree())))
+	http.HandleFunc("/playlists/create", enableCORS(middleware.RequireAuth(sessionRepo, playlistHandlers.Create())))
+	http.HandleFunc("/playlists/{id}", enableCORS(middleware.RequireAuth(sessionRepo, playlistHandlers.Get())))
+	http.HandleFunc("/playlists/{id}/delete", enableCORS(middleware.RequireAuth(sessionRepo, playlistHandlers.Delete())))
+	http.HandleFunc("/playlists/{id}/tracks/add", enableCORS(middleware.RequireAuth(sessionRepo, playlistHandlers.AddTrack())))
+	http.HandleFunc("/playlists/{id}/tracks/remove", enableCORS(middleware.RequireAuth(sessionRepo, playlistHandlers.RemoveTrack())))
 
 	// Public Routes
 	http.HandleFunc("/auth/slack", enableCORS(authHandlers.SlackLogIn()))

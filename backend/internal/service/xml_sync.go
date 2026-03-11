@@ -99,6 +99,8 @@ func (s *XMLSyncService) importNode(ctx context.Context, userID uuid.UUID, node 
 
 	// Leaf Playlist - add tracks by looking up their hash via RekordBoxID
 	for _, tk := range node.Tracks {
+		s.Staging.RecordPlaylistTrack(ctx, userID, playlist.PlaylistID, tk.Key)
+		// Link immediately if audio already is uploaded
 		hash, err := s.Staging.HashForRekordboxID(ctx, userID, tk.Key)
 		if err != nil {
 			continue
