@@ -13,6 +13,13 @@ type PlaylistHandler struct {
 	Repo domain.PlaylistRepository
 }
 
+// GetTree
+// @Summary Get playlist tree
+// @Description returns the nested folder structure of playlists
+// @Tags Playlists
+// @Produce json
+// @Success 200 {array} domain.Playlist
+// @Router /playlists [get]
 func (h *PlaylistHandler) GetTree() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -32,6 +39,15 @@ func (h *PlaylistHandler) GetTree() http.HandlerFunc {
 	}
 }
 
+// Get
+// @Summary Get playlist
+// @Description returns the contents of a playlist with a certain id
+// @Tags Playlists
+// @Produce json
+// @Param id path string true "Playlist ID (UUID)"
+// @Success 200 {object} domain.Playlist
+// @Failure 404 {string} string "Playlist not found"
+// @Router /playlists/{id} [get]
 func (h *PlaylistHandler) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -48,6 +64,7 @@ func (h *PlaylistHandler) Get() http.HandlerFunc {
 		playlist, err := h.Repo.Get(r.Context(), userID, playlistID)
 		if err != nil {
 			http.Error(w, "Playlist not found", http.StatusNotFound)
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -55,6 +72,21 @@ func (h *PlaylistHandler) Get() http.HandlerFunc {
 	}
 }
 
+type CreatePlaylistRequest struct {
+	Name     string     `json:"name"`
+	ParentID *uuid.UUID `json:"parentID"`
+	IsFolder bool       `json:"isFolder"`
+}
+
+// Create
+// @Summary Create a playlist or folder
+// @Description Create a new entry in the playlist tree
+// @Tags Playlists
+// @Accept json
+// @Produce json
+// @Param body body CreatePlaylistRequest true "Playlist creation data"
+// @Success 201 {object} domain.Playlist
+// @Router /playlists [post]
 func (h *PlaylistHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -89,6 +121,13 @@ func (h *PlaylistHandler) Create() http.HandlerFunc {
 	}
 }
 
+// Delete
+// @Summary Delete a playlist
+// @Description Removes a playlist or folder. Use with caution.
+// @Tags Playlists
+// @Param id path string true "Playlist ID"
+// @Success 204 "No Content"
+// @Router /playlists/{id} [delete]
 func (h *PlaylistHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -112,6 +151,18 @@ func (h *PlaylistHandler) Delete() http.HandlerFunc {
 	}
 }
 
+type AddTrackRequest struct {
+	TrackHash string `json:"trackHash"`
+}
+
+// AddTrack
+// @Summary Add track to playlist
+// @Tags Playlists
+// @Accept json
+// @Param id path string true "Playlist ID"
+// @Param body body AddTrackRequest true "Track Hash"
+// @Success 204 "No Content"
+// @Router /playlists/{id}/tracks [post]
 func (h *PlaylistHandler) AddTrack() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -148,6 +199,13 @@ func (h *PlaylistHandler) AddTrack() http.HandlerFunc {
 	}
 }
 
+// RemoveTrack
+// @Summary Remove track from playlist
+// @Tags Playlists
+// @Param id path string true "Playlist ID"
+// @Param hash path string true "Track Hash"
+// @Success 204 "No Content"
+// @Router /playlists/{id}/tracks/{hash} [delete]
 func (h *PlaylistHandler) RemoveTrack() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)

@@ -10,6 +10,14 @@ type SessionHandler struct {
 	Repo domain.SessionRepository
 }
 
+// Me
+// @Summary Get current session
+// @Description Returns the email and userID of the logged-in user via session cookie
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} map[string]string "{"email": "...", "userID": "..."}"
+// @Failure 401 {string} string "Not logged in"
+// @Router /me [get]
 func (h *SessionHandler) Me() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")

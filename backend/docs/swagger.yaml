@@ -1,0 +1,471 @@
+basePath: /
+definitions:
+  domain.CuePoint:
+    properties:
+      blue:
+        type: integer
+      green:
+        type: integer
+      name:
+        type: string
+      num:
+        type: integer
+      red:
+        type: integer
+      start:
+        type: number
+      type:
+        type: integer
+    type: object
+  domain.Playlist:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/domain.Playlist'
+        type: array
+      createdAt:
+        type: string
+      imported:
+        type: boolean
+      isFolder:
+        type: boolean
+      name:
+        type: string
+      parentID:
+        type: string
+      playlistID:
+        type: string
+      position:
+        type: integer
+      tracks:
+        items:
+          $ref: '#/definitions/domain.Track'
+        type: array
+    type: object
+  domain.ProfileData:
+    properties:
+      Playlist:
+        items:
+          $ref: '#/definitions/domain.Playlist'
+        type: array
+      email:
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/domain.TrackMetadata'
+        type: array
+      tracks:
+        items:
+          $ref: '#/definitions/domain.Track'
+        type: array
+      userID:
+        type: string
+    type: object
+  domain.Tempo:
+    properties:
+      battito:
+        type: integer
+      bpm:
+        type: number
+      inizio:
+        type: number
+      metro:
+        type: string
+    type: object
+  domain.Track:
+    properties:
+      artist:
+        type: string
+      format:
+        type: string
+      hash:
+        type: string
+      timeStamp:
+        type: string
+      title:
+        type: string
+    type: object
+  domain.TrackMetadata:
+    properties:
+      album:
+        type: string
+      averageBpm:
+        type: number
+      beatgrid:
+        items:
+          $ref: '#/definitions/domain.Tempo'
+        type: array
+      bitRate:
+        type: integer
+      comments:
+        type: string
+      composer:
+        type: string
+      cuePoints:
+        items:
+          $ref: '#/definitions/domain.CuePoint'
+        type: array
+      dateAdded:
+        type: string
+      duration:
+        type: integer
+      genre:
+        type: string
+      label:
+        type: string
+      mix:
+        type: string
+      playCount:
+        type: integer
+      rating:
+        type: integer
+      remixer:
+        type: string
+      sampleRate:
+        type: integer
+      size:
+        type: integer
+      timeStamp:
+        type: string
+      tonality:
+        type: string
+      trackHash:
+        type: string
+      uploadedBy:
+        type: string
+      year:
+        type: integer
+    type: object
+  handler.AddTrackRequest:
+    properties:
+      trackHash:
+        type: string
+    type: object
+  handler.BatchUploadResponse:
+    properties:
+      error:
+        type: string
+      hash:
+        type: string
+      name:
+        type: string
+    type: object
+  handler.CreatePlaylistRequest:
+    properties:
+      isFolder:
+        type: boolean
+      name:
+        type: string
+      parentID:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a music record pool server.
+  title: Record Pool API
+  version: "1.0"
+paths:
+  /auth/slack:
+    get:
+      description: Redirects the user to Slack for authentication
+      responses:
+        "307":
+          description: Temporary Redirect
+      summary: Start Slack OAuth
+      tags:
+      - Auth
+  /auth/slack/callback:
+    get:
+      description: The endpoint Slack redirects to after user approval. Sets the session
+        cookie.
+      parameters:
+      - description: OAuth code from Slack
+        in: query
+        name: code
+        required: true
+        type: string
+      responses:
+        "303":
+          description: Redirect to frontend callback
+      summary: Slack OAuth Callback
+      tags:
+      - Auth
+  /me:
+    get:
+      description: Returns the email and userID of the logged-in user via session
+        cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"email": "...", "userID": "..."}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Not logged in
+          schema:
+            type: string
+      summary: Get current session
+      tags:
+      - Auth
+  /playlists:
+    get:
+      description: returns the nested folder structure of playlists
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Playlist'
+            type: array
+      summary: Get playlist tree
+      tags:
+      - Playlists
+    post:
+      consumes:
+      - application/json
+      description: Create a new entry in the playlist tree
+      parameters:
+      - description: Playlist creation data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreatePlaylistRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Playlist'
+      summary: Create a playlist or folder
+      tags:
+      - Playlists
+  /playlists/{id}:
+    delete:
+      description: Removes a playlist or folder. Use with caution.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a playlist
+      tags:
+      - Playlists
+    get:
+      description: returns the contents of a playlist with a certain id
+      parameters:
+      - description: Playlist ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Playlist'
+        "404":
+          description: Playlist not found
+          schema:
+            type: string
+      summary: Get playlist
+      tags:
+      - Playlists
+  /playlists/{id}/tracks:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Track Hash
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AddTrackRequest'
+      responses:
+        "204":
+          description: No Content
+      summary: Add track to playlist
+      tags:
+      - Playlists
+  /playlists/{id}/tracks/{hash}:
+    delete:
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Track Hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Remove track from playlist
+      tags:
+      - Playlists
+  /profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ProfileData'
+      summary: Get user profile
+      tags:
+      - Profile
+  /tracks:
+    get:
+      description: Get a full list of all tracks in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Track'
+            type: array
+      summary: List all tracks
+      tags:
+      - Tracks
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a single music file and extract metadata
+      parameters:
+      - description: The music file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: 'Upload Successful: <hash>'
+          schema:
+            type: string
+      summary: Upload a track
+      tags:
+      - Tracks
+  /tracks/{hash}/file:
+    get:
+      description: Stream a music file from storage using its hash
+      parameters:
+      - description: The track hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      produces:
+      - audio/mpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            type: string
+      summary: Download a track
+      tags:
+      - Tracks
+  /tracks/batch:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload multiple music files at once. Returns a list of results
+        for each file.
+      parameters:
+      - description: Multiple music files
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "207":
+          description: 'Multi-Status: Returns success/error for each file'
+          schema:
+            items:
+              $ref: '#/definitions/handler.BatchUploadResponse'
+            type: array
+      summary: Batch upload tracks
+      tags:
+      - Tracks
+  /tracks/page:
+    get:
+      description: Get tracks using cursor-based pagination
+      parameters:
+      - description: RFC3339 date cursor
+        in: query
+        name: date
+        type: string
+      - description: Tie-breaker hash cursor
+        in: query
+        name: hash
+        type: string
+      - description: Limit (default 50, max 200)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Track'
+            type: array
+      summary: Paginated tracks
+      tags:
+      - Tracks
+  /xml:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a Rekordbox collection XML to sync metadata and playlists
+      parameters:
+      - description: Rekordbox XML file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Imported X tracks
+          schema:
+            type: string
+      summary: Import Rekordbox XML
+      tags:
+      - Tracks
+swagger: "2.0"

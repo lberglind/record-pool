@@ -14,6 +14,13 @@ type AuthHandler struct {
 	Auth     service.SlackAuth
 }
 
+// SlackCallback
+// @Summary Slack OAuth Callback
+// @Description The endpoint Slack redirects to after user approval. Sets the session cookie.
+// @Tags Auth
+// @Param code query string true "OAuth code from Slack"
+// @Success 303 "Redirect to frontend callback"
+// @Router /auth/slack/callback [get]
 func (h *AuthHandler) SlackCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
@@ -54,6 +61,12 @@ func (h *AuthHandler) SlackCallback() http.HandlerFunc {
 	}
 }
 
+// SlackLogIn
+// @Summary Start Slack OAuth
+// @Description Redirects the user to Slack for authentication
+// @Tags Auth
+// @Success 307 "Temporary Redirect"
+// @Router /auth/slack [get]
 func (h *AuthHandler) SlackLogIn() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		url := h.Auth.AuthCodeURL("random-state-string")

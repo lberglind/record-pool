@@ -10,6 +10,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"record-pool/internal/domain"
@@ -31,6 +32,13 @@ type TrackHandler struct {
 	Store        domain.ObjectStore
 }
 
+// ListAllTracks
+// @Summary List all tracks
+// @Description Get a full list of all tracks in the database
+// @Tags Tracks
+// @Produce json
+// @Success 200 {array} domain.Track
+// @Router /tracks [get]
 func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tracks, err := h.Repo.ListAllTracks(r.Context())
@@ -47,6 +55,16 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 	}
 }
 
+// ListTrackPage
+// @Summary Paginated tracks
+// @Description Get tracks using cursor-based pagination
+// @Tags Tracks
+// @Produce json
+// @Param date query string false "RFC3339 date cursor"
+// @Param hash query string false "Tie-breaker hash cursor"
+// @Param limit query int false "Limit (default 50, max 200)"
+// @Success 200 {array} domain.Track
+// @Router /tracks/page [get]
 func (h *TrackHandler) ListTrackPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		date := r.URL.Query().Get("date")
@@ -81,19 +99,28 @@ func (h *TrackHandler) ListTrackPage() http.HandlerFunc {
 	}
 }
 
+// Download
+// @Summary Download a track
+// @Description Stream a music file from storage using its hash
+// @Tags Tracks
+// @Produce audio/mpeg
+// @Param hash path string true "The track hash"
+// @Success 200 {file} binary
+// @Failure 404 {string} string "File not found"
+// @Router /tracks/{hash}/file [get]
 func (h *TrackHandler) Download() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get filename from query string
-		hash := r.URL.Query().Get("file")
+		hash := r.PathValue("hash")
 		if hash == "" {
-			http.Error(w, "File name required", http.StatusBadRequest)
+			http.Error(w, "Track hash required", http.StatusBadRequest)
 			return
 		}
 
 		// Fetch the file from MinIO
 		object, size, err := h.Store.GetTrack(r.Context(), hash)
 		if err != nil {
-			http.Error(w, "File not found", http.StatusNotFound)
+			http.Error(w, "Track not found", http.StatusNotFound)
 			return
 		}
 		defer func() {
@@ -112,19 +139,30 @@ func (h *TrackHandler) Download() http.HandlerFunc {
 		}
 
 		// Set headers
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", name, format))
+		filename := fmt.Sprintf("%s.%s", name, format)
+		encodedName := url.PathEscape(filename)
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", encodedName))
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 
 		// Stream data directly to the response
 		_, err = io.Copy(w, object)
 		if err != nil {
-			log.Printf("Error streaming file: %v\n", err)
+			log.Printf("Error streaming track file: %v\n", err)
 			return
 		}
 	}
 }
 
+// Upload
+// @Summary Upload a track
+// @Description Upload a single music file and extract metadata
+// @Tags Tracks
+// @Accept multipart/form-data
+// @Produce plain
+// @Param file formData file true "The music file to upload"
+// @Success 201 {string} string "Upload Successful: <hash>"
+// @Router /tracks [post]
 func (h *TrackHandler) Upload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -173,6 +211,21 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 	}
 }
 
+type BatchUploadResponse struct {
+	Name  string `json:"name"`
+	Hash  string `json:"hash,omitempty"`
+	Error string `json:"error,omitempty"`
+}
+
+// BatchUpload
+// @Summary Batch upload tracks
+// @Description Upload multiple music files at once. Returns a list of results for each file.
+// @Tags Tracks
+// @Accept multipart/form-data
+// @Produce json
+// @Param files formData file true "Multiple music files"
+// @Success 207 {array} BatchUploadResponse "Multi-Status: Returns success/error for each file"
+// @Router /tracks/batch [post]
 func (h *TrackHandler) BatchUpload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
@@ -274,6 +327,15 @@ func (h *TrackHandler) BatchUpload() http.HandlerFunc {
 	}
 }
 
+// UploadXML
+// @Summary Import Rekordbox XML
+// @Description Upload a Rekordbox collection XML to sync metadata and playlists
+// @Tags Tracks
+// @Accept multipart/form-data
+// @Produce plain
+// @Param file formData file true "Rekordbox XML file"
+// @Success 201 {string} string "Imported X tracks"
+// @Router /xml [post]
 func (h *TrackHandler) UploadXML() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
