@@ -32,6 +32,11 @@ be in frontend/.env
 
 - Run docker containers: `$ docker compose up -d`
 
+- Access postgres to initialise tables:
+  - Copy all tables in init-db/schema.psql
+  - `record-pool % psql -h localhost -p 5432 -U admin -d recordpool`
+  - Paste tables
+
 - Start go backend: 
 ```
 $ cd backend/
