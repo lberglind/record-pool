@@ -35,8 +35,10 @@ be in frontend/.env
 - Start go backend: 
 ```
 $ cd backend/
-$ go run main.go
+$ go run cmd/api/main.go
 ```
+
+The API can be reached on localhost:8080/swagger/index.html
 
 - Start frontend:
 ```
