@@ -86,8 +86,12 @@ CREATE TABLE IF NOT EXISTS xml_staging (
 CREATE TABLE IF NOT EXISTS playlists (
     playlist_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    parent_id UUID REFERENCES playlists(playlist_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    is_folder BOOLEAN DEFAULT FALSE,
+    position INT NOT NULL DEFAULT 0,
     is_public BOOLEAN DEFAULT true,
+    imported BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -96,4 +100,11 @@ CREATE TABLE IF NOT EXISTS playlist_tracks (
     track_hash TEXT REFERENCES tracks(hash) ON DELETE CASCADE,
     added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY(playlist_id, track_hash)
+);
+
+CREATE TABLE IF NOT EXISTS staging_playlist_tracks (
+  playlist_id UUID NOT NULL REFERENCES playlists(playlist_id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  rekordbox_id INT NOT NULL,
+  PRIMARY KEY(playlist_id, rekordbox_id)
 );

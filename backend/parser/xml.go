@@ -9,7 +9,7 @@ import (
 type RekordBox struct {
 	XMLName    xml.Name   `xml:"DJ_PLAYLISTS"`
 	Collection Collection `xml:"COLLECTION"`
-	Playlists  Playlists  `xml:"PLAYLISTS"`
+	Playlists  []Node     `xml:"PLAYLISTS>NODE"`
 }
 
 type Collection struct {
@@ -60,13 +60,13 @@ type CuePoint struct {
 	Blue  *int    `xml:"Blue,attr,omitempty"`
 }
 
-type Playlists struct {
-	Nodes []Node `xml:"NODE"`
-}
-
 type Node struct {
-	Name    string     `xml:"Name,attr"`
-	Type    int        `xml:"Type,attr"`
+	Name string `xml:"Name,attr"`
+	Type int    `xml:"Type,attr"`
+	// For root
+	Count int `xml:"Count,attr"`
+
+	// For Playlists
 	KeyType int        `xml:"KeyType,attr"`
 	Entries int        `xml:"Entries,attr"`
 	Nodes   []Node     `xml:"NODE"`

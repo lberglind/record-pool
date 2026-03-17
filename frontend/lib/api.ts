@@ -11,7 +11,7 @@ export async function getTracks() {
 }
 
 export function downloadTrack(track: string) {
-  const url = `${API_URL}/download?file=${encodeURIComponent(track)}`
+  const url = `${API_URL}/tracks/${encodeURIComponent(track)}/file`
 
   const link = document.createElement('a');
 
@@ -39,7 +39,7 @@ export async function uploadTrack(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_URL}/upload`, {
+  const res = await fetch(`${API_URL}/tracks`, {
       method: "POST",
       credentials: "include",
       body: formData,
@@ -55,7 +55,7 @@ export async function batchUpload(files: File[]): Promise<BatchResult[]> {
   for (const file of files) {
     formData.append("files", file);
   }
-  const res = await fetch(`${API_URL}/upload/batch`, {
+  const res = await fetch(`${API_URL}/tracks/batch`, {
     method: "POST",
     credentials: "include",
     body: formData,
@@ -80,7 +80,7 @@ export async function uploadXML(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_URL}/upload/xml`, {
+  const res = await fetch(`${API_URL}/xml`, {
     method: "POST",
     credentials: "include",
     body: formData,
@@ -118,7 +118,7 @@ export async function getTrackPage(cursor?: { date: string; hash: string }): Pro
     params.set("hash", cursor.hash);
   }
 
-  const res = await fetch(`${API_URL}/tracks?${params}`, {
+  const res = await fetch(`${API_URL}/tracks/page?${params}`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to load tracks");
@@ -132,4 +132,68 @@ export async function getTrackPage(cursor?: { date: string; hash: string }): Pro
       : null;
 
   return { tracks, nextCursor };
+}
+
+// ---- Playlist types ----
+
+export type Playlist = {
+  playlistID: string;
+  parentID?: string;
+  name: string;
+  isFolder: boolean;
+  position: number;
+  imported: boolean;
+  createdAt: string;
+  children: Playlist[];
+  tracks: Track[];
+};
+
+// ---- Playlist API calls ----
+
+export async function getPlaylists(): Promise<Playlist[]> {
+  const res = await fetch(`${API_URL}/playlists`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to load playlists");
+  return res.json();
+}
+
+export async function createPlaylist(name: string, isFolder: boolean, parentID?: string): Promise<Playlist> {
+  const res = await fetch(`${API_URL}/playlists`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, isFolder, parentId }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return JSON.parse(text);
+}
+
+export async function deletePlaylist(playlistId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/playlists/${playlistId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to delete playlist");
+}
+
+export async function addTrackToPlaylist(playlistId: string, trackHash: string): Promise<void> {
+  const res = await fetch(`${API_URL}/playlists/${playlistId}/tracks`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ trackHash }),
+  });
+  if (!res.ok) throw new Error("Failed to add track to playlist");
+}
+
+export async function removeTrackFromPlaylist(playlistId: string, trackHash: string): Promise<void> {
+  const res = await fetch(`${API_URL}/playlists/${playlistId}/tracks`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ trackHash }),
+  });
+  if (!res.ok) throw new Error("Failed to remove track from playlist");
 }

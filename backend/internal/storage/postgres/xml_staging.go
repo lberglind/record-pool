@@ -193,3 +193,59 @@ func scanStagingRow(row interface {
 
 	return &e, nil
 }
+
+func (r *XMLStagingRepo) HashForRekordboxID(ctx context.Context, userId uuid.UUID, rekordboxID int) (string, error) {
+	var hash string
+	query := `SELECT track_hash FROM xml_staging WHERE uploaded_by = $1 AND rekordbox_id = $2 AND track_hash IS NOT NULL LIMIT 1`
+	if err := r.pool.QueryRow(ctx, query, userId, rekordboxID).Scan(&hash); err != nil {
+		return "", err
+	}
+	return hash, nil
+}
+
+func (r *XMLStagingRepo) RecordPlaylistTrack(ctx context.Context, playlistID, userID uuid.UUID, rekordboxID int) error {
+	query := `INSERT INTO staging_playlist_tracks (playlist_id, user_id, rekordbox_id)
+		VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`
+	_, err := r.pool.Exec(ctx, query, playlistID, userID, rekordboxID)
+	return err
+}
+
+func (r *XMLStagingRepo) UnlinkedSyncedTracks(ctx context.Context, userID uuid.UUID) ([]domain.XMLStagingEntry, error) {
+	query := `SELECT rekordbox_id, track_hash FROM xml_staging WHERE uploaded_by = $1 AND track_hash IS NOT NULL AND track_hash NOT IN (
+		SELECT pt.track_hash FROM playlist_tracks pt JOIN playlists p ON p.playlist_id = pt.playlist_id WHERE p.user_id = $1
+	)`
+	rows, err := r.pool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []domain.XMLStagingEntry
+	for rows.Next() {
+		var e domain.XMLStagingEntry
+		if err := rows.Scan(&e.RekordboxID, &e.TrackHash); err != nil {
+			continue
+		}
+		entries = append(entries, e)
+	}
+	return entries, nil
+}
+
+func (r *XMLStagingRepo) PlaylistsForRekordboxID(ctx context.Context, userID uuid.UUID, rekordboxID int) ([]uuid.UUID, error) {
+	query := `SELECT playlist_id FROM staging_playlist_tracks WHERE user_id = $1 AND rekordbox_id = $2`
+	rows, err := r.pool.Query(ctx, query, userID, rekordboxID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			continue
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}

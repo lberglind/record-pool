@@ -5,7 +5,7 @@ import { getTrackPage, Track } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useRef, useState, useCallback } from "react";
 
-export function Tracks() {
+export default function TracksPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [cursor, setCursor] = useState<{ date: string; hash: string } | null | undefined>(
     undefined // undefined = haven't loaded yet, null = no more pages
