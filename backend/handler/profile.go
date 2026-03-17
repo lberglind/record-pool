@@ -13,6 +13,12 @@ type ProfileHandler struct {
 	Repo domain.ProfileRepository
 }
 
+// GetProfile
+// @Summary Get user profile
+// @Tags Profile
+// @Produce json
+// @Success 200 {object} domain.ProfileData
+// @Router /profile [get]
 func (h *ProfileHandler) GetProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)

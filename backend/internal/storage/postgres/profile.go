@@ -62,7 +62,7 @@ func (r *ProfileRepo) GetProfile(ctx context.Context, userID uuid.UUID) (*domain
 			JOIN playlist_tracks pt ON pt.track_hash = t.hash
 			WHERE pt.playlist_id = $1 ORDER BY pt.added_at ASC`
 		trackRows, err := r.pool.Query(ctx, query, p.PlaylistID)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		defer trackRows.Close()

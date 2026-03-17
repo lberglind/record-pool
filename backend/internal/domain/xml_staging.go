@@ -50,4 +50,12 @@ type XMLStagingRepository interface {
 
 	// Mark a staging entry as matched to a track hash
 	MarkSynced(ctx context.Context, id int, trackHash string) error
+
+	HashForRekordboxID(ctx context.Context, userId uuid.UUID, rekordboxID int) (string, error)
+
+	RecordPlaylistTrack(ctx context.Context, userID uuid.UUID, playlistID uuid.UUID, rekordboxID int) error
+
+	UnlinkedSyncedTracks(ctx context.Context, userID uuid.UUID) ([]XMLStagingEntry, error)
+
+	PlaylistsForRekordboxID(ctx context.Context, userID uuid.UUID, rekordboxID int) ([]uuid.UUID, error)
 }
