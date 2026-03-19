@@ -51,6 +51,7 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 		err = json.NewEncoder(w).Encode(tracks)
 		if err != nil {
 			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+			return
 		}
 	}
 }
@@ -96,6 +97,10 @@ func (h *TrackHandler) ListTrackPage() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(tracks)
+		if err != nil {
+			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

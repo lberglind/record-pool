@@ -43,6 +43,8 @@ func main() {
 	stagingRepo := postgres.NewXMLStagingRepo(pool)
 	profileRepo := postgres.NewProfileRepo(pool)
 	playlistRepo := postgres.NewPlaylistRepo(pool)
+	searchRepo := postgres.NewSearchRepo(pool)
+
 	trackStorage := minio.NewObjectStore(minioClient)
 
 	// Services
@@ -79,6 +81,10 @@ func main() {
 		Repo: playlistRepo,
 	}
 
+	searchHandlers := handler.SearchHandler{
+		Repo: searchRepo,
+	}
+
 	mux := http.NewServeMux()
 	protected := func(h http.HandlerFunc) http.HandlerFunc {
 		return middleware.RequireAuth(sessionRepo, h)
@@ -96,6 +102,9 @@ func main() {
 	mux.HandleFunc("POST /xml", protected(trackHandlers.UploadXML()))
 	mux.HandleFunc("POST /tracks/batch", protected(trackHandlers.BatchUpload()))
 	mux.HandleFunc("GET /profile", protected(profileHandlers.GetProfile()))
+
+	// Search Routes
+	mux.HandleFunc("GET /search", protected(searchHandlers.TrackSearch()))
 
 	// Playlist routes
 	mux.HandleFunc("GET /playlists", protected(playlistHandlers.GetTree()))

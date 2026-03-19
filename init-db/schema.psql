@@ -1,18 +1,20 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
 CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(256) UNIQUE NOT NULL,
     slack_id TEXT,
     name TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
     session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    expires TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '24 hours'
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    expires TIMESTAMPTZ DEFAULT NOW() + INTERVAL '24 hours'
 );
 
 CREATE TABLE IF NOT EXISTS tracks (
@@ -22,7 +24,7 @@ CREATE TABLE IF NOT EXISTS tracks (
     artist TEXT,
     size DECIMAL,
     is_public BOOLEAN DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS track_metadata (
@@ -92,13 +94,13 @@ CREATE TABLE IF NOT EXISTS playlists (
     position INT NOT NULL DEFAULT 0,
     is_public BOOLEAN DEFAULT true,
     imported BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS playlist_tracks (
     playlist_id UUID REFERENCES playlists(playlist_id) ON DELETE CASCADE,
     track_hash TEXT REFERENCES tracks(hash) ON DELETE CASCADE,
-    added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    added_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY(playlist_id, track_hash)
 );
 
@@ -108,3 +110,40 @@ CREATE TABLE IF NOT EXISTS staging_playlist_tracks (
   rekordbox_id INT NOT NULL,
   PRIMARY KEY(playlist_id, rekordbox_id)
 );
+
+CREATE OR REPLACE FUNCTION f_unaccent(text) RETURN text AS $$
+  SELECT unaccent('unaccent', $1);
+$$ LANGUAGE sql IMMUTABLE;
+
+CREATE INDEX IF NOT EXISTS idx_tracks_title ON tracks
+USING GIN (unaccent(title) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_tracks_artist ON tracks
+USING GIN (unaccent(artist) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_tracks_timestamp ON tracks (created_at);
+
+CREATE INDEX IF NOT EXISTS idx_track_metadata_genre ON track_metadata
+USING GIN (unaccent(genre) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_track_metadata_album ON track_metadata
+USING GIN (unaccent(album) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_track_metadata_comments ON track_metadata
+USING GIN (unaccent(comments) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_track_metadata_remixer ON track_metadata
+USING GIN (unaccent(remixer) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_track_metadata_label ON track_metadata
+USING GIN (unaccent(label) gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_track_metadata_mix ON track_metadata
+USING GIN (unaccent(mix) gin_trgm_ops);
+
+CREATE INDEX idx_track_metadata_bpm ON track_metadata (bpm);
+CREATE INDEX idx_track_metadata_year ON track_metadata (year);
+CREATE INDEX idx_track_metadata_tonality ON track_metadata (tonality);
+CREATE INDEX idx_track_metadata_size ON track_metadata (size);
+CREATE INDEX idx_track_metadata_duration ON track_metadata (duration_seconds);
+CREATE INDEX idx_track_metadata_bitrate ON track_metadata (bitrate);

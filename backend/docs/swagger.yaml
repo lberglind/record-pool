@@ -337,6 +337,136 @@ paths:
       summary: Get user profile
       tags:
       - Profile
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Search tracks with fuzzy matching, metadata filtering, and range
+        queries.
+      parameters:
+      - in: query
+        name: album
+        type: string
+      - in: query
+        name: artist
+        type: string
+      - in: query
+        name: comments
+        type: string
+      - in: query
+        name: composer
+        type: string
+      - in: query
+        name: genre
+        type: string
+      - in: query
+        name: label
+        type: string
+      - in: query
+        name: maxBPM
+        type: integer
+      - in: query
+        name: maxBitRate
+        type: integer
+      - in: query
+        name: maxDateAdded
+        type: string
+      - in: query
+        name: maxDuration
+        type: integer
+      - in: query
+        name: maxPlayCount
+        type: integer
+      - in: query
+        name: maxRating
+        type: integer
+      - in: query
+        name: maxSampleRate
+        type: integer
+      - in: query
+        name: maxSize
+        type: integer
+      - in: query
+        name: maxTimeStamp
+        type: string
+      - in: query
+        name: maxYear
+        type: integer
+      - in: query
+        name: minBPM
+        type: integer
+      - in: query
+        name: minBitRate
+        type: integer
+      - in: query
+        name: minDateAdded
+        type: string
+      - in: query
+        name: minDuration
+        type: integer
+      - in: query
+        name: minPlayCount
+        type: integer
+      - in: query
+        name: minRating
+        type: integer
+      - in: query
+        name: minSampleRate
+        type: integer
+      - in: query
+        name: minSize
+        type: integer
+      - in: query
+        name: minTimeStamp
+        type: string
+      - in: query
+        name: minYear
+        type: integer
+      - in: query
+        name: mix
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: remixer
+        type: string
+      - in: query
+        name: title
+        type: string
+      - in: query
+        name: tonality
+        type: string
+      - in: query
+        name: uploadedBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Track'
+            type: array
+        "400":
+          description: Invalid query parameters
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Advanced Track Search
+      tags:
+      - Search
   /tracks:
     get:
       description: Get a full list of all tracks in the database

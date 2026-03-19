@@ -268,6 +268,217 @@
                 }
             }
         },
+        "/search": {
+            "get": {
+                "description": "Search tracks with fuzzy matching, metadata filtering, and range queries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Advanced Track Search",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "album",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "artist",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "comments",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "composer",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "genre",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "label",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxBPM",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxBitRate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "maxDateAdded",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxDuration",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxPlayCount",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxRating",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxSampleRate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "maxTimeStamp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "maxYear",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minBPM",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minBitRate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "minDateAdded",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minDuration",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minPlayCount",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minRating",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minSampleRate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "minTimeStamp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "minYear",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "mix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "remixer",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "tonality",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "uploadedBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Track"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/tracks": {
             "get": {
                 "description": "Get a full list of all tracks in the database",
