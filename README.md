@@ -33,7 +33,7 @@ should at the moment be in the root directory except for `NEXT_PUBLIC_API_URL` w
 
 
 - Set up a Slack app in your favorite workspace. 
-  - Navigate to https://api.slack.com/apps and set up a new app. Go to `OAuth & Permissions` in the sidebar and input your personal ngrok link followed by `/api/auth/slack/callback`. 
+  - Navigate to `https://api.slack.com/apps` and set up a new app. Go to `OAuth & Permissions` in the sidebar and input your personal ngrok link followed by `/api/auth/slack/callback`. 
 Like so: `https://<my-personal-link>.ngrok-free.dev/api/auth/slack/callback`
   - Add the bot token scope `chat:write` and the user scopes `users:read` and `users:read.email`.
   - Navigate to `Install App` in the sidebar and install the app to your workspace.
