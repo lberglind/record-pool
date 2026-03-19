@@ -10,7 +10,7 @@ services:
       TZ: CET
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      #- ./init-db:/docker-entrypoint-initdb.d
+      - ./init-db/schema.psql:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
