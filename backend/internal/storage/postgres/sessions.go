@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -45,4 +47,16 @@ func (r *SessionRepo) UserFromSession(ctx context.Context, session string) (stri
 		return "", uuid.Nil, err
 	}
 	return email, userID, err
+}
+
+func (r *SessionRepo) StartCleanup(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		_, err := r.pool.Exec(context.Background(), `DELETE FROM sessions WHERE expires < NOW()`)
+		if err != nil {
+			log.Printf("Session cleanup error: %v", err)
+		}
+	}
 }
