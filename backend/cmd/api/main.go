@@ -7,6 +7,7 @@ import (
 	"os"
 	"record-pool/handler"
 	"record-pool/middleware"
+	"time"
 
 	_ "record-pool/docs"
 	"record-pool/internal/service"
@@ -39,6 +40,7 @@ func main() {
 	trackRepo := postgres.NewTrackRepo(pool)
 	userRepo := postgres.NewUserRepo(pool)
 	sessionRepo := postgres.NewSessionRepo(pool)
+	go sessionRepo.StartCleanup(24 * time.Hour)
 	metadataRepo := postgres.NewTrackMetadataRepo(pool)
 	stagingRepo := postgres.NewXMLStagingRepo(pool)
 	profileRepo := postgres.NewProfileRepo(pool)
