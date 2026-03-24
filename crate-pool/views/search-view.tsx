@@ -15,8 +15,6 @@ export default function searchView() {
 
     return (
         <div className="flex flex-col">
-            <p>Search View</p>
-
             <Field orientation="horizontal">
                 <Input type="search" placeholder="Search..." value={query} onChange={(e) => setQuery(e.target.value)} />
 
