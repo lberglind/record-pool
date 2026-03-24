@@ -3,8 +3,7 @@ import UploadView from "@/views/upload-view";
 
 export default function searchPresenter() {
     return (
-        <div>
-            <p>Search Presenter</p>
+        <div className="w-full mx-auto container">
             <SearchView />
             <UploadView />
         </div>)

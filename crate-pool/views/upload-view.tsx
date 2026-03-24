@@ -11,6 +11,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import { PlusIcon } from "lucide-react";
 
 export default function UploadView() {
     const inputRef = useRef<HTMLInputElement>(null)
@@ -18,11 +19,8 @@ export default function UploadView() {
 
     return (
         <div className="flex flex-col">
-            <p>Upload View</p>
             <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant="outline">Upload</Button>
-                </DialogTrigger>
+                <DialogTrigger render={<Button className={"relative h-16 w-16 absolute bottom-5 right-5"}><PlusIcon/></Button>}/>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Upload track</DialogTitle>
@@ -53,9 +51,7 @@ export default function UploadView() {
                     </div>
 
                     <DialogFooter className="sm:justify-start">
-                        <DialogClose asChild>
-                            <Button type="button">Close</Button>
-                        </DialogClose>
+                        <DialogClose render={<Button variant="outline">Close</Button>}/>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
