@@ -1,17 +1,30 @@
 "use client";
-import { getDate } from "@//utils/util";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Input } from "@/components/ui/input"
+import { Field } from "@/components/ui/field";
+import { Search } from "lucide-react";
 
 export default function searchView() {
-    const [number, setNumber] = useState(0);
-    
+    const inputRef = useRef<HTMLInputElement>(null)
+    const [query, setQuery] = useState("")
+
+    function handleSearch() {
+        console.log(query)
+    }
+
     return (
         <div className="flex flex-col">
             <p>Search View</p>
-            {getDate()}
-            <Button variant={"destructive"} onClick={() => setNumber(number + 1)}>Increment</Button>
-            <p>{number}</p>
+
+            <Field orientation="horizontal">
+                <Input type="search" placeholder="Search..." value={query} onChange={(e) => setQuery(e.target.value)} />
+
+                <Button size="icon" onClick={handleSearch}>
+                    <Search className="h-4 w-4" />
+                </Button>
+            </Field>
+
         </div>
-        )
+    )
 }
