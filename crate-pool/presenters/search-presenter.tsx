@@ -7,7 +7,7 @@ import { TracksTableView } from "@/views/tracks-table-view";
 import UploadView from "@/views/upload-view";
 import { useState } from "react";
 
-export default function searchPresenter() {
+export default function SearchPresenter() {
   const [query, setQuery] = useState("");
   const model = useTrackStore();
   return (
