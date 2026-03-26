@@ -5,13 +5,9 @@ import { Track } from "@/models/types"
 
 interface Props {
   tracks: Track[];
-  isLoading: boolean;
 }
 
-export const TracksTableView = ({ tracks, isLoading }: Props) => {
-  if (isLoading) {
-    return <Spinner />
-  }
+export const TracksTableView = ({ tracks }: Props) => {
   return (
     <Table>
       <TableHeader>
@@ -25,7 +21,7 @@ export const TracksTableView = ({ tracks, isLoading }: Props) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tracks.map((track) => (
+        {tracks?.map((track) => (
           <TrackRow key={track.hash} track={track} />
         ))}
       </TableBody>
