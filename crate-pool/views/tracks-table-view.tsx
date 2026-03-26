@@ -1,13 +1,13 @@
 import { TrackRow } from "@/components/track-row"
-import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Track } from "@/models/types"
 
-interface Props {
+interface TracksTableProps {
   tracks: Track[];
+  onPreview: (track: Track) => void;
 }
 
-export const TracksTableView = ({ tracks }: Props) => {
+export const TracksTableView = (props: TracksTableProps) => {
   return (
     <Table>
       <TableHeader>
@@ -21,8 +21,8 @@ export const TracksTableView = ({ tracks }: Props) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tracks?.map((track) => (
-          <TrackRow key={track.hash} track={track} />
+        {props.tracks?.map((track) => (
+          <TrackRow key={track.hash} track={track} onPreview={props.onPreview} />
         ))}
       </TableBody>
     </Table>
