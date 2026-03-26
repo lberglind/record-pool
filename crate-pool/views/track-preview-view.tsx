@@ -32,11 +32,23 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
       <CardFooter className="flex flex-col">
         <div className="w-full flex justify-between">
           <p>Length</p>
-          <p>{track.duration} seconds</p>
+          <p>{secToMin(track.duration)} minutes</p>
+        </div>
+        <div className="w-full flex justify-between">
+          <p>Bitrate</p>
+          <p>{track.bitrate}</p>
+        </div>
+        <div className="w-full flex justify-between">
+          <p>Size</p>
+          <p>{((track.size) / (1024 ** 2)).toFixed(2)} MB</p>
+        </div>
+        <div className="w-full flex justify-between">
+          <p>Format</p>
+          <p>{track.format}</p>
         </div>
         <div className="w-full flex justify-between">
           <p>Key</p>
-          <p>{track.key}</p>
+          <p>{track.tonality}</p>
         </div>
         <div className="w-full flex justify-between">
           <p>Genre</p>
@@ -49,4 +61,11 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
       </CardFooter>
     </Card >
   );
+}
+
+function secToMin(total: number) {
+  const mins = Math.floor(total / 60)
+  const secs = total % 60
+  const formatted = `${mins}:${secs.toString().padStart(2, '0')}`
+  return formatted
 }
