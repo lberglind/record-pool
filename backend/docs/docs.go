@@ -295,7 +295,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "artist",
+                        "name": "albumArtist",
                         "in": "query"
                     },
                     {
@@ -316,6 +316,21 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "label",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lastHash",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lastTimeStamp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
@@ -349,6 +364,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "maxRelease",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "maxSampleRate",
                         "in": "query"
@@ -361,11 +381,6 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "maxTimeStamp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "maxYear",
                         "in": "query"
                     },
                     {
@@ -399,6 +414,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "minRelease",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "minSampleRate",
                         "in": "query"
@@ -414,11 +434,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "minYear",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "name": "mix",
                         "in": "query"
@@ -429,18 +444,13 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "pageSize",
+                        "type": "string",
+                        "name": "query",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "name": "remixer",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "title",
                         "in": "query"
                     },
                     {
@@ -818,9 +828,6 @@ const docTemplate = `{
         "domain.TrackMetadata": {
             "type": "object",
             "properties": {
-                "album": {
-                    "type": "string"
-                },
                 "averageBpm": {
                     "type": "number"
                 },
@@ -886,9 +893,6 @@ const docTemplate = `{
                 },
                 "uploadedBy": {
                     "type": "string"
-                },
-                "year": {
-                    "type": "integer"
                 }
             }
         },

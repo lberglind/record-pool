@@ -78,8 +78,8 @@ func (r *ProfileRepo) GetProfile(ctx context.Context, userID uuid.UUID) (*domain
 	}
 
 	// Users own metadata versions
-	query = `SELECT track_hash, uploaded_by, bpm, tonality, duration_seconds, album, comments, remixer,
-		 label, mix, genre, year, composer, sample_rate, date_added, play_count, rating, bitrate,
+	query = `SELECT track_hash, uploaded_by, bpm, tonality, comments, remixer,
+		 label, mix, genre, composer, date_added, play_count, rating,
 		 cue_points, beatgrid, created_at
 		 FROM track_metadata WHERE uploaded_by = $1 ORDER BY created_at DESC`
 	metaRows, err := r.pool.Query(ctx, query, userID)
