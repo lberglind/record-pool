@@ -28,7 +28,7 @@ type SearchHandler struct {
 // @Router /search [get]
 func (h *SearchHandler) TrackSearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
+		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
 		if !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
@@ -40,7 +40,7 @@ func (h *SearchHandler) TrackSearch() http.HandlerFunc {
 			return
 		}
 
-		result, err := h.Repo.SearchTracks(r.Context(), req)
+		result, err := h.Repo.SearchTracks(r.Context(), userID, req)
 		if err != nil {
 			http.Error(w, "Failed to process search query", http.StatusInternalServerError)
 			return

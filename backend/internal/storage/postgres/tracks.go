@@ -114,3 +114,20 @@ func (r *TrackRepo) ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash
 	}
 	return tracks, nil
 }
+
+func (r *TrackRepo) ExecAddTrack(ctx context.Context, m track.ExecMetadata) error {
+
+	query := `INSERT INTO tracks (
+		hash, file_format, artist, title, album, album_artist, duration, size, bitrate, sample_rate, bpm, 
+		genre, publisher, release_date)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		ON CONFLICT (hash) 
+		DO NOTHING`
+	_, err := r.pool.Exec(ctx, query, m.Hash, m.FileType, m.Artist, m.Title, m.Album, m.AlbumArtist, m.Duration,
+		m.Size, m.BitRate, m.SampleRate, m.Bpm, m.Genre, m.Publisher, m.ReleaseDate)
+	if err != nil {
+		return fmt.Errorf("Error inserting track: %s: %w", m.Title, err)
+	}
+	log.Printf("Track: %s inserted.\n", m.Title)
+	return nil
+}

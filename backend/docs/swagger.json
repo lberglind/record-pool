@@ -289,7 +289,7 @@
                     },
                     {
                         "type": "string",
-                        "name": "artist",
+                        "name": "albumArtist",
                         "in": "query"
                     },
                     {
@@ -310,6 +310,21 @@
                     {
                         "type": "string",
                         "name": "label",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lastHash",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lastTimeStamp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
@@ -343,6 +358,11 @@
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "maxRelease",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "maxSampleRate",
                         "in": "query"
@@ -355,11 +375,6 @@
                     {
                         "type": "string",
                         "name": "maxTimeStamp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "maxYear",
                         "in": "query"
                     },
                     {
@@ -393,6 +408,11 @@
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "minRelease",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "minSampleRate",
                         "in": "query"
@@ -408,11 +428,6 @@
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "minYear",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "name": "mix",
                         "in": "query"
@@ -423,18 +438,13 @@
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "pageSize",
+                        "type": "string",
+                        "name": "query",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "name": "remixer",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "title",
                         "in": "query"
                     },
                     {
@@ -812,9 +822,6 @@
         "domain.TrackMetadata": {
             "type": "object",
             "properties": {
-                "album": {
-                    "type": "string"
-                },
                 "averageBpm": {
                     "type": "number"
                 },
@@ -880,9 +887,6 @@
                 },
                 "uploadedBy": {
                     "type": "string"
-                },
-                "year": {
-                    "type": "integer"
                 }
             }
         },

@@ -87,8 +87,6 @@ definitions:
     type: object
   domain.TrackMetadata:
     properties:
-      album:
-        type: string
       averageBpm:
         type: number
       beatgrid:
@@ -133,8 +131,6 @@ definitions:
         type: string
       uploadedBy:
         type: string
-      year:
-        type: integer
     type: object
   handler.AddTrackRequest:
     properties:
@@ -348,7 +344,7 @@ paths:
         name: album
         type: string
       - in: query
-        name: artist
+        name: albumArtist
         type: string
       - in: query
         name: comments
@@ -362,6 +358,15 @@ paths:
       - in: query
         name: label
         type: string
+      - in: query
+        name: lastHash
+        type: string
+      - in: query
+        name: lastTimeStamp
+        type: string
+      - in: query
+        name: limit
+        type: integer
       - in: query
         name: maxBPM
         type: integer
@@ -381,6 +386,9 @@ paths:
         name: maxRating
         type: integer
       - in: query
+        name: maxRelease
+        type: string
+      - in: query
         name: maxSampleRate
         type: integer
       - in: query
@@ -389,9 +397,6 @@ paths:
       - in: query
         name: maxTimeStamp
         type: string
-      - in: query
-        name: maxYear
-        type: integer
       - in: query
         name: minBPM
         type: integer
@@ -411,6 +416,9 @@ paths:
         name: minRating
         type: integer
       - in: query
+        name: minRelease
+        type: string
+      - in: query
         name: minSampleRate
         type: integer
       - in: query
@@ -420,22 +428,16 @@ paths:
         name: minTimeStamp
         type: string
       - in: query
-        name: minYear
-        type: integer
-      - in: query
         name: mix
         type: string
       - in: query
         name: page
         type: integer
       - in: query
-        name: pageSize
-        type: integer
-      - in: query
-        name: remixer
+        name: query
         type: string
       - in: query
-        name: title
+        name: remixer
         type: string
       - in: query
         name: tonality

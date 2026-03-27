@@ -20,10 +20,18 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS tracks (
     hash TEXT UNIQUE PRIMARY KEY NOT NULL,
     file_format VARCHAR(10) NOT NULL,
-    title TEXT,
     artist TEXT,
+    title TEXT,
+    album TEXT,
+    album_artist TEXT,
+    duration DECIMAL,
     size DECIMAL,
-    is_public BOOLEAN DEFAULT true,
+    bitrate DECIMAL,
+    sample_rate DECIMAL,
+    bpm DECIMAL(5,2),
+    genre TEXT,
+    publisher TEXT,
+    release_date DATE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -32,21 +40,15 @@ CREATE TABLE IF NOT EXISTS track_metadata (
     uploaded_by UUID REFERENCES users(user_id) ON DELETE SET NULL,
     bpm DECIMAL(5,2),
     tonality TEXT,
-    size INT,
-    duration_seconds INT,
-    album TEXT,
     comments TEXT,
     remixer TEXT,
     label TEXT,
     mix TEXT,
     genre TEXT,
-    year SMALLINT,
     composer TEXT,
-    sample_rate INT,
     date_added DATE,
     play_count INT DEFAULT 0,
     rating SMALLINT DEFAULT 0,
-    bitrate INT,
     cue_points JSONB DEFAULT '[]',
     beatgrid JSONB DEFAULT '[]',
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -111,39 +113,40 @@ CREATE TABLE IF NOT EXISTS staging_playlist_tracks (
   PRIMARY KEY(playlist_id, rekordbox_id)
 );
 
-CREATE OR REPLACE FUNCTION f_unaccent(text) RETURN text AS $$
-  SELECT unaccent('unaccent', $1);
+CREATE OR REPLACE FUNCTION f_unaccent(text) RETURNS text AS $$
+  SELECT unaccent($1);
 $$ LANGUAGE sql IMMUTABLE;
 
+CREATE INDEX IF NOT EXISTS idx_tracks_title_artist ON tracks USING GIN (
+  (f_unaccent(lower(title)) || ' ' || f_unaccent(lower(artist))) 
+  gin_trgm_ops
+);
+
 CREATE INDEX IF NOT EXISTS idx_tracks_title ON tracks
-USING GIN (unaccent(title) gin_trgm_ops);
+USING GIN (f_unaccent(title) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_tracks_artist ON tracks
-USING GIN (unaccent(artist) gin_trgm_ops);
+USING GIN (f_unaccent(artist) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_tracks_timestamp ON tracks (created_at);
 
 CREATE INDEX IF NOT EXISTS idx_track_metadata_genre ON track_metadata
-USING GIN (unaccent(genre) gin_trgm_ops);
+USING GIN (f_unaccent(genre) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_track_metadata_album ON track_metadata
-USING GIN (unaccent(album) gin_trgm_ops);
+USING GIN (f_unaccent(album) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_track_metadata_comments ON track_metadata
-USING GIN (unaccent(comments) gin_trgm_ops);
+USING GIN (f_unaccent(comments) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_track_metadata_remixer ON track_metadata
-USING GIN (unaccent(remixer) gin_trgm_ops);
+USING GIN (f_unaccent(remixer) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_track_metadata_label ON track_metadata
-USING GIN (unaccent(label) gin_trgm_ops);
+USING GIN (f_unaccent(label) gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS idx_track_metadata_mix ON track_metadata
-USING GIN (unaccent(mix) gin_trgm_ops);
+USING GIN (f_unaccent(mix) gin_trgm_ops);
 
 CREATE INDEX idx_track_metadata_bpm ON track_metadata (bpm);
-CREATE INDEX idx_track_metadata_year ON track_metadata (year);
 CREATE INDEX idx_track_metadata_tonality ON track_metadata (tonality);
-CREATE INDEX idx_track_metadata_size ON track_metadata (size);
-CREATE INDEX idx_track_metadata_duration ON track_metadata (duration_seconds);
-CREATE INDEX idx_track_metadata_bitrate ON track_metadata (bitrate);
