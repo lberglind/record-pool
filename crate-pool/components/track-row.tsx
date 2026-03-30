@@ -4,14 +4,20 @@ import { Badge } from "./ui/badge";
 import { Eye } from "lucide-react";
 import { Track } from "@/models/types";
 
-export function TrackRow({ track }: { track: Track }) {
+interface TrackRowProps {
+  track: Track;
+  onPreview: (track: Track) => void;
+}
+
+export function TrackRow(props: TrackRowProps) {
+  const track = props.track;
   return (
     <TableRow>
       <TableCell>{track.title || "test title"}</TableCell>
       <TableCell>{track.artist || "test artist"}</TableCell>
       <TableCell>{track.duration}</TableCell>
       <TableCell>{track.bpm}</TableCell>
-      <TableCell>{track.key}</TableCell>
+      <TableCell>{track.tonality}</TableCell>
       <TableCell>
         <div className="flex gap-0.5"> {
           track.genre?.split(/;|\//).map((genre) => (
@@ -20,7 +26,7 @@ export function TrackRow({ track }: { track: Track }) {
         </div>
       </TableCell>
       <TableCell>
-        <Button className="hover:bg-primary/45"><Eye /></Button>
+        <Button className="hover:bg-primary/45" onClick={() => props.onPreview(props.track)}><Eye /></Button>
       </TableCell>
     </TableRow>
   )

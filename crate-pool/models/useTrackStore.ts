@@ -53,6 +53,8 @@ export const useTrackStore = create<TrackStore>((set) => ({
     } catch (error) {
       set({ isLoading: false });
     }
+
   }
+
 }))
 

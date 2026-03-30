@@ -9,6 +9,7 @@ import { useState } from "react";
 
 export default function SearchPresenter() {
   const [query, setQuery] = useState("");
+
   const model = useTrackStore();
   return (
     <div className="w-full mx-auto container">
