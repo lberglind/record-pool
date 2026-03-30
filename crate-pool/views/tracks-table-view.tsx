@@ -4,10 +4,10 @@ import { Track } from "@/models/types"
 
 interface TracksTableProps {
   tracks: Track[];
-  onPreview: (track: Track) => void;
+
 }
 
-export const TracksTableView = (props: TracksTableProps) => {
+export const TracksTableView = ({ tracks }: Props) => {
   return (
     <div className='[&>div]:max-h-100'>
       <Table >

@@ -3,7 +3,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Track } from "@/models/types";
 import { useTrackStore } from "@/models/useTrackStore";
 import SearchView from "@/views/search-view";
-import TrackPreviewView from "@/views/track-preview-view";
 import { TracksTableView } from "@/views/tracks-table-view";
 import UploadView from "@/views/upload-view";
 import { useState } from "react";
@@ -44,19 +43,13 @@ export default function SearchPresenter() {
   );
 }
 
-function RenderTracks({
-  isLoading,
-  tracks,
-  setCurrentTrack
-}: {
-  isLoading: boolean,
-  tracks: Track[],
-  setCurrentTrack: (track: Track | null) => void,
-}) {
+function RenderTracks({ isLoading, tracks }: { isLoading: boolean, tracks: Track[] }) {
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <Spinner />
+    );
   }
   return (
-    <TracksTableView tracks={tracks} onPreview={setCurrentTrack} />
+    <TracksTableView tracks={tracks} />
   );
 }
