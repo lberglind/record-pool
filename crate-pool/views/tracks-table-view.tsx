@@ -9,7 +9,7 @@ interface TracksTableProps {
 
 export const TracksTableView = ({ tracks, onPreview }: TracksTableProps) => {
   return (
-     <div className='[&>div]:max-h-100'>
+     <div className='[&>div]:max-h-100 w-full'>
       <Table >
         <TableHeader>
           <TableRow className="bg-background sticky top-0">

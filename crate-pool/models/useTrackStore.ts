@@ -60,8 +60,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
   },
   setCurrentTrack: (track: Track | null) => {
     set({ currentTrack: track });
-  }
-
+  },
   uploadTrack: async (file) => {
     set({ isLoading: true });
     try {
