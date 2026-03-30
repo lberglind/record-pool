@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { secToMin } from "@/lib/utils";
 import { Track } from "@/models/types";
 import { HeartIcon, X } from "lucide-react";
 
@@ -36,7 +37,7 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
         </div>
         <div className="w-full flex justify-between">
           <p>Key</p>
-          <p>{track.key}</p>
+          <p>{track.tonality}</p>
         </div>
         <div className="w-full flex justify-between">
           <p>Genre</p>
@@ -51,9 +52,3 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
   );
 }
 
-function secToMin(total: number) {
-  const mins = Math.floor(total / 60)
-  const secs = total % 60
-  const formatted = `${mins}:${secs.toString().padStart(2, '0')}`
-  return formatted
-}
