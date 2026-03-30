@@ -14,13 +14,14 @@ import (
 
 // mockSessionRepo satisfies domain.SessionRepository
 type mockSessionRepo struct {
-	email   string
 	userID  uuid.UUID
+	email   string
+	avatar  string
 	userErr error
 }
 
-func (m *mockSessionRepo) UserFromSession(_ context.Context, _ string) (string, uuid.UUID, error) {
-	return m.email, m.userID, m.userErr
+func (m *mockSessionRepo) UserFromSession(_ context.Context, _ string) (uuid.UUID, string, string, error) {
+	return m.userID, m.email, m.avatar, m.userErr
 }
 
 func (m *mockSessionRepo) CreateSession(_ context.Context, _ string) (string, error) {

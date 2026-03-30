@@ -37,7 +37,7 @@ func (h *AuthHandler) SlackCallback() http.HandlerFunc {
 			return
 		}
 
-		userID, err := h.Users.UpsertUser(r.Context(), authUser.Email, authUser.Name)
+		userID, err := h.Users.UpsertUser(r.Context(), authUser.Email, authUser.Name, authUser.AvatarURL)
 		if err != nil {
 			http.Error(w, "Failed the database checks: "+err.Error(), http.StatusInternalServerError)
 			return

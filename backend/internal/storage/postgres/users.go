@@ -15,16 +15,18 @@ func NewUserRepo(pool *pgxpool.Pool) *UserRepo {
 	return &UserRepo{pool: pool}
 }
 
-func (r *UserRepo) UpsertUser(ctx context.Context, email, name string) (string, error) {
+func (r *UserRepo) UpsertUser(ctx context.Context, email, name, avatar string) (string, error) {
 	var userID string
 
 	query := `
-		INSERT INTO users (email, name) 
-		VALUES ($1, $2) 
-		ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name
+		INSERT INTO users (email, name, avatar) 
+		VALUES ($1, $2, $3) 
+		ON CONFLICT (email) DO UPDATE SET 
+		name = EXCLUDED.name,
+		avatar = EXCLUDED.avatar
 		RETURNING user_id`
 
-	err := r.pool.QueryRow(ctx, query, email, name).Scan(&userID)
+	err := r.pool.QueryRow(ctx, query, email, name, avatar).Scan(&userID)
 	if err != nil {
 		log.Printf("Couldn't create user: %v", err)
 		return "", err
