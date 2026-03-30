@@ -129,13 +129,14 @@ func ExecExtractMetadata(ctx context.Context, file multipart.File, header *multi
 
 	g, gCtx := errgroup.WithContext(ctx)
 
+	// 4. Execute go routines
 	var cover []byte
 	var mimeType string
 	g.Go(func() error {
 		m, err := tag.ReadFrom(tempFile)
 		if err != nil {
 			log.Printf("tag.ReadFrom(tempfile): %v\n", err.Error())
-			return err
+			return nil
 		}
 		if pic := m.Picture(); pic != nil {
 			cover = pic.Data
@@ -145,14 +146,13 @@ func ExecExtractMetadata(ctx context.Context, file multipart.File, header *multi
 		return nil
 	})
 
-	// 4. Execute go routines
 	var meta ffprobeResult
 	g.Go(func() error {
 		meta, err = getffprobe(gCtx, filePath)
 		if err != nil {
 			log.Printf("ffprobe: %v\n", err.Error())
 		}
-		return err
+		return nil
 	})
 
 	var bpm float64
@@ -170,7 +170,7 @@ func ExecExtractMetadata(ctx context.Context, file multipart.File, header *multi
 		if err != nil {
 			log.Printf("ffmpeg: %v\n", err.Error())
 		}
-		return err
+		return nil
 	})
 
 	if err := g.Wait(); err != nil {
