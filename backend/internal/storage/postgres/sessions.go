@@ -32,21 +32,21 @@ func (r *SessionRepo) CreateSession(ctx context.Context, userID string) (string,
 	return sessionID, err
 }
 
-func (r *SessionRepo) UserFromSession(ctx context.Context, session string) (string, uuid.UUID, error) {
-	var email string
+func (r *SessionRepo) UserFromSession(ctx context.Context, session string) (uuid.UUID, string, string, error) {
 	var userID uuid.UUID
+	var email, avatar string
 
 	query := `
-		SELECT u.email, u.user_id FROM users u
+		SELECT u.user_id, u.email, u.avatar FROM users u
 		JOIN sessions s ON u.user_id = s.user_id
 		WHERE s.session_id = $1
 		AND s.expires > NOW()
 		`
-	err := r.pool.QueryRow(ctx, query, session).Scan(&email, &userID)
+	err := r.pool.QueryRow(ctx, query, session).Scan(&userID, &email, &avatar)
 	if err != nil {
-		return "", uuid.Nil, err
+		return uuid.Nil, "", "", err
 	}
-	return email, userID, err
+	return userID, email, avatar, err
 }
 
 func (r *SessionRepo) StartCleanup(interval time.Duration) {
