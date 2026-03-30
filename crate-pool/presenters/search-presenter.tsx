@@ -10,19 +10,38 @@ import { useState } from "react";
 
 export default function SearchPresenter() {
   const [query, setQuery] = useState("");
-
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
+  const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
+  const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
   const model = useTrackStore();
-  return (
-    <div className="w-full mx-auto container">
-      <SearchView onSearch={handleSearch} query={query} onQueryChange={setQuery} />
-      <RenderTracks isLoading={model.isLoading} tracks={model.tracks} currentTrack={model.currentTrack} />
-      <UploadView />
-    </div>
-  );
 
   function handleSearch(query: string) {
     model.search({ query: query });
   }
+
+  function handleTrackUpload(file: File | null) {
+    if (file) {
+      model.uploadTrack(file);
+    }
+  }
+
+  function handleXmlUpload(file: File | null) {
+    if (file) {
+      model.uploadXML(file);
+    }
+  }
+
+  return (
+    <div className="w-full mx-auto container">
+      <SearchView onSearch={handleSearch} query={query} onQueryChange={setQuery} />
+      <RenderTracks isLoading={model.isLoading} tracks={model.tracks} currentTrack={model.currentTrack} />
+      <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
+        xml={currentXmlFile} onXmlFileChange={setCurrentXmlFile} onXmlUpload={handleXmlUpload}
+
+      />
+    </div>
+  );
+}
 
   function closeTrackPreview() {
     model.setCurrentTrack(null);

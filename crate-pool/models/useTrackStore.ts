@@ -1,14 +1,17 @@
 import { create } from "zustand";
 import { Track } from "./types";
-import { search } from "@/api/trackSource";
+
+import { search, uploadTrack, uploadXML } from "@/api/trackSource";
+
 
 export interface TrackStore {
   currentTrack: Track | null;
   tracks: Track[];
   isLoading: boolean;
-  hasMore: boolean;
-  search: (params: Record<string, string>, append?: boolean) => Promise<void>;
   setCurrentTrack: (track: Track | null) => void;
+  search: (params: Record<string, string>) => Promise<void>;
+  uploadTrack: (file: File) => Promise<void>;
+  uploadXML: (file: File) => Promise<void>;
 }
 
 const mockTracks: Track[] = [
@@ -45,8 +48,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
   currentTrack: null,
   tracks: mockTracks,
   isLoading: false,
-  hasMore: true,
-  search: async (params, append = false) => {
+  search: async (params) => {
     set({ isLoading: true });
     try {
       const tracks = await search(params);
@@ -60,5 +62,23 @@ export const useTrackStore = create<TrackStore>((set) => ({
     set({ currentTrack: track });
   }
 
+  uploadTrack: async (file) => {
+    set({ isLoading: true });
+    try {
+      await uploadTrack(file);
+      set({ isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+    }
+  },
+  uploadXML: async (file) => {
+    set({ isLoading: true });
+    try {
+      await uploadXML(file);
+      set({ isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+    }
+  },
 }))
 
