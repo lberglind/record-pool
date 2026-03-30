@@ -11,10 +11,24 @@ import { useState } from "react";
 export default function SearchPresenter() {
   const [query, setQuery] = useState("");
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
+  const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
+  const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
   const model = useTrackStore();
 
   function handleSearch(query: string) {
     model.search({ query: query });
+  }
+
+  function handleTrackUpload(file: File | null) {
+    if (file) {
+      model.uploadTrack(file);
+    }
+  }
+
+  function handleXmlUpload(file: File | null) {
+    if (file) {
+      model.uploadXML(file);
+    }
   }
 
   return (
@@ -22,7 +36,10 @@ export default function SearchPresenter() {
       <SearchView onSearch={handleSearch} query={query} onQueryChange={setQuery} />
       {currentTrack && <TrackPreviewView track={currentTrack} onExitPreview={() => setCurrentTrack(null)} />}
       <RenderTracks isLoading={model.isLoading} tracks={model.tracks} setCurrentTrack={setCurrentTrack} />
-      <UploadView />
+      <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
+        xml={currentXmlFile} onXmlFileChange={setCurrentXmlFile} onXmlUpload={handleXmlUpload}
+
+      />
     </div>
   );
 }
