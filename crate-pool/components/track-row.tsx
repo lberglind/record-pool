@@ -17,7 +17,7 @@ export function TrackRow(props: TrackRowProps) {
       <TableCell>{track.artist || "test artist"}</TableCell>
       <TableCell>{track.duration}</TableCell>
       <TableCell>{track.bpm}</TableCell>
-      <TableCell>{track.tonality}</TableCell>
+      <TableCell>{track.key}</TableCell>
       <TableCell>
         <div className="flex gap-0.5"> {
           track.genre?.split(/;|\//).map((genre) => (

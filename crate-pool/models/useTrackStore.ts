@@ -8,6 +8,7 @@ export interface TrackStore {
   currentTrack: Track | null;
   tracks: Track[];
   isLoading: boolean;
+  setCurrentTrack: (track: Track | null) => void;
   search: (params: Record<string, string>) => Promise<void>;
   uploadTrack: (file: File) => Promise<void>;
   uploadXML: (file: File) => Promise<void>;
@@ -57,6 +58,10 @@ export const useTrackStore = create<TrackStore>((set) => ({
     }
 
   },
+  setCurrentTrack: (track: Track | null) => {
+    set({ currentTrack: track });
+  }
+
   uploadTrack: async (file) => {
     set({ isLoading: true });
     try {
