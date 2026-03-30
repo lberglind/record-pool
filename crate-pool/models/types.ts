@@ -6,7 +6,4 @@ export interface Track {
   bpm: number;
   key: string;
   genre: string;
-
 }
-
-

@@ -35,20 +35,8 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
           <p>{secToMin(track.duration)} minutes</p>
         </div>
         <div className="w-full flex justify-between">
-          <p>Bitrate</p>
-          <p>{track.bitrate}</p>
-        </div>
-        <div className="w-full flex justify-between">
-          <p>Size</p>
-          <p>{((track.size) / (1024 ** 2)).toFixed(2)} MB</p>
-        </div>
-        <div className="w-full flex justify-between">
-          <p>Format</p>
-          <p>{track.format}</p>
-        </div>
-        <div className="w-full flex justify-between">
           <p>Key</p>
-          <p>{track.tonality}</p>
+          <p>{track.key}</p>
         </div>
         <div className="w-full flex justify-between">
           <p>Genre</p>

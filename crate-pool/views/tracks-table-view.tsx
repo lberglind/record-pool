@@ -4,10 +4,10 @@ import { Track } from "@/models/types"
 
 interface TracksTableProps {
   tracks: Track[];
-
+  onPreview: (track: Track) => void;
 }
 
-export const TracksTableView = ({ tracks }: Props) => {
+export const TracksTableView = ({ tracks, onPreview }: TracksTableProps) => {
   return (
     <Table>
       <TableHeader>
@@ -23,7 +23,7 @@ export const TracksTableView = ({ tracks }: Props) => {
       <TableBody>
 
         {tracks?.map((track) => (
-          <TrackRow key={track.hash} track={track} />
+          <TrackRow key={track.hash} track={track} onPreview={onPreview} />
         ))}
       </TableBody>
     </Table>

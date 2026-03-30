@@ -8,6 +8,7 @@ export interface TrackStore {
   isLoading: boolean;
   hasMore: boolean;
   search: (params: Record<string, string>, append?: boolean) => Promise<void>;
+  setCurrentTrack: (track: Track | null) => void;
 }
 
 const mockTracks: Track[] = [
@@ -54,6 +55,9 @@ export const useTrackStore = create<TrackStore>((set) => ({
       set({ isLoading: false });
     }
 
+  },
+  setCurrentTrack: (track: Track | null) => {
+    set({ currentTrack: track });
   }
 
 }))
