@@ -7,3 +7,9 @@ export interface Track {
   key: string;
   genre: string;
 }
+
+export interface User {
+  userId: string;
+  email: string;
+  avatar: string;
+}
