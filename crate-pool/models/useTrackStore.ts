@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Track } from "./types";
+import { QueryParams, Track } from "./types";
 
 import { search, uploadTrack, uploadXML } from "@/api/trackSource";
 
@@ -9,7 +9,7 @@ export interface TrackStore {
   tracks: Track[];
   isLoading: boolean;
   setCurrentTrack: (track: Track | null) => void;
-  search: (params: Record<string, string>) => Promise<void>;
+  search: (query: QueryParams) => Promise<void>;
   uploadTrack: (file: File) => Promise<void>;
   uploadXML: (file: File) => Promise<void>;
 }
@@ -46,12 +46,12 @@ const mockTracks: Track[] = [
 
 export const useTrackStore = create<TrackStore>((set) => ({
   currentTrack: null,
-  tracks: mockTracks,
+  tracks: [],
   isLoading: false,
-  search: async (params) => {
+  search: async (query) => {
     set({ isLoading: true });
     try {
-      const tracks = await search(params);
+      const tracks = await search(query);
       set({ tracks, isLoading: false });
     } catch (error) {
       set({ isLoading: false });

@@ -1,7 +1,7 @@
 import { env } from "@/config/env";
-import { Track } from "@/models/types";
+import { QueryParams, Track } from "@/models/types";
 
-export async function search(searchParams: Record<string, string>) {
+export async function search(query: QueryParams) {
   const options: RequestInit = {
     method: 'GET',
     credentials: "include",
@@ -10,10 +10,7 @@ export async function search(searchParams: Record<string, string>) {
     },
   } as const;
 
-  const params = { ...searchParams };
-  if (!params['limit']) {
-    params['limit'] = '20';
-  }
+  const params = { ...query };
 
   const queryString = new URLSearchParams(params).toString();
 
