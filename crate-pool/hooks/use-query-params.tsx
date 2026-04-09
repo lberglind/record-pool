@@ -8,12 +8,53 @@ export function useQueryParams() {
     const searchParams = useSearchParams()
     const router = useRouter();
 
-    // Construct the query object from the URL search parameters, providing default values if parameters are missing
+    // Construct the query object from the URL search parameters
     const query: QueryParams = {
-        title: searchParams.get('title') ?? "",
-        artist: searchParams.get('artist') ?? "",
+        title: searchParams.get('title') ?? undefined,
+        artist: searchParams.get('artist') ?? undefined,
+        album: searchParams.get('album') ?? undefined,
+        composer: searchParams.get('composer') ?? undefined,
+        remixer: searchParams.get('remixer') ?? undefined,
+        genre: searchParams.get('genre') ?? undefined,
+        tonality: searchParams.get('tonality') ?? undefined,
+        mix: searchParams.get('mix') ?? undefined,
+        label: searchParams.get('label') ?? undefined,
+        comments: searchParams.get('comments') ?? undefined,
+        uploadedBy: searchParams.get('uploadedBy') ?? undefined,
+        
+        minBPM: searchParams.get('minBPM') ?? undefined,
+        maxBPM: searchParams.get('maxBPM') ?? undefined,
+        
+        minDuration: searchParams.get('minDuration') ?? undefined,
+        maxDuration: searchParams.get('maxDuration') ?? undefined,
+        
+        minDateAdded: searchParams.get('minDateAdded') ?? undefined,
+        maxDateAdded: searchParams.get('maxDateAdded') ?? undefined,
+        
+        minTimeStamp: searchParams.get('minTimeStamp') ?? undefined,
+        maxTimeStamp: searchParams.get('maxTimeStamp') ?? undefined,
+        
+        minRating: searchParams.get('minRating') ?? undefined,
+        maxRating: searchParams.get('maxRating') ?? undefined,
+        
+        minPlayCount: searchParams.get('minPlayCount') ?? undefined,
+        maxPlayCount: searchParams.get('maxPlayCount') ?? undefined,
+        
+        minBitRate: searchParams.get('minBitRate') ?? undefined,
+        maxBitRate: searchParams.get('maxBitRate') ?? undefined,
+        
+        minSampleRate: searchParams.get('minSampleRate') ?? undefined,
+        maxSampleRate: searchParams.get('maxSampleRate') ?? undefined,
+        
+        minSize: searchParams.get('minSize') ?? undefined,
+        maxSize: searchParams.get('maxSize') ?? undefined,
+        
+        minYear: searchParams.get('minYear') ?? undefined,
+        maxYear: searchParams.get('maxYear') ?? undefined,
+        
         page: searchParams.get('page') ?? "1",
-        pageSize: searchParams.get('pageSize') ?? "20",
+        pageSize: searchParams.get('pageSize') ?? "50",
+        
         sortBy: (searchParams.get('sortBy') ?? "title") as SortBy,
         sortDirection: (searchParams.get('sortDirection') ?? "asc") as SortDirection,
     };

@@ -28,7 +28,7 @@ export async function fetchNextPage(params: Record<string, string>, lastTrack: T
 
 
   if (lastTrack) {
-    nextParams['last_timestamp'] = lastTrack.time_stamp.toISOString();
+    nextParams['last_timestamp'] = lastTrack.timeStamp.toString();
     nextParams['last_hash'] = lastTrack.hash;
   }
 
