@@ -1,7 +1,7 @@
 "use client";
 
-import {useState} from "react";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {NavbarView} from "@/views/navbar-view";
 
@@ -10,14 +10,17 @@ export function NavbarPresenter() {
     const pathname = usePathname(); //current path URL
     const searchParams = useSearchParams(); //get query parameters from URL
 
-    //get query parameter "q" from URL or default to empty string
-    // get on /search?q=house gives house
-    const initialQuery = searchParams.get("q") ?? "";
+    // Keep navbar search synced with the active URL search title.
+    const currentTitle = searchParams.get("title") ?? "";
 
     // useState will return; searchQuery; current value; setSearchQuery; function to update it
     //creates state of type string and initial value of initialQuery
     //state remains between renders
-    const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
+    const [searchQuery, setSearchQuery] = useState<string>(currentTitle);
+
+    useEffect(() => {
+        setSearchQuery(currentTitle);
+    }, [currentTitle]);
 
     //called when user types in search bar
     function handleSearchQueryChange(value: string): void {
@@ -27,16 +30,24 @@ export function NavbarPresenter() {
     //called when user hits enter in search bar
     function handleSearchSubmit(): void {
         const trimmedQuery = searchQuery.trim();
+        const params = new URLSearchParams(searchParams.toString());
 
         if (trimmedQuery.length === 0) {
-            router.push("/search");
+            params.delete("title");
+
+            if (params.toString()) {
+                router.push(`/?${params.toString()}`);
+            } else {
+                router.push("/");
+            }
             return;
         }
 
-        //format search query for URL if special chars
-        //drum & bass -> drum%20and%26bass
-        const encodedQuery = encodeURIComponent(trimmedQuery);
-        router.push(`/search?q=${encodedQuery}`);
+        // Write title query param; SearchPresenter reacts to URL query changes.
+        params.set("title", trimmedQuery);
+        params.delete("page");
+
+        router.push(`/?${params.toString()}`);
     }
 
     function handleLibraryClick(): void {
@@ -53,6 +64,16 @@ export function NavbarPresenter() {
 
     function handleClearSearch(): void {
         setSearchQuery("");
+
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("title");
+        params.delete("page");
+
+        if (params.toString()) {
+            router.push(`/?${params.toString()}`);
+        } else {
+            router.push("/");
+        }
     }
 
     //pass props to view as single object

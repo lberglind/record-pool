@@ -44,51 +44,51 @@ export interface QueryParams {
   mix?: string;
   label?: string;
   comments?: string;
-  uploadedBy?: string;
+  user?: string;
   
   // Range queries - BPM
-  minBPM?: string;
-  maxBPM?: string;
+  min_bpm?: string;
+  max_bpm?: string;
   
   // Range queries - Duration
-  minDuration?: string;
-  maxDuration?: string;
+  min_duration?: string;
+  max_duration?: string;
   
   // Range queries - Date Added
-  minDateAdded?: string;
-  maxDateAdded?: string;
+  min_date_added?: string;
+  max_date_added?: string;
   
   // Range queries - Timestamp
-  minTimeStamp?: string;
-  maxTimeStamp?: string;
+  min_time_stamp?: string;
+  max_time_stamp?: string;
   
   // Range queries - Rating
-  minRating?: string;
-  maxRating?: string;
+  min_rating?: string;
+  max_rating?: string;
   
   // Range queries - Play Count
-  minPlayCount?: string;
-  maxPlayCount?: string;
+  min_play_count?: string;
+  max_play_count?: string;
   
   // Range queries - File properties
-  minBitRate?: string;
-  maxBitRate?: string;
-  minSampleRate?: string;
-  maxSampleRate?: string;
-  minSize?: string;
-  maxSize?: string;
+  min_bitrate?: string;
+  max_bitrate?: string;
+  min_sample_rate?: string;
+  max_sample_rate?: string;
+  min_size?: string;
+  max_size?: string;
   
   // Range queries - Year
-  minYear?: string;
-  maxYear?: string;
+  min_year?: string;
+  max_year?: string;
   
   // Pagination
   page?: string;
-  pageSize?: string;
+  page_size?: string;
   
   // Sorting
-  sortBy?: SortBy;
-  sortDirection?: SortDirection;
+  sort_by?: SortBy;
+  sort_direction?: SortDirection;
 }
 
 export type SortDirection = "asc" | "desc";

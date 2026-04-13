@@ -3,7 +3,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { Track } from "@/models/types";
 import { useTrackStore } from "@/models/useTrackStore";
-import SearchView from "@/views/search-view";
 import TrackPreviewView from "@/views/track-preview-view";
 import { TracksTableView } from "@/views/tracks-table-view";
 import UploadView from "@/views/upload-view";
@@ -23,7 +22,7 @@ export default function SearchPresenter() {
   const setCurrentTrack = useTrackStore((state) => state.setCurrentTrack);
 
   // Get query params from URL
-  const {query, setQuery} = useQueryParams();
+  const { query } = useQueryParams();
 
   // Effect to perform search when query params change
   useEffect(() => {
@@ -41,37 +40,32 @@ export default function SearchPresenter() {
     query.mix,
     query.label,
     query.comments,
-    query.uploadedBy,
-    query.minBPM,
-    query.maxBPM,
-    query.minDuration,
-    query.maxDuration,
-    query.minDateAdded,
-    query.maxDateAdded,
-    query.minTimeStamp,
-    query.maxTimeStamp,
-    query.minRating,
-    query.maxRating,
-    query.minPlayCount,
-    query.maxPlayCount,
-    query.minBitRate,
-    query.maxBitRate,
-    query.minSampleRate,
-    query.maxSampleRate,
-    query.minSize,
-    query.maxSize,
-    query.minYear,
-    query.maxYear,
+    query.user,
+    query.min_bpm,
+    query.max_bpm,
+    query.min_duration,
+    query.max_duration,
+    query.min_date_added,
+    query.max_date_added,
+    query.min_time_stamp,
+    query.max_time_stamp,
+    query.min_rating,
+    query.max_rating,
+    query.min_play_count,
+    query.max_play_count,
+    query.min_bitrate,
+    query.max_bitrate,
+    query.min_sample_rate,
+    query.max_sample_rate,
+    query.min_size,
+    query.max_size,
+    query.min_year,
+    query.max_year,
     query.page,
-    query.pageSize,
-    query.sortBy,
-    query.sortDirection,
+    query.page_size,
+    query.sort_by,
+    query.sort_direction,
   ]);
-
-  function handleSearch(title: string) {
-    setQuery("title", title);
-  }
-
 
   function handleTrackUpload(file: File | null) {
     if (file) {
@@ -119,11 +113,9 @@ export default function SearchPresenter() {
 
   return (
     <div className="w-full mx-auto container">
-      <SearchView onSearch={handleSearch} query={query} />
       <RenderTracks isLoading={isLoading} tracks={tracks} currentTrack={currentTrack} />
       <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
         xml={currentXmlFile} onXmlFileChange={setCurrentXmlFile} onXmlUpload={handleXmlUpload}
-
       />
     </div>
   );
