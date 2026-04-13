@@ -7,6 +7,8 @@ written in go that connects to a selfhosted postgres database and selfhosted s3 
 
 A user is authenticated via a slack OAuth token from the connected workspace which can be joined through this link: `https://join.slack.com/t/recordpooltest/shared_invite/zt-3v23ckmxx-BfllkTW7q1Tyd17cows9rg`
 
+To enter website use: `https://pool.berglind.io/`
+
 ## What You Have Done
 * Created various presenters and their accompanying views to allow basic functionality. 
 * Routing done through the navbar-presenter and in the /app directory.
