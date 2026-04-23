@@ -52,6 +52,80 @@ const docTemplate = `{
                 }
             }
         },
+        "/like/{hash}": {
+            "post": {
+                "description": "Adds a track to a user's liked tracks",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Likes a track",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Track Hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Removes a track from the user's liked tracks",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Removes a liked track",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Track Hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/me": {
             "get": {
                 "description": "Returns the email and userID of the logged-in user via session cookie",

@@ -187,6 +187,55 @@ paths:
       summary: Slack OAuth Callback
       tags:
       - Auth
+  /like/{hash}:
+    delete:
+      description: Removes a track from the user's liked tracks
+      parameters:
+      - description: Track Hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: Removes a liked track
+      tags:
+      - Likes
+    post:
+      description: Adds a track to a user's liked tracks
+      parameters:
+      - description: Track Hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Created
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: Likes a track
+      tags:
+      - Likes
   /me:
     get:
       description: Returns the email and userID of the logged-in user via session

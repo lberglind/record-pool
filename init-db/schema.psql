@@ -36,6 +36,13 @@ CREATE TABLE IF NOT EXISTS tracks (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS likes (
+  user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  track_hash TEXT REFERENCES tracks(hash) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY(user_id, track_hash)
+);
+
 CREATE TABLE IF NOT EXISTS track_metadata (
     track_hash TEXT NOT NULL REFERENCES tracks(hash) ON DELETE CASCADE,
     uploaded_by UUID REFERENCES users(user_id) ON DELETE SET NULL,

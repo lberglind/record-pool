@@ -33,6 +33,28 @@ services:
     volumes:
       - minio_data:/data
 
+ # backend:
+ #   build:
+ #     context: ./backend/
+ #     dockerfile: Dockerfile
+ #   ports:
+ #     - "8080:8080"
+ #   env_file:
+ #     - .env
+ #   depends_on:
+ #     - database
+ #     - minio
+
+ # tunnel:
+ #   image: cloudflare/cloudflared:latest
+ #   restart: always
+ #   environment:
+ #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+ #   command: tunnel -no-autoupdate run
+ #   depends_on:
+ #     - backend
+ #     - minio
+
 volumes:
   postgres_data:
   minio_data:
