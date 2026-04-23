@@ -104,6 +104,8 @@ func main() {
 	mux.HandleFunc("POST /xml", protected(trackHandlers.UploadXML()))
 	mux.HandleFunc("POST /tracks/batch", protected(trackHandlers.BatchUpload()))
 	mux.HandleFunc("GET /profile", protected(profileHandlers.GetProfile()))
+	mux.HandleFunc("POST /like/{hash}", protected(trackHandlers.LikeTrack()))
+	mux.HandleFunc("DELETE /like/{hash}", protected(trackHandlers.DeleteTrackLike()))
 
 	// Search Routes
 	mux.HandleFunc("GET /search", protected(searchHandlers.TrackSearch()))
