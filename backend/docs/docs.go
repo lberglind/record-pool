@@ -52,7 +52,42 @@ const docTemplate = `{
                 }
             }
         },
-        "/like/{hash}": {
+        "/likes": {
+            "get": {
+                "description": "Retrieves all tracks liked by the authenticated user session.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Gets a users liked tracks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Like"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/likes/{hash}": {
             "post": {
                 "description": "Adds a track to a user's liked tracks",
                 "produces": [
@@ -792,6 +827,20 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "integer"
+                }
+            }
+        },
+        "domain.Like": {
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "type": "string"
+                },
+                "track": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },

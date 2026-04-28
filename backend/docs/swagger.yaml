@@ -17,6 +17,15 @@ definitions:
       type:
         type: integer
     type: object
+  domain.Like:
+    properties:
+      timestamp:
+        type: string
+      track:
+        type: string
+      user:
+        type: string
+    type: object
   domain.Playlist:
     properties:
       children:
@@ -187,7 +196,30 @@ paths:
       summary: Slack OAuth Callback
       tags:
       - Auth
-  /like/{hash}:
+  /likes:
+    get:
+      description: Retrieves all tracks liked by the authenticated user session.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Like'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: Gets a users liked tracks
+      tags:
+      - Likes
+  /likes/{hash}:
     delete:
       description: Removes a track from the user's liked tracks
       parameters:
