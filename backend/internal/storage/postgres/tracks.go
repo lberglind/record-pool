@@ -8,7 +8,6 @@ import (
 	"record-pool/internal/track"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -130,28 +129,5 @@ func (r *TrackRepo) ExecAddTrack(ctx context.Context, m track.ExecMetadata) erro
 		return fmt.Errorf("Error inserting track: %s: %w", m.Title, err)
 	}
 	log.Printf("Track: %s inserted.\n", m.Title)
-	return nil
-}
-
-func (r *TrackRepo) LikeTrack(ctx context.Context, user uuid.UUID, track string) error {
-	query := `
-		INSERT INTO likes (user_id, track_hash)
-		VALUES ($1, $2)
-		ON CONFLICT DO NOTHING`
-	_, err := r.pool.Exec(ctx, query, user, track)
-	if err != nil {
-		log.Printf("Couldn't add track like: %v", err)
-		return err
-	}
-	return nil
-}
-
-func (r *TrackRepo) DeleteTrackLike(ctx context.Context, user uuid.UUID, track string) error {
-	query := `DELETE FROM likes WHERE user_id = $1 AND track_hash = $2`
-	_, err := r.pool.Exec(ctx, query, user, track)
-	if err != nil {
-		log.Printf("Couldn't delete track like")
-		return err
-	}
 	return nil
 }
