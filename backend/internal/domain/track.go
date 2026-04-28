@@ -4,8 +4,6 @@ import (
 	"context"
 	"record-pool/internal/track"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Track struct {
@@ -22,6 +20,4 @@ type TrackRepository interface {
 	AddTrack(ctx context.Context, track track.Metadata, size int64) error
 	ExecAddTrack(ctx context.Context, track track.ExecMetadata) error
 	ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash string, limit int) ([]Track, error)
-	LikeTrack(ctx context.Context, user uuid.UUID, track string) error
-	DeleteTrackLike(ctx context.Context, user uuid.UUID, track string) error
 }
