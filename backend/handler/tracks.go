@@ -32,61 +32,6 @@ type TrackHandler struct {
 	Store        domain.ObjectStore
 }
 
-// LikeTrack
-// @Summary Likes a track
-// @Description Adds a track to a user's liked tracks
-// @Tags Likes
-// @Param hash path 	string true "Track Hash"
-// @Produce plain
-// @Success 201 {object} nil "Created"
-// @Failure 401 {string} string "Unauthorized"
-// @Failure 500 {string} string "Database error"
-// @Router /like/{hash} [post]
-func (h *TrackHandler) LikeTrack() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
-		if !ok {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		hash := r.PathValue("hash")
-		err := h.Repo.LikeTrack(r.Context(), userID, hash)
-		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusCreated)
-	}
-}
-
-// DeleteTrackLike
-// @Summary Removes a liked track
-// @Description Removes a track from the user's liked tracks
-// @Tags Likes
-// @Param hash path 	string true "Track Hash"
-// @Produce plain
-// @Success 204 {object} nil "No Content"
-// @Failure 401 {string} string "Unauthorized"
-// @Failure 500 {string} string "Database error"
-// @Router /like/{hash} [delete]
-func (h *TrackHandler) DeleteTrackLike() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDContextKey).(uuid.UUID)
-		if !ok {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		hash := r.PathValue("hash")
-		err := h.Repo.DeleteTrackLike(r.Context(), userID, hash)
-		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
-	}
-}
-
 // ListAllTracks
 // @Summary List all tracks
 // @Description Get a full list of all tracks in the database
