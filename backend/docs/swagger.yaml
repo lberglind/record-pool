@@ -585,6 +585,29 @@ paths:
       summary: Upload a track
       tags:
       - Tracks
+  /tracks/{hash}:
+    get:
+      description: Get a track by its hash
+      parameters:
+      - description: Track Hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Track'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get track from hash
+      tags:
+      - Tracks
   /tracks/{hash}/file:
     get:
       description: Stream a music file from storage using its hash
