@@ -20,4 +20,5 @@ type TrackRepository interface {
 	AddTrack(ctx context.Context, track track.Metadata, size int64) error
 	ExecAddTrack(ctx context.Context, track track.ExecMetadata) error
 	ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash string, limit int) ([]Track, error)
+	GetTrack(ctx context.Context, hash string) (Track, error)
 }

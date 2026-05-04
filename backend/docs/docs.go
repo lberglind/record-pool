@@ -735,6 +735,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/tracks/{hash}": {
+            "get": {
+                "description": "Get a track by its hash",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Get track from hash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Track Hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Track"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/tracks/{hash}/file": {
             "get": {
                 "description": "Stream a music file from storage using its hash",

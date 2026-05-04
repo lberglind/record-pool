@@ -56,6 +56,32 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 	}
 }
 
+// GetTrack
+// @Summary Get track from hash
+// @Description Get a track by its hash
+// @Tags Tracks
+// @Produce json
+// @Param hash path string true "Track Hash"
+// @Failure 500 {string} string "Internal Server Error"
+// @Success 200 {object} domain.Track
+// @Router /tracks/{hash} [get]
+func (h *TrackHandler) GetTrack() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		hash := r.PathValue("hash")
+		track, err := h.Repo.GetTrack(r.Context(), hash)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(track)
+		if err != nil {
+			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 // ListTrackPage
 // @Summary Paginated tracks
 // @Description Get tracks using cursor-based pagination

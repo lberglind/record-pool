@@ -103,6 +103,7 @@ func main() {
 	// Protected Routes
 
 	mux.HandleFunc("GET /tracks", protected(trackHandlers.ListAllTracks()))
+	mux.HandleFunc("GET /tracks/{hash}", protected(trackHandlers.GetTrack()))
 	mux.HandleFunc("GET /tracks/page", protected(trackHandlers.ListTrackPage()))
 	mux.HandleFunc("GET /tracks/{hash}/file", protected(trackHandlers.Download()))
 	mux.HandleFunc("POST /tracks", protected(trackHandlers.Upload()))

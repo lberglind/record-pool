@@ -131,3 +131,17 @@ func (r *TrackRepo) ExecAddTrack(ctx context.Context, m track.ExecMetadata) erro
 	log.Printf("Track: %s inserted.\n", m.Title)
 	return nil
 }
+
+func (r *TrackRepo) GetTrack(ctx context.Context, hash string) (domain.Track, error) {
+	var t domain.Track
+	query := `SELECT hash, file_format, title, artist, created_at FROM tracks
+						WHERE hash = $1`
+	err := r.pool.QueryRow(ctx, query, hash).Scan(
+		&t.Hash,
+		&t.Format,
+		&t.Title,
+		&t.Artist,
+		&t.CreatedAt,
+	)
+	return t, err
+}

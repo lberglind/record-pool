@@ -19,23 +19,6 @@ func NewSearchRepo(pool *pgxpool.Pool) *SearchRepo {
 	return &SearchRepo{pool: pool}
 }
 
-//CREATE TABLE IF NOT EXISTS tracks (
-//    hash TEXT UNIQUE PRIMARY KEY NOT NULL,
-//    file_format VARCHAR(10) NOT NULL,
-//    artist TEXT,
-//    title TEXT,
-//    album TEXT,
-//    album_artist TEXT,
-//    duration DECIMAL,
-//    size DECIMAL,
-//    bitrate DECIMAL,
-//    bpm DECIMAL(5,2),
-//    genre TEXT,
-//    publisher TEXT,
-//    release_date DATE,
-//    created_at TIMESTAMPTZ DEFAULT NOW()
-//);
-
 func (r *SearchRepo) SearchTracks(ctx context.Context, userID uuid.UUID, params domain.SearchParams) ([]domain.SearchResult, error) {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	query := psql.Select(`DISTINCT ON (t.hash) t.hash, t.file_format, t.artist, t.title, t.album, t.album_artist, t.duration, 
