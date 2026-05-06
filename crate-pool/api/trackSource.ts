@@ -2,6 +2,7 @@ import { env } from "@/config/env";
 import { QueryParams, Track } from "@/models/types";
 
 export async function search(query: QueryParams) {
+  console.log("Searching with query in API:", query);
   const options: RequestInit = {
     method: 'GET',
     credentials: "include",
@@ -20,7 +21,11 @@ export async function search(query: QueryParams) {
     throw new Error("Search failed")
   }
 
-  return await res.json();
+  console.log("Search response:", res);
+  const data = await res.json();
+  console.log("Search response json:", data);
+
+  return data;
 }
 
 export async function fetchNextPage(params: Record<string, string>, lastTrack: Track) {

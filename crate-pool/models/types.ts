@@ -1,42 +1,52 @@
 export interface Track {
   hash: string;
+  format: string;
   title: string;
   artist: string;
-  format: string;
-  timeStamp: string;
+  album: string;
+  album_artist: string;
+  bpm: number;
+  bitrate: number;
+  comments: string;
+  composer?: string;
+  date_added: string | null;
+  duration: number;
+  genre: string;
+  label: string;
+  limit: number | null;
+  mix: string;
+  page: number | null;
+  play_count: number | null;
+  rating: number | null;
+  release_date: string | null;
+  remixer: string;
+  sample_rate: number;
+  size: number;
+  time_stamp: string;
+  tonality: string;
+  user: string | null;
+
+  // Backward-compatible aliases used by the current UI and pagination code.
+  albumArtist?: string;
+  bitRate?: number;
+  dateAdded?: string | null;
+  playCount?: number | null;
+  releaseDate?: string | null;
+  sampleRate?: number;
+  timeStamp?: string;
+  uploadedBy?: string | null;
+  key?: string;
 }
 
-export interface TrackMetadata {
-  trackHash: string;
-  album?: string;
-  artist?: string;
-  averageBpm?: number;
-  bitRate?: number;
-  comments?: string;
-  composer?: string;
-  dateAdded?: string;
-  duration?: number;
-  genre?: string;
-  label?: string;
-  mix?: string;
-  playCount?: number;
-  rating?: number;
-  remixer?: string;
-  sampleRate?: number;
-  size?: number;
-  timeStamp?: string;
-  tonality?: string;
-  uploadedBy?: string;
-  year?: number;
-}
+export type SearchResult = Track;
 
 export interface QueryParams {
   // Basic search
-  title?: string;
-  artist?: string;
-  album?: string;
-  
+  query?: string;
+
   // Metadata filters
+  album?: string;
+  album_artist?: string;
   composer?: string;
   remixer?: string;
   genre?: string;
@@ -53,6 +63,10 @@ export interface QueryParams {
   // Range queries - Duration
   min_duration?: string;
   max_duration?: string;
+
+  // Range queries - Release date
+  min_release?: string;
+  max_release?: string;
   
   // Range queries - Date Added
   min_date_added?: string;
@@ -78,18 +92,11 @@ export interface QueryParams {
   min_size?: string;
   max_size?: string;
   
-  // Range queries - Year
-  min_year?: string;
-  max_year?: string;
-  
   // Pagination
   page?: string;
-  page_size?: string;
-  
-  // Sorting
-  sort_by?: SortBy;
-  sort_direction?: SortDirection;
-}
+  limit?: string;
 
-export type SortDirection = "asc" | "desc";
-export type SortBy = "title" | "artist" | "album" | "genre" | "duration" | "averageBpm" | "rating" | "year";
+  // Cursor pagination
+  last_timestamp?: string;
+  last_hash?: string;
+}

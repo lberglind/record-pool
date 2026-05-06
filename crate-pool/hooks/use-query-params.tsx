@@ -1,6 +1,6 @@
 "use client"
 
-import { QueryParams, SortBy, SortDirection } from "@/models/types";
+import { QueryParams } from "@/models/types";
 import { useRouter, useSearchParams } from "next/navigation";
 
 
@@ -9,13 +9,15 @@ export function useQueryParams() {
     const router = useRouter();
 
     const keys = [
-        'title', 'artist', 
+        'query',
         'album', 'composer', 
+        'album_artist',
         'remixer', 'genre', 
         'tonality', 'mix', 
         'label', 'comments', 'user',
         'min_bpm', 'max_bpm',
         'min_duration', 'max_duration',
+        'min_release', 'max_release',
         'min_date_added', 'max_date_added',
         'min_time_stamp', 'max_time_stamp',
         'min_rating', 'max_rating',
@@ -23,8 +25,8 @@ export function useQueryParams() {
         'min_bitrate', 'max_bitrate',
         'min_sample_rate', 'max_sample_rate',
         'min_size', 'max_size',
-        'min_year', 'max_year',
-        'page', 'page_size',
+        'page', 'limit',
+        'last_timestamp', 'last_hash',
     ] as const;
 
     const query: QueryParams = {};
@@ -43,8 +45,8 @@ export function useQueryParams() {
         //query.page = "1";
     }
 
-    if (!query.page_size) {
-        //query.page_size = "50";
+    if (!query.limit) {
+        //query.limit = "50";
     }
 
     // Function to update a specific query parameter in the URL, while preserving other parameters and resetting the page to 1 if any parameter other than page is changed

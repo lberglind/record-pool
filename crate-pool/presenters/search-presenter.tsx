@@ -24,15 +24,17 @@ export default function SearchPresenter() {
   // Get query params from URL
   const { query } = useQueryParams();
 
+  console.log("TrackStore state:", { tracks, currentTrack, isLoading });
+
   // Effect to perform search when query params change
   useEffect(() => {
     console.log("Performing search in useEffect with query:", query);
     searchTracks(query);
   }, [
     searchTracks,
-    query.title,
-    query.artist,
+    query.query,
     query.album,
+    query.album_artist,
     query.composer,
     query.remixer,
     query.genre,
@@ -45,6 +47,8 @@ export default function SearchPresenter() {
     query.max_bpm,
     query.min_duration,
     query.max_duration,
+    query.min_release,
+    query.max_release,
     query.min_date_added,
     query.max_date_added,
     query.min_time_stamp,
@@ -59,12 +63,10 @@ export default function SearchPresenter() {
     query.max_sample_rate,
     query.min_size,
     query.max_size,
-    query.min_year,
-    query.max_year,
     query.page,
-    query.page_size,
-    query.sort_by,
-    query.sort_direction,
+    query.limit,
+    query.last_timestamp,
+    query.last_hash,
   ]);
 
   function handleTrackUpload(file: File | null) {
