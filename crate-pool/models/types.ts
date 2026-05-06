@@ -26,15 +26,8 @@ export interface Track {
   tonality: string;
   user: string | null;
 
-  // Backward-compatible aliases used by the current UI and pagination code.
-  albumArtist?: string;
-  bitRate?: number;
-  dateAdded?: string | null;
-  playCount?: number | null;
-  releaseDate?: string | null;
-  sampleRate?: number;
+  // Backward-compatible aliases used by the current UI.
   timeStamp?: string;
-  uploadedBy?: string | null;
   key?: string;
 }
 
@@ -99,4 +92,10 @@ export interface QueryParams {
   // Cursor pagination
   last_timestamp?: string;
   last_hash?: string;
+}
+
+export interface User {
+  userId: string;
+  email: string;
+  avatar: string;
 }

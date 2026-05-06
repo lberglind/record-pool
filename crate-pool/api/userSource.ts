@@ -1,9 +1,5 @@
 import { env } from "@/config/env";
-
-interface User {
-  email: string;
-  userID: string;
-}
+import { User } from "@/models/types";
 
 export async function getCurrentUser() {
   const options: RequestInit = {
