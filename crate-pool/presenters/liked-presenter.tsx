@@ -1,9 +1,10 @@
 // liked-presenter.tsx
 "use client"
+import { Spinner } from "@/components/ui/spinner";
 import { useLikeStore } from "@/models/useLikeStore";
 import { Track } from "@/models/types";
 import { useEffect } from "react";
-import LikedView from "@/views/liked-view";
+import { TracksTableView } from "@/views/tracks-table-view";
 
 export default function LikedPresenter() {
     const model = useLikeStore();
@@ -12,15 +13,16 @@ export default function LikedPresenter() {
         model.fetchLikes();
     }, []);
 
-    function handleRemoveLike(track: Track) {
-        model.removeLike(track.hash);
+    function setTrackPreview(track: Track) {
+        model.setCurrentTrack(track);
+        console.log("Set current track to", track);
     }
 
     return (
-        <LikedView
-            tracks={model.likes}
-            isLoading={model.isLoading}
-            onRemoveLike={handleRemoveLike}
-        />
+        <div className="w-full mx-auto container">
+            <h1 className="text-2xl font-bold mb-4">Liked Tracks</h1>
+            <TracksTableView tracks={model.likes} onPreview={setTrackPreview} />
+        </div>
+
     );
 }

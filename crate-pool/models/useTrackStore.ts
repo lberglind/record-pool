@@ -6,7 +6,7 @@ import { search, uploadTrack, uploadXML } from "@/api/trackSource";
 
 export interface TrackStore {
   currentTrack: Track | null;
-  tracks: Track[];
+  tracks: [];
   isLoading: boolean;
   setCurrentTrack: (track: Track | null) => void;
   search: (params: Record<string, string>) => Promise<void>;
@@ -46,7 +46,7 @@ const mockTracks: Track[] = [
 
 export const useTrackStore = create<TrackStore>((set) => ({
   currentTrack: null,
-  tracks: mockTracks,
+  tracks: [],
   isLoading: false,
   search: async (params) => {
     set({ isLoading: true });
@@ -54,6 +54,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       const tracks = await search(params);
       set({ tracks, isLoading: false });
     } catch (error) {
+      console.error("Search error:", error);
       set({ isLoading: false });
     }
 
@@ -61,11 +62,13 @@ export const useTrackStore = create<TrackStore>((set) => ({
   setCurrentTrack: (track: Track | null) => {
     set({ currentTrack: track });
   },
+
   uploadTrack: async (file) => {
     set({ isLoading: true });
     try {
       await uploadTrack(file);
-      set({ isLoading: false });
+      const tracks = await search({});
+      set({ tracks, isLoading: false });
     } catch (error) {
       set({ isLoading: false });
     }
@@ -80,4 +83,3 @@ export const useTrackStore = create<TrackStore>((set) => ({
     }
   },
 }))
-

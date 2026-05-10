@@ -1,26 +1,32 @@
 "use client"
 import { Spinner } from "@/components/ui/spinner";
 import { Track } from "@/models/types";
-import { useTrackStore } from "@/models/useTrackStore";
-import SearchView from "@/views/search-view";
+import { useTrackStore } from "@/models/useTrackStore"; import { useLikeStore } from "@/models/useLikeStore"; import SearchView from "@/views/search-view";
 import TrackPreviewView from "@/views/track-preview-view";
 import { TracksTableView } from "@/views/tracks-table-view";
 import UploadView from "@/views/upload-view";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 export default function SearchPresenter() {
   const [query, setQuery] = useState("");
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
   const model = useTrackStore();
+  const likeModel = useLikeStore();
+
+  useEffect(() => {
+    model.search({});
+  }, []);
+
 
   function handleSearch(query: string) {
     model.search({ query: query });
   }
 
-  function handleTrackUpload(file: File | null) {
+  async function handleTrackUpload(file: File | null) {
     if (file) {
-      model.uploadTrack(file);
+      await model.uploadTrack(file);
+      await model.search({});
     }
   }
 
@@ -41,11 +47,20 @@ export default function SearchPresenter() {
   }
 
   function RenderTrackPreview({ track }: { track: Track }) {
+    const isLiked = useLikeStore(state => state.likes.some(like => like.hash === track.hash));
     return (
       <div>
-        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} />
+        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} onLike={handleLike} isLiked={isLiked} />
       </div>
     )
+  }
+  function handleLike(track: Track) {
+    const isLiked = likeModel.likes.some((t) => t.hash === track.hash);
+    if (isLiked) {
+      likeModel.removeLike(track.hash);
+    } else {
+      likeModel.addLike(track.hash);
+    }
   }
 
   function RenderTracks({ isLoading, tracks, currentTrack }: { isLoading: boolean, tracks: Track[], currentTrack: Track | null }) {
@@ -64,6 +79,7 @@ export default function SearchPresenter() {
 
   return (
     <div className="w-full mx-auto container">
+      <h1 className="text-2xl font-bold mb-4">Home</h1>
       <SearchView onSearch={handleSearch} query={query} onQueryChange={setQuery} />
       <RenderTracks isLoading={model.isLoading} tracks={model.tracks} currentTrack={model.currentTrack} />
       <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
@@ -74,7 +90,7 @@ export default function SearchPresenter() {
   );
 }
 
-  
+
 
 
 
