@@ -1,9 +1,10 @@
 import { getCurrentUser } from "@/api/userSource";
 import { env } from "@/config/env";
 import { create } from "zustand";
+import { User } from "./types";
 
 interface UserStore {
-  user: { email: string; userID: string } | null;
+  user: User | null;
   isLoading: boolean;
   slackAuthUrl: string;
   fetchUser: () => Promise<void>;

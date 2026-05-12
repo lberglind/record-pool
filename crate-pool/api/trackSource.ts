@@ -1,7 +1,8 @@
 import { env } from "@/config/env";
-import { Track } from "@/models/types";
+import { QueryParams, Track } from "@/models/types";
 
-export async function search(searchParams: Record<string, string>) {
+export async function search(query: QueryParams) {
+  console.log("Searching with query in API:", query);
   const options: RequestInit = {
     method: 'GET',
     credentials: "include",
@@ -10,10 +11,7 @@ export async function search(searchParams: Record<string, string>) {
     },
   } as const;
 
-  const params = { ...searchParams };
-  if (!params['limit']) {
-    params['limit'] = '20';
-  }
+  const params = { ...query };
 
   const queryString = new URLSearchParams(params).toString();
 
@@ -23,7 +21,11 @@ export async function search(searchParams: Record<string, string>) {
     throw new Error("Search failed")
   }
 
-  return await res.json();
+  console.log("Search response:", res);
+  const data = await res.json();
+  console.log("Search response json:", data);
+
+  return data;
 }
 
 export async function fetchNextPage(params: Record<string, string>, lastTrack: Track) {
@@ -31,7 +33,7 @@ export async function fetchNextPage(params: Record<string, string>, lastTrack: T
 
 
   if (lastTrack) {
-    nextParams['last_timestamp'] = lastTrack.time_stamp.toISOString();
+    nextParams['last_timestamp'] = lastTrack.timeStamp.toString();
     nextParams['last_hash'] = lastTrack.hash;
   }
 

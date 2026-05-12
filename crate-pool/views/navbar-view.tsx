@@ -1,15 +1,16 @@
-import {Search, Library, Heart, User, CircleX} from "lucide-react";
+import { Search, Library, Heart, User, X } from "lucide-react";
 
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import type {NavbarViewProps} from "@/models/navbarTypes";
-import type {ChangeEvent, SubmitEvent} from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { NavbarViewProps } from "@/models/navbarTypes";
+import type { ChangeEvent, SubmitEvent } from "react";
 import Link from "next/link";
 
 //props and types defined in navbarTypes.ts
 export function NavbarView(props: NavbarViewProps) {
     const {
         searchQuery,
+        urlQuery,
         activePath,
         onSearchQueryChange,
         onSearchSubmit,
@@ -35,11 +36,15 @@ export function NavbarView(props: NavbarViewProps) {
     }
 
     // check if the current path matches any of the active paths for ghost highlighting
+    // This is used to determine which navigation button should be highlighted as active
     const isLibraryActive = activePath === "/library";
     const isLikedActive = activePath === "/liked";
     const isProfileActive = activePath === "/profile";
 
+    // Disable search button when search query is empty or only whitespace
     const isSearchDisabled = searchQuery.trim().length === 0;
+
+    const isQueryEmpty = urlQuery.trim().length === 0;
 
     return (
         <header
@@ -57,38 +62,38 @@ export function NavbarView(props: NavbarViewProps) {
                     onSubmit={handleSearchFormSubmit}
                     className="hidden min-w-0 flex-1 md:block"
                 >
-                    <div className="relative">
-                        {/* Search icon */}
-                        <button
-                            type="submit"
-                            disabled={isSearchDisabled}
-                            //active when search query exists; change cursor to pointer and activate click
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground enabled:cursor-pointer disabled:cursor-default"
-                            aria-label="Search"
-                        >
-                            <Search className="h-4 w-4" />
-                        </button>
-                        {/* Search text inside form,
+                    <div className="flex gap-2 px-8">
+                        <div className="relative w-full">
+                            {/* Search icon */}
+                            <button
+                                type="submit"
+                                disabled={isSearchDisabled}
+                                //active when search query exists; change cursor to pointer and activate click
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground enabled:cursor-pointer disabled:cursor-default"
+                                aria-label="Search"
+                            >
+                                <Search className="h-4 w-4" />
+                            </button>
+                            {/* Search text inside form,
                          onChange fires custom event up*/}
-                        <Input
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
-                            type="search"
-                            placeholder="Search tracks, artists, playlists..."
-                            //input padding
-                            className="pl-10"
-                            aria-label="Search"
-                        />
-
-                        <button
+                            <Input
+                                value={searchQuery}
+                                onChange={handleSearchInputChange}
+                                type="search"
+                                placeholder="Search tracks, artists, playlists..."
+                                //input padding
+                                className="pl-10"
+                                aria-label="Search"
+                            />
+                        </div>
+                        <Button
                             type="button"
-                            disabled={isSearchDisabled}
+                            variant={isQueryEmpty ? "ghost" : "default"}
+                            className="gap-2 cursor-pointer"
                             onClick={onClearSearch}
-                            className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground enabled:cursor-pointer disabled:cursor-default"
-                            aria-label="Clear search"
                         >
-                            <CircleX className="h-4 w-4" />
-                        </button>
+                            Clear
+                        </Button>
                     </div>
                 </form>
 
@@ -106,7 +111,7 @@ export function NavbarView(props: NavbarViewProps) {
                         onClick={onLibraryClick}
                         aria-current={isLibraryActive ? "page" : undefined}
                     >
-                        <Library className="h-4 w-4"/>
+                        <Library className="h-4 w-4" />
                         <span className="hidden sm:inline">Library</span>
                     </Button>
 
@@ -119,7 +124,7 @@ export function NavbarView(props: NavbarViewProps) {
                         onClick={onLikedClick}
                         aria-current={isLikedActive ? "page" : undefined}
                     >
-                        <Heart className="h-4 w-4"/>
+                        <Heart className="h-4 w-4" />
                         <span className="hidden sm:inline">Liked</span>
                     </Button>
 
@@ -132,7 +137,7 @@ export function NavbarView(props: NavbarViewProps) {
                         onClick={onProfileClick}
                         aria-current={isProfileActive ? "page" : undefined}
                     >
-                        <User className="h-4 w-4"/>
+                        <User className="h-4 w-4" />
                         <span className="hidden sm:inline">Profile</span>
                     </Button>
                 </nav>
@@ -144,7 +149,7 @@ export function NavbarView(props: NavbarViewProps) {
                 <form onSubmit={handleSearchFormSubmit}>
                     <div className="relative">
                         <Search
-                            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"/>
+                            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             value={searchQuery}
                             onChange={handleSearchInputChange}
