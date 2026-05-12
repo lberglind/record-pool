@@ -8,10 +8,19 @@ import { HeartIcon, X } from "lucide-react";
 interface TrackPreviewViewProps {
   track: Track;
   onExitPreview: () => void;
+  onLike: (track: Track) => void;
+  isLiked: boolean;
 }
 
 export default function TrackPreviewView(props: TrackPreviewViewProps) {
   const track = props.track;
+  function removeFromLibrary() {
+    console.log("Placeholder, should remove from library, need endpoint:", track);
+  }
+  function toggleLike() {
+    console.log("toggled like for:", track.title);
+    props.onLike(track);
+  }
   if (!track) {
     return (<Card>
       <CardHeader>
@@ -37,7 +46,7 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
         </div>
         <div className="w-full flex justify-between">
           <p>Key</p>
-          <p>{track.tonality}</p>
+          <p>{track.key}</p>
         </div>
         <div className="w-full flex justify-between">
           <p>Genre</p>
@@ -45,10 +54,10 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
         </div>
         <div className="w-full flex gap-4">
           <Button className="flex-grow py-6 mt-4">Download</Button>
-          <Button className="p-6 mt-4" variant={"outline"}><HeartIcon /></Button>
+          <Button className="p-6 mt-4" variant={"outline"} onClick={toggleLike}><HeartIcon className={props.isLiked ? "fill-red-500 text-red-500" : ""} /></Button>
+          <Button className="p-6 mt-4" variant={"outline"} onClick={removeFromLibrary}><X /></Button>
         </div>
       </CardFooter>
     </Card >
   );
 }
-

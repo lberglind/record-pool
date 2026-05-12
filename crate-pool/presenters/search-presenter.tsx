@@ -2,15 +2,16 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { Track } from "@/models/types";
-import { useTrackStore } from "@/models/useTrackStore";
+import { useTrackStore } from "@/models/useTrackStore"; import { useLikeStore } from "@/models/useLikeStore"; import SearchView from "@/views/search-view";
 import TrackPreviewView from "@/views/track-preview-view";
 import { TracksTableView } from "@/views/tracks-table-view";
 import UploadView from "@/views/upload-view";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 export default function SearchPresenter() {
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
+  const likeModel = useLikeStore();
 
   // Zustand store for tracks and search state
   const tracks = useTrackStore((state) => state.tracks);
@@ -69,9 +70,10 @@ export default function SearchPresenter() {
     query.last_hash,
   ]);
 
-  function handleTrackUpload(file: File | null) {
+  async function handleTrackUpload(file: File | null) {
     if (file) {
-      uploadTrack(file);
+      await uploadTrack(file);
+      await searchTracks({});
     }
   }
 
@@ -92,11 +94,20 @@ export default function SearchPresenter() {
   }
 
   function RenderTrackPreview({ track }: { track: Track }) {
+    const isLiked = useLikeStore(state => state.likes.some(like => like.hash === track.hash));
     return (
       <div>
-        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} />
+        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} onLike={handleLike} isLiked={isLiked} />
       </div>
     )
+  }
+  function handleLike(track: Track) {
+    const isLiked = likeModel.likes.some((t) => t.hash === track.hash);
+    if (isLiked) {
+      likeModel.removeLike(track.hash);
+    } else {
+      likeModel.addLike(track.hash);
+    }
   }
 
   function RenderTracks({ isLoading, tracks, currentTrack }: { isLoading: boolean, tracks: Track[], currentTrack: Track | null }) {
@@ -122,9 +133,3 @@ export default function SearchPresenter() {
     </div>
   );
 }
-
-
-
-
-
-
