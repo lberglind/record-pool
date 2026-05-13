@@ -1,58 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-import {NavbarView} from "@/views/navbar-view";
+import { usePathname, useRouter } from "next/navigation";
+import { NavbarView } from "@/views/navbar-view";
+import FilterView from "@/views/filter-view";
+import { useQueryParams } from "@/hooks/use-query-params";
+import { useDebouncedCallback } from 'use-debounce';
 
 export function NavbarPresenter() {
     const router = useRouter(); //create router object for page navigation
     const pathname = usePathname(); //current path URL
-    const searchParams = useSearchParams(); //get query parameters from URL
+
+    const { query, setQuery, clearFilters } = useQueryParams(); //custom hook to parse query parameters into an object
 
     // This is the source of truth for the search query state, derived from the URL query parameter "query"
-    const urlQuery = searchParams.get("query") ?? ""; //get "query" parameter from URL, default to empty string if not present
+    const urlQuery = query.query || ""; //get "query" parameter from URL, default to empty string if not present
 
     // useState will return; searchQuery; current value; setSearchQuery; function to update it
     //creates state of type string and initial value of initialQuery
     //state remains between renders
-    const [searchQuery, setSearchQuery] = useState<string>(urlQuery);
+    const [searchQueryState, setSearchQueryState] = useState<string>(urlQuery);
 
     useEffect(() => {
-        setSearchQuery(urlQuery);
+        setSearchQueryState(urlQuery);
     }, [urlQuery]);
 
-    //called when user types in search bar
-    // TODO: consider debouncing this to avoid excessive updates while typing
-    // We could also consider updating the URL on every change instead of only on submit
+
+    // Update local input state immediately, but debounce updates to the URL
+    const debouncedSetQuery = useDebouncedCallback((value: string) => {
+        setQuery([{ key: "query", value }]); // update "query" parameter in URL with new value
+    }, 300); // Debounce for 300ms
+
     function handleSearchQueryChange(value: string): void {
-        setSearchQuery(value);
-    }
-
-    //called when user hits enter in search bar
-    function handleSearchSubmit(): void {
-        const trimmedQuery = searchQuery.trim();
-        const params = new URLSearchParams(searchParams.toString());
-
-        if (trimmedQuery.length === 0) {
-            params.delete("query");
-
-            if (params.toString()) {
-                router.push(`/?${params.toString()}`);
-            } else {
-                router.push("/");
-            }
-            return;
-        }
-
-        // Write query param; SearchPresenter reacts to URL query changes.
-        params.set("query", trimmedQuery);
-
-        // Reset page to 1 when a new search is submitted.
-        params.delete("page");
-
-        // Update URL with new search query; SearchPresenter reacts to URL query changes.
-        router.push(`/?${params.toString()}`);
+        setSearchQueryState(value); // update local input immediately so the UI is responsive
+        debouncedSetQuery(value); // debounce the URL update
     }
 
     function handleLibraryClick(): void {
@@ -68,33 +49,87 @@ export function NavbarPresenter() {
     }
 
     function handleClearSearch(): void {
+        debouncedSetQuery.cancel?.();
+        setSearchQueryState(""); // Clear the search query state and remove related query parameters from the URL.
+        setQuery([{ key: "query", value: "" }]); // This will remove the "query" parameter from the URL
+    }
 
-        // Clear the search query state and remove related query parameters from the URL.
-        setSearchQuery("");
+    const [isFilterViewOpen, setIsFilterViewOpen] = useState(false);
 
-        // Remove query and page parameters from the URL.
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete("query");
-        params.delete("page");
+    function toggleFilterView(): void {
+        setIsFilterViewOpen(!isFilterViewOpen);
+    }
 
-        if (params.toString()) {
-            router.push(`/?${params.toString()}`);
-        } else {
-            router.push("/");
+    function renderFilterView() {
+        if (!isFilterViewOpen) return null;
+        // Compute controlled values for sliders from URL query params
+        const releaseValue: [number, number] = [
+            query.min_release ? Number(query.min_release) : 1900,
+            query.max_release ? Number(query.max_release) : 2026,
+        ];
+
+        const durationValue: [number, number] = [
+            query.min_duration ? Number(query.min_duration) : 0,
+            query.max_duration ? Number(query.max_duration) : 300,
+        ];
+
+        const bpmValue: [number, number] = [
+            query.min_bpm ? Number(query.min_bpm) : 0,
+            query.max_bpm ? Number(query.max_bpm) : 200,
+        ];
+
+        function handleReleaseChange([min, max]: [number, number]) {
+            setQuery([{ key: "min_release", value: min }, { key: "max_release", value: max }]);
         }
+
+        function handleDurationChange([min, max]: [number, number]) {
+            setQuery([{ key: "min_duration", value: min }, { key: "max_duration", value: max }]);
+        }
+
+        function handleBPMChange([min, max]: [number, number]) {
+            setQuery([{ key: "min_bpm", value: min }, { key: "max_bpm", value: max }]);
+        }
+
+        function handleGenreChange(genre: string) {
+            if (query.genre === genre) {                // If the same genre is clicked again, toggle it off
+                setQuery([{ key: "genre", value: "" }]);
+                return;
+            }
+            setQuery([{ key: "genre", value: genre }]);
+        }
+
+        return (
+            <div className="fixed top-16 left-0 right-0 z-40 w-full animate-in fade-in">
+                <FilterView
+                    clearFilters={clearFilters}
+                    query={query}
+                    releaseValue={releaseValue}
+                    durationValue={durationValue}
+                    bpmValue={bpmValue}
+                    onReleaseChange={handleReleaseChange}
+                    onDurationChange={handleDurationChange}
+                    onBPMChange={handleBPMChange}
+                    onGenreChange={handleGenreChange}
+                />
+            </div>
+        );
     }
 
     return (
-        <NavbarView
-            searchQuery={searchQuery}
-            urlQuery={urlQuery}
-            activePath={pathname}
-            onSearchQueryChange={handleSearchQueryChange}
-            onSearchSubmit={handleSearchSubmit}
-            onClearSearch={handleClearSearch}
-            onLibraryClick={handleLibraryClick}
-            onLikedClick={handleLikedClick}
-            onProfileClick={handleProfileClick}
-        />
+        <>
+            <NavbarView
+                searchQuery={searchQueryState}
+                urlQuery={urlQuery}
+                activePath={pathname}
+                onSearchQueryChange={handleSearchQueryChange}
+                onClearSearch={handleClearSearch}
+                onLibraryClick={handleLibraryClick}
+                onLikedClick={handleLikedClick}
+                onProfileClick={handleProfileClick}
+                isFilterViewOpen={isFilterViewOpen}
+                onToggleFilterView={toggleFilterView}
+            />
+            {renderFilterView()}
+        </>
     );
 }

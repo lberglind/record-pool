@@ -3,6 +3,10 @@
 import { QueryParams } from "@/models/types";
 import { useRouter, useSearchParams } from "next/navigation";
 
+interface SetQueryParams {
+    key: keyof QueryParams;
+    value: number | string;
+}[];
 
 export function useQueryParams() {
     const searchParams = useSearchParams()
@@ -10,10 +14,10 @@ export function useQueryParams() {
 
     const keys = [
         'query',
-        'album', 'composer', 
+        'album', 'composer',
         'album_artist',
-        'remixer', 'genre', 
-        'tonality', 'mix', 
+        'remixer', 'genre',
+        'tonality', 'mix',
         'label', 'comments', 'user',
         'min_bpm', 'max_bpm',
         'min_duration', 'max_duration',
@@ -50,29 +54,48 @@ export function useQueryParams() {
     }
 
     // Function to update a specific query parameter in the URL, while preserving other parameters and resetting the page to 1 if any parameter other than page is changed
-    function setQuery(key: keyof QueryParams, value: string) {
+    function setQuery(SetQueryParams: SetQueryParams[]) {
         const params = new URLSearchParams(searchParams.toString());
 
-        // Update the specific query parameter with the new value, or remove it if the value is empty
-        if (value) {
-            params.set(key, value);
-        }
-        else {
-            params.delete(key);
-        }
+        // Update the specific query parameter with the new value.
+        // If the value is empty, remove the parameter entirely from the URL.
+        SetQueryParams.forEach(({ key, value }) => {
+            if (value) {
+                params.set(key, value.toString());
+            }
+            else {
+                params.delete(key);
+            }
+        });
 
         // Reset page to 1 if any query parameter other than page is changed
         // if (key !== "page") {
         //     params.set("page", "1");
         // }
 
-        // Perform a client-side navigation to the provided route without adding a new entry into the browser’s history stack
-        if(params.toString()) {
+        // Use replace so the URL updates in place instead of adding a new history entry.
+        // That means the back button does not step through every filter/search change.
+        if (params.toString()) {
             router.replace(`?${params.toString()}`);
         } else {
             router.replace(`/`);
         }
     }
 
-    return { query, setQuery }
+    function clearFilters() {
+        const params = new URLSearchParams();
+
+        // Behåll endast sökqueryn
+        if (query.query) {
+            params.set("query", query.query);
+        }
+
+        if (params.toString()) {
+            router.replace(`?${params.toString()}`);
+        } else {
+            router.replace(`/`);
+        }
+    }
+
+    return { query, setQuery, clearFilters };
 }
