@@ -1,4 +1,4 @@
-import { Search, Library, Heart, User, X } from "lucide-react";
+import { Search, Library, Heart, User, X, ListFilter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,33 +6,33 @@ import type { NavbarViewProps } from "@/models/navbarTypes";
 import type { ChangeEvent, SubmitEvent } from "react";
 import Link from "next/link";
 
+{/* <Button
+                            type="button"
+                            variant={isQueryEmpty ? "ghost" : "default"}
+                            className="gap-2 cursor-pointer"
+                            onClick={onClearSearch}
+                        >
+                            Clear
+                        </Button> */}
+
 //props and types defined in navbarTypes.ts
 export function NavbarView(props: NavbarViewProps) {
     const {
         searchQuery,
-        urlQuery,
         activePath,
         onSearchQueryChange,
-        onSearchSubmit,
-        onClearSearch,
         onLibraryClick,
         onLikedClick,
         onProfileClick,
-    } = props;  //destructure props
+        isFilterViewOpen,
+        onToggleFilterView
+    } = props; 
 
     // ran when user types in search bar
     // event has type of a ChangeEvent which is triggered when the value of an <input> element is changed
     //returns void
     function handleSearchInputChange(event: ChangeEvent<HTMLInputElement>): void {
         onSearchQueryChange(event.target.value);
-    }
-
-    // ran when user submits search form
-    // event has type of a SubmitEvent which is triggered when the user submits a form
-    // returns void
-    function handleSearchFormSubmit(event: SubmitEvent<HTMLFormElement>): void {
-        event.preventDefault(); //stop page from reloading when form is submitted
-        onSearchSubmit();
     }
 
     // check if the current path matches any of the active paths for ghost highlighting
@@ -43,8 +43,6 @@ export function NavbarView(props: NavbarViewProps) {
 
     // Disable search button when search query is empty or only whitespace
     const isSearchDisabled = searchQuery.trim().length === 0;
-
-    const isQueryEmpty = urlQuery.trim().length === 0;
 
     return (
         <header
@@ -59,7 +57,6 @@ export function NavbarView(props: NavbarViewProps) {
                 {/* search form; hidden on small screens, visible on medium screens and
                 adjusts to layout */}
                 <form
-                    onSubmit={handleSearchFormSubmit}
                     className="hidden min-w-0 flex-1 md:block"
                 >
                     <div className="flex gap-2 px-8">
@@ -88,11 +85,11 @@ export function NavbarView(props: NavbarViewProps) {
                         </div>
                         <Button
                             type="button"
-                            variant={isQueryEmpty ? "ghost" : "default"}
+                            variant={!isFilterViewOpen ? "ghost" : "default"}
                             className="gap-2 cursor-pointer"
-                            onClick={onClearSearch}
+                            onClick={onToggleFilterView}
                         >
-                            Clear
+                            <ListFilter className="h-4 w-4" />
                         </Button>
                     </div>
                 </form>
@@ -146,7 +143,7 @@ export function NavbarView(props: NavbarViewProps) {
             {/* search for mobile or small screens,
              shown on row below by separating divs */}
             <div className="border-t px-4 py-3 md:hidden">
-                <form onSubmit={handleSearchFormSubmit}>
+                <form>
                     <div className="relative">
                         <Search
                             className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
