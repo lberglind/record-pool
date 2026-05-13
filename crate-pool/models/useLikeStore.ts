@@ -31,28 +31,28 @@ export const useLikeStore = create<LikeStore>((set) => ({
 
     addLike: async (hash) => {
         set((state) => ({
-            likes: [...state.likes, { hash } as Track],  // ← optimistic add
+            likes: [...state.likes, { hash } as Track],  // optimistic add
         }));
         try {
             await addLike(hash);
             const tracks = await fetchUserLikes();
-            set({ likes: tracks });  // ← reconcile with real data
+            set({ likes: tracks });  // reconcile with real data
         } catch (error) {
-            const tracks = await fetchUserLikes();  // ← revert on error
+            const tracks = await fetchUserLikes();  // revert on error
             set({ likes: tracks });
         }
     },
 
     removeLike: async (hash) => {
         set((state) => ({
-            likes: state.likes.filter((t) => t.hash !== hash),  // ← optimistic remove
+            likes: state.likes.filter((t) => t.hash !== hash),  // optimistic remove
         }));
         try {
             await removeLike(hash);
             const tracks = await fetchUserLikes();
-            set({ likes: tracks });  // ← reconcile with real data
+            set({ likes: tracks });  // reconcile with real data
         } catch (error) {
-            const tracks = await fetchUserLikes();  // ← revert on error
+            const tracks = await fetchUserLikes();  // revert on error
             set({ likes: tracks });
         }
     },
