@@ -1,11 +1,11 @@
 package minio
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
-	"os"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -20,14 +20,14 @@ func NewObjectStore(client *minio.Client) *ObjectStore {
 }
 
 func (s *ObjectStore) Upload(ctx context.Context, objectName string, reader io.Reader, size int64) error {
-	bucketName := os.Getenv("MINIO_BUCKET_TRACKS")
+	bucketName := "tracks"
 	contentType := "audio/mpeg"
 	_, err := s.Client.PutObject(ctx, bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: contentType})
 	return err
 }
 
 func (s *ObjectStore) GetTrack(ctx context.Context, fileName string) (io.ReadCloser, int64, error) {
-	object, err := s.Client.GetObject(ctx, os.Getenv("MINIO_BUCKET_TRACKS"), fileName, minio.GetObjectOptions{})
+	object, err := s.Client.GetObject(ctx, "tracks", fileName, minio.GetObjectOptions{})
 	if err != nil {
 		log.Printf("File not found: %v\n", err)
 		return nil, 0, err
@@ -44,6 +44,14 @@ func (s *ObjectStore) UploadCollectionXML(ctx context.Context, userID uuid.UUID,
 	bucketName := "xmlcollections"
 	objectName := fmt.Sprintf("%s.xml", userID)
 	contentType := "application/xml"
+	_, err := s.Client.PutObject(ctx, bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: contentType})
+	return err
+}
+
+func (s *ObjectStore) UploadCover(ctx context.Context, objectName, contentType string, data []byte) error {
+	bucketName := "albumcovers"
+	reader := bytes.NewReader(data)
+	size := int64(len(data))
 	_, err := s.Client.PutObject(ctx, bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: contentType})
 	return err
 }

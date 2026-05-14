@@ -53,6 +53,10 @@ func (m *mockTrackRepo) AddTrack(ctx context.Context, t track.Metadata, size int
 	return m.addTrackErr
 }
 
+func (m *mockTrackRepo) ExecAddTrack(ctx context.Context, t track.ExecMetadata) error {
+	return m.addTrackErr
+}
+
 type mockObjectStore struct {
 	getTrackErr error
 	uploadErr   error
@@ -72,6 +76,10 @@ func (m *mockObjectStore) GetTrack(ctx context.Context, fileName string) (io.Rea
 }
 
 func (m *mockObjectStore) UploadCollectionXML(ctx context.Context, userID uuid.UUID, reader io.Reader, size int64) error {
+	return nil
+}
+
+func (m *mockObjectStore) UploadCover(ctx context.Context, objectName, contentType string, data []byte) error {
 	return nil
 }
 

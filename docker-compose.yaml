@@ -10,7 +10,7 @@ services:
       TZ: CET
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db/schema.psql:/docker-entrypoint-initdb.d
+      - ./init-db:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
@@ -32,6 +32,28 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+
+ # backend:
+ #   build:
+ #     context: ./backend/
+ #     dockerfile: Dockerfile
+ #   ports:
+ #     - "8080:8080"
+ #   env_file:
+ #     - .env
+ #   depends_on:
+ #     - database
+ #     - minio
+
+ # tunnel:
+ #   image: cloudflare/cloudflared:latest
+ #   restart: always
+ #   environment:
+ #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+ #   command: tunnel -no-autoupdate run
+ #   depends_on:
+ #     - backend
+ #     - minio
 
 volumes:
   postgres_data:
