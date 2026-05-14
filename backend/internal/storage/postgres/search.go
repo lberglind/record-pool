@@ -51,7 +51,7 @@ func (r *SearchRepo) SearchTracks(ctx context.Context, userID uuid.UUID, params 
 
 	// --- Specific matchers ---
 	if params.Genre != "" {
-		query = query.Where("? = ANY(string_to_array(t.genre, ';'))", params.Genre)
+		query = query.Where("LOWER(?) = ANY(string_to_array(LOWER(t.genre), ';'))", params.Genre)
 	}
 	if params.Tonality != "" {
 		query = query.Where("m.tonality = ?", params.Tonality)
