@@ -18,14 +18,15 @@ var _ domain.SessionRepository = &mockSessionRepo{}
 
 type mockSessionRepo struct {
 	email         string
+	avatar        string
 	userID        uuid.UUID
 	userErr       error
 	createSession string
 	createErr     error
 }
 
-func (m *mockSessionRepo) UserFromSession(ctx context.Context, session string) (string, uuid.UUID, error) {
-	return m.email, m.userID, m.userErr
+func (m *mockSessionRepo) UserFromSession(ctx context.Context, session string) (uuid.UUID, string, string, error) {
+	return m.userID, m.email, m.avatar, m.userErr
 }
 
 func (m *mockSessionRepo) CreateSession(ctx context.Context, userID string) (string, error) {

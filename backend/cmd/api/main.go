@@ -46,6 +46,7 @@ func main() {
 	profileRepo := postgres.NewProfileRepo(pool)
 	playlistRepo := postgres.NewPlaylistRepo(pool)
 	searchRepo := postgres.NewSearchRepo(pool)
+	likeRepo := postgres.NewLikeRepo(pool)
 
 	trackStorage := minio.NewObjectStore(minioClient)
 
@@ -87,6 +88,10 @@ func main() {
 		Repo: searchRepo,
 	}
 
+	likeHandlers := handler.LikeHandler{
+		Repo: likeRepo,
+	}
+
 	mux := http.NewServeMux()
 	protected := func(h http.HandlerFunc) http.HandlerFunc {
 		return middleware.RequireAuth(sessionRepo, h)
@@ -98,12 +103,16 @@ func main() {
 	// Protected Routes
 
 	mux.HandleFunc("GET /tracks", protected(trackHandlers.ListAllTracks()))
+	mux.HandleFunc("GET /tracks/{hash}", protected(trackHandlers.GetTrack()))
 	mux.HandleFunc("GET /tracks/page", protected(trackHandlers.ListTrackPage()))
 	mux.HandleFunc("GET /tracks/{hash}/file", protected(trackHandlers.Download()))
 	mux.HandleFunc("POST /tracks", protected(trackHandlers.Upload()))
 	mux.HandleFunc("POST /xml", protected(trackHandlers.UploadXML()))
 	mux.HandleFunc("POST /tracks/batch", protected(trackHandlers.BatchUpload()))
 	mux.HandleFunc("GET /profile", protected(profileHandlers.GetProfile()))
+	mux.HandleFunc("POST /likes/{hash}", protected(likeHandlers.LikeTrack()))
+	mux.HandleFunc("DELETE /likes/{hash}", protected(likeHandlers.DeleteTrackLike()))
+	mux.HandleFunc("GET /likes", protected(likeHandlers.GetTrackLikesForUser()))
 
 	// Search Routes
 	mux.HandleFunc("GET /search", protected(searchHandlers.TrackSearch()))

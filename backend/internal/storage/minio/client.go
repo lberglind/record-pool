@@ -15,7 +15,7 @@ func NewClient() *minio.Client {
 	accessKeyID := os.Getenv("MINIO_ROOT_USER")
 	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
 	useSSL, _ := strconv.ParseBool(os.Getenv("MINIO_USE_SSL"))
-	bucketName := os.Getenv("MINIO_BUCKET_TRACKS")
+	buckets := [3]string{"tracks", "albumcovers", "xmlcollections"}
 
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
@@ -27,14 +27,16 @@ func NewClient() *minio.Client {
 	log.Println("minioClient now set up")
 
 	ctx := context.Background()
-	exists, err := minioClient.BucketExists(ctx, bucketName)
-	if err != nil {
-		log.Printf("Warning: Could not check bucket status: %v\n", err)
-	} else if !exists {
-		log.Printf("Bucket %s does not exist. Creating it..\n", bucketName)
-		err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+	for _, bucket := range buckets {
+		exists, err := minioClient.BucketExists(ctx, bucket)
 		if err != nil {
-			log.Printf("Error creating bucket: %v\n", err)
+			log.Printf("Warning: Could not check bucket status: %v\n", err)
+		} else if !exists {
+			log.Printf("Bucket %s does not exist. Creating it..\n", bucket)
+			err = minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
+			if err != nil {
+				log.Printf("Error creating bucket: %v\n", err)
+			}
 		}
 	}
 

@@ -43,12 +43,38 @@ func (h *TrackHandler) ListAllTracks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tracks, err := h.Repo.ListAllTracks(r.Context())
 		if err != nil {
-			http.Error(w, "Database error: ", http.StatusInternalServerError)
+			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(tracks)
+		if err != nil {
+			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// GetTrack
+// @Summary Get track from hash
+// @Description Get a track by its hash
+// @Tags Tracks
+// @Produce json
+// @Param hash path string true "Track Hash"
+// @Failure 500 {string} string "Internal Server Error"
+// @Success 200 {object} domain.Track
+// @Router /tracks/{hash} [get]
+func (h *TrackHandler) GetTrack() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		hash := r.PathValue("hash")
+		track, err := h.Repo.GetTrack(r.Context(), hash)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(track)
 		if err != nil {
 			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
 			return
@@ -188,16 +214,18 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 		}
 		defer file.Close()
 
-		trackData, err := track.ExtractMetadata(file)
+		// Option 2
+		trackData, err := track.ExecExtractMetadata(r.Context(), file, header)
 		if err != nil {
-			http.Error(w, "Could not read track metadata", http.StatusBadRequest)
+			http.Error(w, "Could not read track exec metadata: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = h.Repo.AddTrack(r.Context(), trackData, header.Size)
+		err = h.Repo.ExecAddTrack(r.Context(), trackData)
 		if err != nil {
 			http.Error(w, "Could not add track: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		_, err = file.Seek(0, 0)
 		if err != nil {
 			http.Error(w, "Failed to process file", http.StatusInternalServerError)
@@ -207,6 +235,13 @@ func (h *TrackHandler) Upload() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, "Could not upload file to minio", http.StatusInternalServerError)
 			return
+		}
+		if trackData.Cover != nil && trackData.MimeType != "" {
+			err = h.Store.UploadCover(r.Context(), trackData.Hash, trackData.MimeType, trackData.Cover)
+			if err != nil {
+				http.Error(w, "Could not upload album cover to minio", http.StatusInternalServerError)
+				return
+			}
 		}
 
 		go h.XMLSync.TrySync(context.Background(), userID, nil)
@@ -318,6 +353,13 @@ func (h *TrackHandler) BatchUpload() http.HandlerFunc {
 				os.Remove(tmp.Name())
 				results = append(results, result{Name: filename, Error: "storage failed"})
 				continue
+			}
+			if trackData.Cover != nil && trackData.MimeType != "" {
+				err = h.Store.UploadCover(r.Context(), trackData.Hash, trackData.MimeType, trackData.Cover)
+				if err != nil {
+					http.Error(w, "Could not upload album cover to minio", http.StatusInternalServerError)
+					return
+				}
 			}
 			tmp.Close()
 			os.Remove(tmp.Name())

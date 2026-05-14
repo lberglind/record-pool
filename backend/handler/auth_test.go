@@ -20,7 +20,7 @@ type mockUserRepo struct {
 	upsertErr error
 }
 
-func (m *mockUserRepo) UpsertUser(ctx context.Context, email, name string) (string, error) {
+func (m *mockUserRepo) UpsertUser(ctx context.Context, email, name, avatar string) (string, error) {
 	return m.userID, m.upsertErr
 }
 

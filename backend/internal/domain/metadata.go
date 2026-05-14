@@ -8,28 +8,26 @@ import (
 )
 
 type TrackMetadata struct {
-	TrackHash  string     `json:"trackHash"`
-	UploadedBy *uuid.UUID `json:"uploadedBy"`
-	BPM        float64    `json:"averageBpm"`
-	Duration   int        `json:"duration"`
-	Album      string     `json:"album"`
-	Comments   string     `json:"comments"`
-	Remixer    string     `json:"remixer"`
-	Label      string     `json:"label"`
-	Mix        string     `json:"mix"`
-	Genre      string     `json:"genre"`
-	Size       int        `json:"size"`
-	Year       int        `json:"year"`
-	Composer   string     `json:"composer"`
-	SampleRate int        `json:"sampleRate"`
-	DateAdded  *time.Time `json:"dateAdded"`
-	PlayCount  int        `json:"playCount"`
-	Rating     int        `json:"rating"`
-	BitRate    int        `json:"bitRate"`
-	Tonality   string     `json:"tonality"`
-	Beatgrid   []Tempo    `json:"beatgrid"`
-	CuePoints  []CuePoint `json:"cuePoints"`
-	CreatedAt  time.Time  `json:"timeStamp"`
+	TrackHash  string      `json:"trackHash"`
+	UploadedBy *uuid.UUID  `json:"uploadedBy"`
+	BPM        *float64    `json:"averageBpm"`
+	Duration   *int        `json:"duration"`
+	Comments   *string     `json:"comments"`
+	Remixer    *string     `json:"remixer"`
+	Label      *string     `json:"label"`
+	Mix        *string     `json:"mix"`
+	Genre      *string     `json:"genre"`
+	Size       *int        `json:"size"`
+	Composer   *string     `json:"composer"`
+	SampleRate *int        `json:"sampleRate"`
+	DateAdded  **time.Time `json:"dateAdded"`
+	PlayCount  *int        `json:"playCount"`
+	Rating     *int        `json:"rating"`
+	BitRate    *int        `json:"bitRate"`
+	Tonality   *string     `json:"tonality"`
+	Beatgrid   []Tempo     `json:"beatgrid"`
+	CuePoints  []CuePoint  `json:"cuePoints"`
+	CreatedAt  *time.Time  `json:"timeStamp"`
 }
 
 type Tempo struct {

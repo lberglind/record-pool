@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 	"os"
 	"record-pool/internal/domain"
@@ -35,7 +37,7 @@ func (h *AuthHandler) SlackCallback() http.HandlerFunc {
 			return
 		}
 
-		userID, err := h.Users.UpsertUser(r.Context(), authUser.Email, authUser.Name)
+		userID, err := h.Users.UpsertUser(r.Context(), authUser.Email, authUser.Name, authUser.AvatarURL)
 		if err != nil {
 			http.Error(w, "Failed the database checks: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -69,7 +71,13 @@ func (h *AuthHandler) SlackCallback() http.HandlerFunc {
 // @Router /auth/slack [get]
 func (h *AuthHandler) SlackLogIn() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		url := h.Auth.AuthCodeURL("random-state-string")
+		url := h.Auth.AuthCodeURL(generateRandomString(32))
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	}
+}
+
+func generateRandomString(n int) string {
+	b := make([]byte, n)
+	rand.Read(b)
+	return base64.URLEncoding.EncodeToString(b)
 }

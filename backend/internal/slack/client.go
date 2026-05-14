@@ -26,6 +26,7 @@ type slackUser struct {
 type slackUserProfile struct {
 	Email    string `json:"email"`
 	RealName string `json:"real_name"`
+	Image192 string `json:"image_192"`
 }
 
 type AuthService struct {
@@ -108,9 +109,10 @@ func (s *AuthService) getUserInfo(accessToken, userID string) (*service.AuthUser
 		return nil, fmt.Errorf("Slack users.info returned not ok")
 	}
 	return &service.AuthUser{
-		ID:    info.User.ID,
-		Email: info.User.Profile.Email,
-		Name:  info.User.Name,
+		ID:        info.User.ID,
+		Email:     info.User.Profile.Email,
+		Name:      info.User.Name,
+		AvatarURL: info.User.Profile.Image192,
 	}, nil
 
 }

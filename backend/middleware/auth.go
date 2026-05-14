@@ -18,7 +18,7 @@ func RequireAuth(repo domain.SessionRepository, next http.HandlerFunc) http.Hand
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		email, userID, err := repo.UserFromSession(r.Context(), cookie.Value)
+		userID, email, _, err := repo.UserFromSession(r.Context(), cookie.Value)
 		if err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return

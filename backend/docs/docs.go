@@ -52,6 +52,115 @@ const docTemplate = `{
                 }
             }
         },
+        "/likes": {
+            "get": {
+                "description": "Retrieves all tracks liked by the authenticated user session.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Gets a users liked tracks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Like"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/likes/{hash}": {
+            "post": {
+                "description": "Adds a track to a user's liked tracks",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Likes a track",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Track Hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Removes a track from the user's liked tracks",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Removes a liked track",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Track Hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/me": {
             "get": {
                 "description": "Returns the email and userID of the logged-in user via session cookie",
@@ -295,7 +404,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "artist",
+                        "name": "albumArtist",
                         "in": "query"
                     },
                     {
@@ -316,6 +425,21 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "label",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lastHash",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lastTimeStamp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
@@ -349,6 +473,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "maxRelease",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "maxSampleRate",
                         "in": "query"
@@ -361,11 +490,6 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "maxTimeStamp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "maxYear",
                         "in": "query"
                     },
                     {
@@ -399,6 +523,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "minRelease",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "minSampleRate",
                         "in": "query"
@@ -414,11 +543,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "minYear",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "name": "mix",
                         "in": "query"
@@ -429,18 +553,13 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "pageSize",
+                        "type": "string",
+                        "name": "query",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "name": "remixer",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "title",
                         "in": "query"
                     },
                     {
@@ -616,6 +735,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/tracks/{hash}": {
+            "get": {
+                "description": "Get a track by its hash",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Get track from hash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Track Hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Track"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/tracks/{hash}/file": {
             "get": {
                 "description": "Stream a music file from storage using its hash",
@@ -708,6 +862,20 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "integer"
+                }
+            }
+        },
+        "domain.Like": {
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "type": "string"
+                },
+                "track": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },
@@ -818,9 +986,6 @@ const docTemplate = `{
         "domain.TrackMetadata": {
             "type": "object",
             "properties": {
-                "album": {
-                    "type": "string"
-                },
                 "averageBpm": {
                     "type": "number"
                 },
@@ -886,9 +1051,6 @@ const docTemplate = `{
                 },
                 "uploadedBy": {
                     "type": "string"
-                },
-                "year": {
-                    "type": "integer"
                 }
             }
         },
