@@ -7,11 +7,21 @@ import (
 )
 
 type Track struct {
-	Hash      string    `json:"hash"`
-	Format    string    `json:"format"`
-	Title     string    `json:"title"`
-	Artist    string    `json:"artist"`
-	CreatedAt time.Time `json:"timeStamp"`
+	Hash        string     `json:"hash"`
+	Format      string     `json:"format"`
+	Artist      string     `json:"artist"`
+	Title       string     `json:"title"`
+	Album       *string    `json:"album"`
+	AlbumArtist *string    `json:"album_artist"`
+	Duration    *float64   `json:"duration"`
+	Size        *float64   `json:"size"`
+	Bitrate     *float64   `json:"bitrate"`
+	SampleRate  *float64   `json:"sample_rate"`
+	BPM         *float64   `json:"bpm"`
+	Genre       *string    `json:"genre"`
+	Publisher   *string    `json:"publisher"`
+	ReleaseDate *time.Time `json:"release_date"`
+	CreatedAt   time.Time  `json:"timeStamp"`
 }
 
 type TrackRepository interface {
