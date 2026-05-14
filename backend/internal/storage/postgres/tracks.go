@@ -21,7 +21,8 @@ func NewTrackRepo(pool *pgxpool.Pool) *TrackRepo {
 }
 
 func (r *TrackRepo) ListAllTracks(ctx context.Context) ([]domain.Track, error) {
-	query := "SELECT hash, file_format, title, artist, created_at FROM tracks"
+	query := `SELECT hash, file_format, artist, title, album, album_artist, duration, size, 
+		bitrate, sample_rate, bpm, genre, publisher, release_date, created_at FROM tracks`
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
@@ -35,8 +36,18 @@ func (r *TrackRepo) ListAllTracks(ctx context.Context) ([]domain.Track, error) {
 		err := rows.Scan(
 			&t.Hash,
 			&t.Format,
-			&t.Title,
 			&t.Artist,
+			&t.Title,
+			&t.Album,
+			&t.AlbumArtist,
+			&t.Duration,
+			&t.Size,
+			&t.Bitrate,
+			&t.SampleRate,
+			&t.BPM,
+			&t.Genre,
+			&t.Publisher,
+			&t.ReleaseDate,
 			&t.CreatedAt)
 		if err != nil {
 			continue
@@ -78,15 +89,17 @@ func (r *TrackRepo) ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash
 	var err error
 
 	if lpDate == nil || lpHash == "" {
-		query := `SELECT hash, file_format, title, artist, created_at 
-			FROM TRACKS ORDER BY created_at DESC, hash DESC LIMIT $1`
+		query := `SELECT hash, file_format, artist, title, album, album_artist, duration, size, 
+			bitrate, sample_rate, bpm, genre, publisher, release_date, created_at 
+			FROM tracks ORDER BY created_at DESC, hash DESC LIMIT $1`
 		rows, err = r.pool.Query(ctx, query, limit)
 	} else {
-		query := `SELECT hash, file_format, title, artist, created_at 
-		FROM tracks
-		WHERE (created_at, hash) < ($1, $2)
-		ORDER BY created_at DESC, hash DESC
-		LIMIT $3`
+		query := `SELECT hash, file_format, artist, title, album, album_artist, duration, size, 
+			bitrate, sample_rate, bpm, genre, publisher, release_date, created_at 
+			FROM tracks
+			WHERE (created_at, hash) < ($1, $2)
+			ORDER BY created_at DESC, hash DESC
+			LIMIT $3`
 		rows, err = r.pool.Query(ctx, query, lpDate, lpHash, limit)
 	}
 
@@ -101,8 +114,18 @@ func (r *TrackRepo) ListTrackPage(ctx context.Context, lpDate *time.Time, lpHash
 		err := rows.Scan(
 			&t.Hash,
 			&t.Format,
-			&t.Title,
 			&t.Artist,
+			&t.Title,
+			&t.Album,
+			&t.AlbumArtist,
+			&t.Duration,
+			&t.Size,
+			&t.Bitrate,
+			&t.SampleRate,
+			&t.BPM,
+			&t.Genre,
+			&t.Publisher,
+			&t.ReleaseDate,
 			&t.CreatedAt)
 		if err != nil {
 			continue
@@ -134,14 +157,25 @@ func (r *TrackRepo) ExecAddTrack(ctx context.Context, m track.ExecMetadata) erro
 
 func (r *TrackRepo) GetTrack(ctx context.Context, hash string) (domain.Track, error) {
 	var t domain.Track
-	query := `SELECT hash, file_format, title, artist, created_at FROM tracks
-						WHERE hash = $1`
+	query := `SELECT hash, file_format, artist, title, album, album_artist, duration, size, 
+			bitrate, sample_rate, bpm, genre, publisher, release_date, created_at 
+			FROM tracks 
+			WHERE hash = $1`
 	err := r.pool.QueryRow(ctx, query, hash).Scan(
 		&t.Hash,
 		&t.Format,
-		&t.Title,
 		&t.Artist,
-		&t.CreatedAt,
-	)
+		&t.Title,
+		&t.Album,
+		&t.AlbumArtist,
+		&t.Duration,
+		&t.Size,
+		&t.Bitrate,
+		&t.SampleRate,
+		&t.BPM,
+		&t.Genre,
+		&t.Publisher,
+		&t.ReleaseDate,
+		&t.CreatedAt)
 	return t, err
 }
