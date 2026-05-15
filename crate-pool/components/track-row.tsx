@@ -16,11 +16,11 @@ export function TrackRow(props: TrackRowProps) {
   const track = props.track;
   return (
     <TableRow>
-      <TableCell>{track.title || "test title"}</TableCell>
-      <TableCell>{track.artist || "test artist"}</TableCell>
+      <TableCell>{track.title || "Unknown Title"}</TableCell>
+      <TableCell>{track.artist || "Unknown Artist"}</TableCell>
       <TableCell>{secToMin(track.duration)}</TableCell>
       <TableCell>{track.bpm}</TableCell>
-      <TableCell>{track.key}</TableCell>
+      <TableCell>{track.tonality}</TableCell>
       <TableCell>
         <div className="flex gap-0.5"> {
           track.genre != "" &&

@@ -34,7 +34,7 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
     { label: "Genre:", value: track.genre?.split(/;|\//).join(', ') },
     { label: "Length:", value: `${secToMin(track.duration)} minutes` },
     { label: "BPM:", value: track.bpm },
-    { label: "Key:", value: track.key },
+    { label: "Key:", value: track.tonality },
     { label: "Bitrate:", value: `${bitrateToKB(track.bitrate)} kbps` },
     { label: "File Format:", value: track.format },
     { label: "Size:", value: formatSize(track.size) },
@@ -52,7 +52,7 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
       </CardHeader>
       <CardContent className="relative aspect-square w-full">
         {visibleDetails.map((detail) => (
-          <div className="w-full flex justify-between">
+          <div className="w-full flex justify-between" key={detail.label}>
             <p>{detail.label}</p>
             <p>{detail.value}</p>
           </div>
