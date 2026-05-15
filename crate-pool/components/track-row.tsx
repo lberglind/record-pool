@@ -1,13 +1,15 @@
 import { Button } from "./ui/button";
 import { TableCell, TableRow } from "./ui/table";
 import { Badge } from "./ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 import { Track } from "@/models/types";
 import { secToMin } from "@/lib/utils";
 
 interface TrackRowProps {
   track: Track;
   onPreview: (track: Track) => void;
+  onLike: (track: Track) => void;
+  isLiked: boolean;
 }
 
 export function TrackRow(props: TrackRowProps) {
@@ -29,6 +31,7 @@ export function TrackRow(props: TrackRowProps) {
       </TableCell>
       <TableCell>
         <Button className="hover:bg-primary/45" onClick={() => props.onPreview(props.track)}><Eye /></Button>
+        <Button className="hover:bg-primary/45" onClick={() => props.onLike(track)}><Heart className={props.isLiked ? "fill-red-500 text-red-500" : ""} /></Button>
       </TableCell>
     </TableRow>
   )
