@@ -11,6 +11,7 @@ interface TracksLayoutProps {
   handleLike: (t: Track) => void;
   likedHashes: Set<string>;
   closeTrackPreview: () => void;
+  onDownload: (t: Track) => void;
 }
 
 export default function TracksLayoutView(props: TracksLayoutProps) {
@@ -22,7 +23,7 @@ export default function TracksLayoutView(props: TracksLayoutProps) {
   return (
     <div className="flex flex-row gap-4 pt-8">
       <TracksTableView tracks={props.tracks} onPreview={props.onPreview} onLike={props.handleLike} likedHashes={props.likedHashes} />
-      {props.currentTrack && <TrackPreviewView track={props.currentTrack} onExitPreview={props.closeTrackPreview} onLike={props.handleLike} isLiked={props.likedHashes.has(props.currentTrack.hash)} />}
+      {props.currentTrack && <TrackPreviewView onDownload={props.onDownload} track={props.currentTrack} onExitPreview={props.closeTrackPreview} onLike={props.handleLike} isLiked={props.likedHashes.has(props.currentTrack.hash)} />}
     </div>
   );
 }

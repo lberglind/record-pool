@@ -10,17 +10,27 @@ interface TrackPreviewViewProps {
   onExitPreview: () => void;
   onLike: (track: Track) => void;
   isLiked: boolean;
+  onDownload: (track: Track) => void;
 }
 
 export default function TrackPreviewView(props: TrackPreviewViewProps) {
   const track = props.track;
+
   function removeFromLibrary() {
     console.log("Placeholder, should remove from library, need endpoint:", track);
   }
+
   function toggleLike() {
     console.log("toggled like for:", track.title);
     props.onLike(track);
   }
+
+  function download() {
+    console.log("Downloading track:", track.title)
+    props.onDownload(track);
+  }
+
+
   if (!track) {
     return (<Card>
       <CardHeader>
@@ -46,8 +56,8 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{track.title}</CardTitle>
-        <CardDescription>{track.artist}</CardDescription>
+        <CardTitle>{track.title || "Unknown Title"}</CardTitle>
+        <CardDescription>{track.artist || "Unknown Artist"}</CardDescription>
         <CardAction><Button size="icon-lg" variant="ghost" onClick={props.onExitPreview}><X /></Button></CardAction>
       </CardHeader>
       <CardContent className="relative aspect-square w-full">
@@ -60,7 +70,7 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
       </CardContent>
       <CardFooter className="flex flex-col">
         <div className="w-full flex gap-4">
-          <Button className="flex-grow py-6 mt-4">Download</Button>
+          <Button className="flex-grow py-6 mt-4" onClick={download}>Download</Button>
           <Button className="p-6 mt-4" variant={"outline"} onClick={toggleLike}><HeartIcon className={props.isLiked ? "fill-red-500 text-red-500" : ""} /></Button>
           <Button className="p-6 mt-4" variant={"outline"} onClick={removeFromLibrary}><X /></Button>
         </div>

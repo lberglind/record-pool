@@ -19,6 +19,7 @@ export default function SearchPresenter() {
   const uploadTrack = useTrackStore((state) => state.uploadTrack);
   const uploadXML = useTrackStore((state) => state.uploadXML);
   const setCurrentTrack = useTrackStore((state) => state.setCurrentTrack);
+  const downloadTrack = useTrackStore((state) => state.downloadTrack);
 
   // Get query params from URL
   const { query } = useQueryParams();
@@ -81,6 +82,10 @@ export default function SearchPresenter() {
     }
   }
 
+  function handleTrackDownload(track: Track) {
+    downloadTrack(track)
+  }
+
   function closeTrackPreview() {
     setCurrentTrack(null);
     console.log("Closed track preview");
@@ -98,7 +103,7 @@ export default function SearchPresenter() {
 
   return (
     <div className="w-full mx-auto container">
-      <TracksLayoutView isLoading={isLoading} tracks={tracks} currentTrack={currentTrack} onPreview={setTrackPreview} handleLike={toggleLike} likedHashes={likedHashes} closeTrackPreview={closeTrackPreview} />
+      <TracksLayoutView onDownload={handleTrackDownload} isLoading={isLoading} tracks={tracks} currentTrack={currentTrack} onPreview={setTrackPreview} handleLike={toggleLike} likedHashes={likedHashes} closeTrackPreview={closeTrackPreview} />
       <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
         xml={currentXmlFile} onXmlFileChange={setCurrentXmlFile} onXmlUpload={handleXmlUpload}
       />
