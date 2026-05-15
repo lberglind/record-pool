@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"record-pool/internal/domain"
 	"record-pool/internal/service"
 	"record-pool/internal/track"
@@ -163,8 +162,11 @@ func (h *TrackHandler) Download() http.HandlerFunc {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
 		}
+		if name == "" {
+			name = "unknown"
+		}
 
-		contentType := mime.TypeByExtension(filepath.Ext(hash))
+		contentType := mime.TypeByExtension("." + format)
 		if contentType == "" {
 			contentType = "application/octet-stream"
 		}
@@ -172,7 +174,7 @@ func (h *TrackHandler) Download() http.HandlerFunc {
 		// Set headers
 		filename := fmt.Sprintf("%s.%s", name, format)
 		encodedName := url.PathEscape(filename)
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", encodedName))
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", filename, encodedName))
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 
