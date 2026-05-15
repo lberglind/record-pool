@@ -1,17 +1,15 @@
 "use client"
-import { Spinner } from "@/components/ui/spinner";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { Track } from "@/models/types";
-import { useTrackStore } from "@/models/useTrackStore"; import { useLikeStore } from "@/models/useLikeStore"; import SearchView from "@/views/search-view";
-import TrackPreviewView from "@/views/track-preview-view";
-import { TracksTableView } from "@/views/tracks-table-view";
+import { useTrackStore } from "@/models/useTrackStore"; import { useLikeStore } from "@/models/useLikeStore";
 import UploadView from "@/views/upload-view";
-import { use, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import TracksLayoutView from "@/views/tracks-layout-view";
+
 
 export default function SearchPresenter() {
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
-  const likeModel = useLikeStore();
 
   // Zustand store for tracks and search state
   const tracks = useTrackStore((state) => state.tracks);
@@ -93,43 +91,18 @@ export default function SearchPresenter() {
     console.log("Set current track to", track);
   }
 
-  function RenderTrackPreview({ track }: { track: Track }) {
-    const isLiked = useLikeStore(state => state.likes.some(like => like.hash === track.hash));
-    return (
-      <div>
-        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} onLike={handleLike} isLiked={isLiked} />
-      </div>
-    )
-  }
-  function handleLike(track: Track) {
-    const isLiked = likeModel.likes.some((t) => t.hash === track.hash);
-    if (isLiked) {
-      likeModel.removeLike(track.hash);
-    } else {
-      likeModel.addLike(track.hash);
-    }
-  }
+  const toggleLike = useLikeStore(s => s.toggleLike)
+  const likes = useLikeStore(s => s.likes);
+  const likedHashes = useMemo(() => new Set(likes.map(t => t.hash)), [likes]);
 
-  function RenderTracks({ isLoading, tracks, currentTrack }: { isLoading: boolean, tracks: Track[], currentTrack: Track | null }) {
-    if (isLoading) {
-      return (
-        <Spinner />
-      );
-    }
-    return (
-      <div className="flex flex-row gap-4 pt-8">
-        <TracksTableView tracks={tracks} onPreview={setTrackPreview} />
-        {currentTrack && <RenderTrackPreview track={currentTrack} />}
-      </div>
-    );
-  }
 
   return (
     <div className="w-full mx-auto container">
-      <RenderTracks isLoading={isLoading} tracks={tracks} currentTrack={currentTrack} />
+      <TracksLayoutView isLoading={isLoading} tracks={tracks} currentTrack={currentTrack} onPreview={setTrackPreview} handleLike={toggleLike} likedHashes={likedHashes} closeTrackPreview={closeTrackPreview} />
       <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
         xml={currentXmlFile} onXmlFileChange={setCurrentXmlFile} onXmlUpload={handleXmlUpload}
       />
     </div>
   );
 }
+

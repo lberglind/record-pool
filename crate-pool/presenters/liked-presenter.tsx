@@ -1,28 +1,34 @@
 // liked-presenter.tsx
 "use client"
-import { Spinner } from "@/components/ui/spinner";
 import { useLikeStore } from "@/models/useLikeStore";
-import { Track } from "@/models/types";
-import { useEffect } from "react";
-import { TracksTableView } from "@/views/tracks-table-view";
+import { useEffect, useMemo } from "react";
+import { useTrackStore } from "@/models/useTrackStore";
+import TracksLayoutView from "@/views/tracks-layout-view";
 
 export default function LikedPresenter() {
-    const model = useLikeStore();
+  const likeModel = useLikeStore();
+  const currentTrack = useTrackStore((state) => state.currentTrack);
+  const isLoading = useTrackStore((state) => state.isLoading);
+  const setCurrentTrack = useTrackStore((state) => state.setCurrentTrack);
+  const toggleLike = useLikeStore((s) => s.toggleLike);
+  const likes = useLikeStore(s => s.likes);
+  const likedHashes = useMemo(() => new Set(likes.map(t => t.hash)), [likes]);
+  const fetchLikes = useLikeStore(s => s.fetchLikes)
 
-    useEffect(() => {
-        model.fetchLikes();
-    }, []);
+  function closeTrackPreview() {
+    setCurrentTrack(null);
+    console.log("Closed track preview");
+  }
 
-    function setTrackPreview(track: Track) {
-        model.setCurrentTrack(track);
-        console.log("Set current track to", track);
-    }
+  useEffect(() => {
+    fetchLikes();
+  }, []);
 
-    return (
-        <div className="w-full mx-auto container">
-            <h1 className="text-2xl font-bold mb-4">Liked Tracks</h1>
-            <TracksTableView tracks={model.likes} onPreview={setTrackPreview} />
-        </div>
+  return (
+    <div className="w-full mx-auto container">
+      <h1 className="text-2xl font-bold mb-4">Liked Tracks</h1>
+      <TracksLayoutView isLoading={isLoading} currentTrack={currentTrack} tracks={likeModel.likes} onPreview={setCurrentTrack} handleLike={toggleLike} likedHashes={likedHashes} closeTrackPreview={closeTrackPreview} />
+    </div>
 
-    );
+  );
 }
