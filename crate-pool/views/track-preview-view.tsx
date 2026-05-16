@@ -3,13 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { secToMin } from "@/lib/utils";
 import { Track } from "@/models/types";
-import { HeartIcon, X } from "lucide-react";
+import { HeartIcon, X, ListPlus } from "lucide-react";
+import {Playlist} from "@/api/playlistSource";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TrackPreviewViewProps {
   track: Track;
   onExitPreview: () => void;
   onLike: (track: Track) => void;
   isLiked: boolean;
+  playlists: Playlist[];
+  onAddToPlaylist: (playlistID: string) => void;
+  playlistMessage: string;
 }
 
 export default function TrackPreviewView(props: TrackPreviewViewProps) {
@@ -52,6 +62,41 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
           <p>Genre</p>
           <Badge>{track.genre}</Badge>
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+              render={
+                <Button variant="outline" className="w-full mt-4 cursor-pointer" type="button">
+                  <ListPlus className="mr-2 h-4 w-4" />
+                  Add to playlist...
+                </Button>
+              }
+          />
+
+          <DropdownMenuContent className="w-56">
+            {props.playlists.length === 0 ? (
+                <DropdownMenuItem disabled>
+                  No playlists available
+                </DropdownMenuItem>
+            ) : (
+                props.playlists.map((playlist) => (
+                    <DropdownMenuItem
+                        key={playlist.playlistID}
+                        onClick={() => props.onAddToPlaylist(playlist.playlistID)}
+                    >
+                      {playlist.name}
+                    </DropdownMenuItem>
+                ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {props.playlistMessage && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {props.playlistMessage}
+            </p>
+        )}
+
         <div className="w-full flex gap-4">
           <Button className="flex-grow py-6 mt-4">Download</Button>
           <Button className="p-6 mt-4" variant={"outline"} onClick={toggleLike}><HeartIcon className={props.isLiked ? "fill-red-500 text-red-500" : ""} /></Button>

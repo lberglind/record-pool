@@ -2,6 +2,8 @@ import { env } from "@/config/env";
 import { User } from "@/models/types";
 
 export async function getCurrentUser() {
+  console.log("API URL:", env.apiUrl);
+
   const options: RequestInit = {
     credentials: "include",
     headers: {

@@ -20,6 +20,7 @@ export const useUserStore = create<UserStore>((set) => ({
       const user = await getCurrentUser();
       set({ user: user, isLoading: false });
     } catch (error) {
+      console.error("fetchUser failed:", error);
       set({ isLoading: false });
     }
   },

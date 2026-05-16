@@ -7,6 +7,7 @@ import TrackPreviewView from "@/views/track-preview-view";
 import { TracksTableView } from "@/views/tracks-table-view";
 import UploadView from "@/views/upload-view";
 import { use, useEffect, useState } from "react";
+import {usePlaylistStore} from "@/models/usePlaylistStore";
 
 export default function SearchPresenter() {
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
@@ -21,6 +22,11 @@ export default function SearchPresenter() {
   const uploadTrack = useTrackStore((state) => state.uploadTrack);
   const uploadXML = useTrackStore((state) => state.uploadXML);
   const setCurrentTrack = useTrackStore((state) => state.setCurrentTrack);
+
+  const playlists = usePlaylistStore((state) => state.playlists);
+  const fetchPlaylists = usePlaylistStore((state) => state.fetchPlaylists);
+  const addTrackToPlaylist = usePlaylistStore((state) => state.addTrackToPlaylist);
+  const [playlistMessage, setPlaylistMessage] = useState("");
 
   // Get query params from URL
   const { query } = useQueryParams();
@@ -70,6 +76,42 @@ export default function SearchPresenter() {
     query.last_hash,
   ]);
 
+  useEffect(() => {
+    fetchPlaylists();
+  }, [fetchPlaylists]);
+
+  async function handleAddToPlaylist(playlistID: string, track: Track) {
+    if (!playlistID) {
+      return;
+    }
+
+    const playlist = playlists.find(
+        (playlist) => playlist.playlistID === playlistID
+    );
+
+    const alreadyExists = playlist?.tracks?.some(
+        (playlistTrack) => playlistTrack.hash === track.hash
+    );
+
+    if (alreadyExists) {
+      setPlaylistMessage("Track is already in this playlist");
+
+      setTimeout(() => {
+        setPlaylistMessage("");
+      }, 2500);
+
+      return;
+    }
+
+    await addTrackToPlaylist(playlistID, track.hash);
+    await fetchPlaylists();
+    setPlaylistMessage("Added to playlist");
+
+    setTimeout(() => {
+      setPlaylistMessage("");
+    }, 2500);
+  }
+
   async function handleTrackUpload(file: File | null) {
     if (file) {
       await uploadTrack(file);
@@ -97,7 +139,15 @@ export default function SearchPresenter() {
     const isLiked = useLikeStore(state => state.likes.some(like => like.hash === track.hash));
     return (
       <div>
-        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} onLike={handleLike} isLiked={isLiked} />
+        <TrackPreviewView
+            track={track}
+            onExitPreview={closeTrackPreview}
+            onLike={handleLike}
+            isLiked={isLiked}
+            playlists={playlists.filter((playlist) => !playlist.isFolder)}
+            onAddToPlaylist={(playlistID) => handleAddToPlaylist(playlistID, track)}
+            playlistMessage={playlistMessage}
+        />
       </div>
     )
   }
