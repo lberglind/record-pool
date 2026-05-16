@@ -1,17 +1,14 @@
-import { LogIn } from "lucide-react"
-import { buttonVariants } from "./ui/button"
+import Link from "next/link";
+import { LogIn } from "lucide-react";
+import { Button } from "./ui/button";
 
-interface Props {
-  href: string;
-  label?: string;
-}
-
-export const LoginButton = ({ href, label = "Login with Slack" }: Props) => {
+export default function LoginButton({ href }: { href: string }) {
   return (
-    <a href={href} className={buttonVariants({ variant: "secondary" })}>
-      {label}
-      <LogIn />
-    </a>
+    <Button variant="outline">
+      <Link href={href} className="flex items-center gap-2">
+        Login with Slack
+        <LogIn />
+      </Link>
+    </Button>
   );
 }
-

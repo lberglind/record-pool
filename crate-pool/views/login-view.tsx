@@ -1,4 +1,4 @@
-import { LoginButton } from "@/components/login-button";
+import  LoginButton  from "@/components/login-button";
 
 interface LoginViewProps {
   authUrl: string;

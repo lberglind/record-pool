@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { Track } from "./types";
 import { fetchUserLikes, addLike, removeLike } from "@/api/likeSource";
 
-export interface LikeStore {
+export type LikeStore = {
     likes: Track[];
     isLoading: boolean;
     hasFetched: boolean;

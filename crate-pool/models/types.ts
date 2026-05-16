@@ -99,8 +99,3 @@ export interface User {
   email: string;
   avatar: string;
 }
-export interface User {
-  userId: string;
-  email: string;
-  avatar: string;
-}
