@@ -90,3 +90,9 @@ export async function uploadXML(file: File) {
 
   return await res.json();
 }
+
+export async function downloadTrack(track: Track) {
+  const url = `${env.apiUrl}/tracks/${track.hash}/file`;
+  // This is like clicking a link; the browser handles the download
+  window.location.assign(url);
+}

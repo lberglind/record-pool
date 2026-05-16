@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { QueryParams, Track } from "./types";
-import { search as searchAPI, uploadTrack as uploadTrackAPI, uploadXML as uploadXMLAPI } from "@/api/trackSource";
+
+import { downloadTrack as downloadTrackAPI, search as searchAPI, uploadTrack as uploadTrackAPI, uploadXML as uploadXMLAPI } from "@/api/trackSource";
 
 
 export type TrackStore = {
@@ -11,6 +12,7 @@ export type TrackStore = {
   search: (query: QueryParams) => Promise<void>;
   uploadTrack: (file: File) => Promise<void>;
   uploadXML: (file: File) => Promise<void>;
+  downloadTrack: (track: Track) => Promise<void>;
 }
 
 export const useTrackStore = create<TrackStore>((set) => ({
@@ -43,6 +45,15 @@ export const useTrackStore = create<TrackStore>((set) => ({
     set({ isLoading: true });
     try {
       await uploadXMLAPI(file);
+      set({ isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+    }
+  },
+  downloadTrack: async (track: Track) => {
+    set({ isLoading: true });
+    try {
+      await downloadTrackAPI(track);
       set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false });

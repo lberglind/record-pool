@@ -1,11 +1,11 @@
-"use client"
-import { Spinner } from "@/components/ui/spinner";
+"use client";
+
 import { QueryParams, Track } from "@/models/types";
-import { TrackStore } from "@/models/useTrackStore"; import { LikeStore, useLikeStore } from "@/models/useLikeStore";
-import TrackPreviewView from "@/views/track-preview-view";
-import { TracksTableView } from "@/views/tracks-table-view";
+import { TrackStore } from "@/models/useTrackStore"; 
+import { LikeStore } from "@/models/useLikeStore";
 import UploadView from "@/views/upload-view";
-import { useEffect, useState } from "react";
+import TracksLayoutView from "@/views/tracks-layout-view";
+import { useEffect, useMemo, useState } from "react";
 
 interface SearchPresenterProps {
   trackModel: TrackStore;
@@ -15,9 +15,15 @@ interface SearchPresenterProps {
 
 export default function SearchPresenter({ trackModel, likeModel, queryParams }: SearchPresenterProps) {
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
-  const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);  
+  const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
 
-  // Effect to perform search when query params change
+  console.log("TrackStore state:", { 
+    tracks: trackModel.tracks, 
+    currentTrack: trackModel.currentTrack, 
+    isLoading: trackModel.isLoading 
+  });
+
+  // Effekt som kör sökning när queryParams ändras
   useEffect(() => {
     console.log("Performing search in useEffect with query:", queryParams);
     trackModel.search(queryParams);
@@ -73,6 +79,10 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
     }
   }
 
+  function handleTrackDownload(track: Track) {
+    trackModel.downloadTrack(track);
+  }
+
   function closeTrackPreview() {
     trackModel.setCurrentTrack(null);
     console.log("Closed track preview");
@@ -83,43 +93,40 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
     console.log("Set current track to", track);
   }
 
-  function handleLike(track: Track) {
-    const isLiked = likeModel.likes.some((t) => t.hash === track.hash);
-    if (isLiked) {
+  // Sparar gillade hashes i ett Set för blixtsnabb lookup i vyn
+  const likedHashes = useMemo(
+    () => new Set(likeModel.likes.map((t) => t.hash)),
+    [likeModel.likes]
+  );
+
+  // Wrapper-funktion för att hantera gilla-markeringar via likeModel
+  function handleToggleLike(track: Track) {
+    if (likedHashes.has(track.hash)) {
       likeModel.removeLike(track.hash);
     } else {
       likeModel.addLike(track.hash);
     }
   }
 
-  function RenderTrackPreview({ track }: { track: Track }) {
-    const isLiked = likeModel.likes.some(like => like.hash === track.hash);
-    return (
-      <div>
-        <TrackPreviewView track={track} onExitPreview={closeTrackPreview} onLike={handleLike} isLiked={isLiked} />
-      </div>
-    )
-  }
-
-  function RenderTracks({ isLoading, tracks, currentTrack }: { isLoading: boolean, tracks: Track[], currentTrack: Track | null }) {
-    if (isLoading) {
-      return (
-        <Spinner />
-      );
-    }
-    return (
-      <div className="flex flex-row gap-4 pt-8">
-        <TracksTableView tracks={tracks} onPreview={setTrackPreview} />
-        {currentTrack && <RenderTrackPreview track={currentTrack} />}
-      </div>
-    );
-  }
-
   return (
     <div className="w-full mx-auto container">
-      <RenderTracks isLoading={trackModel.isLoading} tracks={trackModel.tracks} currentTrack={trackModel.currentTrack} />
-      <UploadView track={currentTrackFile} onTrackFileChange={setCurrentTrackFile} onTrackUpload={handleTrackUpload}
-        xml={currentXmlFile} onXmlFileChange={setCurrentXmlFile} onXmlUpload={handleXmlUpload}
+      <TracksLayoutView 
+        onDownload={handleTrackDownload} 
+        isLoading={trackModel.isLoading} 
+        tracks={trackModel.tracks} 
+        currentTrack={trackModel.currentTrack} 
+        onPreview={setTrackPreview} 
+        handleLike={handleToggleLike} 
+        likedHashes={likedHashes} 
+        closeTrackPreview={closeTrackPreview} 
+      />
+      <UploadView 
+        track={currentTrackFile} 
+        onTrackFileChange={setCurrentTrackFile} 
+        onTrackUpload={handleTrackUpload}
+        xml={currentXmlFile} 
+        onXmlFileChange={setCurrentXmlFile} 
+        onXmlUpload={handleXmlUpload}
       />
     </div>
   );
