@@ -4,7 +4,7 @@ import { QueryParams, Track } from "./types";
 import { downloadTrack as downloadTrackAPI, search as searchAPI, uploadTrack as uploadTrackAPI, uploadXML as uploadXMLAPI } from "@/api/trackSource";
 
 
-export interface TrackStore {
+export type TrackStore = {
   currentTrack: Track | null;
   tracks: Track[];
   isLoading: boolean;
