@@ -47,19 +47,7 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
       set({ likes: tracks, error: "Failed to add like" });
     }
   },
-  /*
-    addLike: async (hash) => {
-      set({ error: null });
-      try {
-        await addLike(hash);
-        const tracks = await fetchUserLikes();
-        set({ likes: tracks });
-      } catch (error) {
-        set({ error: "Failed to add like" });
-      }
-    },
-  */
-
+ 
   removeLike: async (hash) => {
     set((state) => ({
       likes: state.likes.filter((t) => t.hash !== hash),  // optimistic remove
@@ -74,18 +62,6 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
     }
   },
 
-  /*
- removeLike: async (hash) => {
-   set({ error: null });
-   try {
-     await removeLike(hash);
-     const tracks = await fetchUserLikes();
-     set({ likes: tracks });
-   } catch (error) {
-     set({ error: "Failed to remove like" });
-   }
- },
- */
   toggleLike: async (track) => {
     const { likes, removeLike, addLike } = get();
     const isLiked = likes.some((t) => t.hash === track.hash);
