@@ -18,11 +18,13 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
   const fetchLikes = useLikeStore(s => s.fetchLikes);
 
+  /*
   console.log("TrackStore state:", {
     tracks: trackModel.tracks,
     currentTrack: trackModel.currentTrack,
     isLoading: trackModel.isLoading
   });
+  */
 
   useEffect(() => {
     fetchLikes();
