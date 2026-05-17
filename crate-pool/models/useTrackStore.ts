@@ -8,6 +8,7 @@ export type TrackStore = {
   currentTrack: Track | null;
   tracks: Track[];
   isLoading: boolean;
+  error: string | null;
   setCurrentTrack: (track: Track | null) => void;
   search: (query: QueryParams) => Promise<void>;
   uploadTrack: (file: File) => Promise<void>;
@@ -19,13 +20,14 @@ export const useTrackStore = create<TrackStore>((set) => ({
   currentTrack: null,
   tracks: [],
   isLoading: false,
+  error: null,
   search: async (query) => {
     set({ isLoading: true });
     try {
       const tracks: Track[] = await searchAPI(query);
       set({ tracks, isLoading: false });
     } catch (error) {
-      set({ isLoading: false });
+      set({ isLoading: false, error: "Failed to search tracks" });
     }
 
   },
@@ -38,7 +40,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       await uploadTrackAPI(file);
       set({ isLoading: false });
     } catch (error) {
-      set({ isLoading: false });
+      set({ isLoading: false, error: "Failed to upload track" });
     }
   },
   uploadXML: async (file: File) => {
@@ -47,7 +49,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       await uploadXMLAPI(file);
       set({ isLoading: false });
     } catch (error) {
-      set({ isLoading: false });
+      set({ isLoading: false, error: "Failed to upload XML" });
     }
   },
   downloadTrack: async (track: Track) => {
@@ -56,7 +58,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       await downloadTrackAPI(track);
       set({ isLoading: false });
     } catch (error) {
-      set({ isLoading: false });
+      set({ isLoading: false, error: "Failed to download track" });
     }
   },
 }))
