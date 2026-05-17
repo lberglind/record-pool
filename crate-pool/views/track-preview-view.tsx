@@ -16,10 +16,6 @@ interface TrackPreviewViewProps {
 export default function TrackPreviewView(props: TrackPreviewViewProps) {
   const track = props.track;
 
-  function removeFromLibrary() {
-    console.log("Placeholder, should remove from library, need endpoint:", track);
-  }
-
   function toggleLike() {
     console.log("toggled like for:", track.title);
     props.onLike(track);
@@ -72,7 +68,6 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
         <div className="w-full flex gap-4">
           <Button className="flex-grow py-6 mt-4" onClick={download}>Download</Button>
           <Button className="p-6 mt-4" variant={"outline"} onClick={toggleLike}><HeartIcon className={props.isLiked ? "fill-red-500 text-red-500" : ""} /></Button>
-          <Button className="p-6 mt-4" variant={"outline"} onClick={removeFromLibrary}><X /></Button>
         </div>
       </CardFooter>
     </Card >
