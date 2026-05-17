@@ -41,7 +41,7 @@ export async function addLike(hash: string) {
         const text = await res.text();
         throw new Error(`Failed to add like: ${text}`);
     }
-    return await res.json();
+    //return await res.json();
 
 }
 
@@ -59,5 +59,5 @@ export async function removeLike(hash: string) {
         const text = await res.text();
         throw new Error(`Failed to remove like: ${text}`);
     }
-    return await res.json();
+    //return await res.json();
 }

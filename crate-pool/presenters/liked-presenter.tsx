@@ -10,6 +10,7 @@ export default function LikedPresenter() {
   const isLoading = useTrackStore((state) => state.isLoading);
   const setCurrentTrack = useTrackStore((state) => state.setCurrentTrack);
   const downloadTrack = useTrackStore((state) => state.downloadTrack);
+  const error = useTrackStore((state) => state.error);
 
 
   const toggleLike = useLikeStore((s) => s.toggleLike);
@@ -30,7 +31,7 @@ export default function LikedPresenter() {
     <div className="w-full mx-auto container">
       <h1 className="text-2xl font-bold mb-4">Liked Tracks</h1>
       <TracksLayoutView isLoading={isLoading} currentTrack={currentTrack} tracks={likes} onPreview={setCurrentTrack}
-        handleLike={toggleLike} likedHashes={likedHashes} closeTrackPreview={closeTrackPreview} onDownload={downloadTrack} />
+        handleLike={toggleLike} likedHashes={likedHashes} closeTrackPreview={closeTrackPreview} onDownload={downloadTrack} error={error} />
     </div>
 
   );

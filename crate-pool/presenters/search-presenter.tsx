@@ -1,11 +1,11 @@
 "use client";
 
 import { QueryParams, Track } from "@/models/types";
-import { TrackStore } from "@/models/useTrackStore"; 
-import { LikeStore } from "@/models/useLikeStore";
+import { TrackStore } from "@/models/useTrackStore";
+import { LikeStore, useLikeStore } from "@/models/useLikeStore";
 import UploadView from "@/views/upload-view";
 import TracksLayoutView from "@/views/tracks-layout-view";
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 
 interface SearchPresenterProps {
   trackModel: TrackStore;
@@ -16,12 +16,17 @@ interface SearchPresenterProps {
 export default function SearchPresenter({ trackModel, likeModel, queryParams }: SearchPresenterProps) {
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
+  const fetchLikes = useLikeStore(s => s.fetchLikes);
 
-  console.log("TrackStore state:", { 
-    tracks: trackModel.tracks, 
-    currentTrack: trackModel.currentTrack, 
-    isLoading: trackModel.isLoading 
+  console.log("TrackStore state:", {
+    tracks: trackModel.tracks,
+    currentTrack: trackModel.currentTrack,
+    isLoading: trackModel.isLoading
   });
+
+  useEffect(() => {
+    fetchLikes();
+  }, []);
 
   // Effekt som kör sökning när queryParams ändras
   useEffect(() => {
@@ -110,22 +115,23 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
 
   return (
     <div className="w-full mx-auto container">
-      <TracksLayoutView 
-        onDownload={handleTrackDownload} 
-        isLoading={trackModel.isLoading} 
-        tracks={trackModel.tracks} 
-        currentTrack={trackModel.currentTrack} 
-        onPreview={setTrackPreview} 
-        handleLike={handleToggleLike} 
-        likedHashes={likedHashes} 
-        closeTrackPreview={closeTrackPreview} 
+      <TracksLayoutView
+        onDownload={handleTrackDownload}
+        isLoading={trackModel.isLoading}
+        tracks={trackModel.tracks}
+        currentTrack={trackModel.currentTrack}
+        onPreview={setTrackPreview}
+        handleLike={handleToggleLike}
+        likedHashes={likedHashes}
+        closeTrackPreview={closeTrackPreview}
+        error={trackModel.error || likeModel.error}
       />
-      <UploadView 
-        track={currentTrackFile} 
-        onTrackFileChange={setCurrentTrackFile} 
+      <UploadView
+        track={currentTrackFile}
+        onTrackFileChange={setCurrentTrackFile}
         onTrackUpload={handleTrackUpload}
-        xml={currentXmlFile} 
-        onXmlFileChange={setCurrentXmlFile} 
+        xml={currentXmlFile}
+        onXmlFileChange={setCurrentXmlFile}
         onXmlUpload={handleXmlUpload}
       />
     </div>
