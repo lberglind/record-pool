@@ -43,3 +43,29 @@ func (h *SessionHandler) Me() http.HandlerFunc {
 		})
 	}
 }
+
+func (h *SessionHandler) DestroyMe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("session")
+		if err != nil {
+			http.Error(w, "Not logged in", http.StatusUnauthorized)
+			return
+		}
+		sessionID := cookie.Value
+		err = h.Repo.DestroySession(r.Context(), sessionID)
+		if err != nil {
+			http.Error(w, "Logout Error", http.StatusInternalServerError)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+		})
+		w.WriteHeader(http.StatusNoContent)
+	}
+}

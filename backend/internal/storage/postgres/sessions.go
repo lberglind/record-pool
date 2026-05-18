@@ -60,3 +60,10 @@ func (r *SessionRepo) StartCleanup(interval time.Duration) {
 		}
 	}
 }
+
+func (r *SessionRepo) DestroySession(ctx context.Context, sessionID string) error {
+	query := `DELETE FROM sessions WHERE session_id = $1`
+
+	_, err := r.pool.Exec(ctx, query, sessionID)
+	return err
+}

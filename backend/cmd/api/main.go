@@ -125,6 +125,9 @@ func main() {
 	mux.HandleFunc("POST /playlists/{id}/tracks", protected(playlistHandlers.AddTrack()))
 	mux.HandleFunc("DELETE /playlists/{id}/tracks/{hash}", protected(playlistHandlers.RemoveTrack()))
 
+	// Session Routes
+	mux.HandleFunc("DELETE /me", protected(sessionHandlers.DestroyMe()))
+
 	// Public Routes
 	mux.HandleFunc("GET /auth/slack", authHandlers.SlackLogIn())
 	mux.HandleFunc("GET /auth/slack/callback", authHandlers.SlackCallback())
