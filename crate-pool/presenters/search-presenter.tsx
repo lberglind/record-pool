@@ -7,6 +7,7 @@ import UploadView from "@/views/upload-view";
 import { usePlaylistStore } from "@/models/usePlaylistStore";
 import TracksLayoutView from "@/views/tracks-layout-view";
 import { use, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 interface SearchPresenterProps {
   trackModel: TrackStore;
@@ -78,19 +79,34 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
 
   async function handleTrackUpload(file: File | null) {
     if (file) {
-      await trackModel.uploadTrack(file);
-      await trackModel.search({});
+      try {
+        await trackModel.uploadTrack(file);
+        await trackModel.search({});
+        toast.success("Track uploaded successfully");
+      } catch (error) {
+        toast.error("Failed to upload track");
+      }
     }
   }
 
-  function handleXmlUpload(file: File | null) {
+  async function handleXmlUpload(file: File | null) {
     if (file) {
-      trackModel.uploadXML(file);
+      try {
+        await trackModel.uploadXML(file);
+        toast.success("XML uploaded successfully");
+      } catch (error) {
+        toast.error("Failed to upload XML");
+      }
     }
   }
 
-  function handleTrackDownload(track: Track) {
-    trackModel.downloadTrack(track);
+  async function handleTrackDownload(track: Track) {
+    try {
+      await trackModel.downloadTrack(track);
+      toast.message(`Downloading ${track.title}`);
+    } catch (error) {
+      toast.error(`Failed to download ${track.title}`);
+    }
   }
 
   function closeTrackPreview() {
@@ -110,12 +126,23 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
   );
 
   // Wrapper-funktion för att hantera gilla-markeringar via likeModel
-  function handleToggleLike(track: Track) {
-    likeModel.toggleLike(track);
+  async function handleToggleLike(track: Track) {
+    const wasLiked = likedHashes.has(track.hash);
+    try {
+      await likeModel.toggleLike(track);
+      toast.success(wasLiked ? `Unliked ${track.title}` : `Liked ${track.title}`);
+    } catch (error) {
+      toast.error(wasLiked ? `Failed to unlike ${track.title}` : `Failed to like ${track.title}`);
+    }
   }
 
-  function handleAddToPlaylist(playlistID: string, hash: string) {
-    addTrackToPlaylist(playlistID, hash)
+  async function handleAddToPlaylist(playlistID: string, hash: string) {
+    try {
+      await addTrackToPlaylist(playlistID, hash)
+      toast.success("Added track to playlist");
+    } catch (error) {
+      toast.error("Failed to add track to playlist");
+    }
   }
 
   return (

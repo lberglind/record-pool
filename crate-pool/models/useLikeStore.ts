@@ -45,6 +45,7 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
       console.error("addLike catch:", error);  // ← add
       const tracks = await fetchUserLikes();
       set({ likes: tracks, error: "Failed to add like" });
+      throw new Error("Failed to add like");
     }
   },
  
@@ -59,6 +60,7 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
     } catch (error) {
       const tracks = await fetchUserLikes();  // revert on error
       set({ likes: tracks, error: "Failed to remove like" });
+      throw new Error("Failed to remove like");
     }
   },
 
@@ -67,9 +69,9 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
     const isLiked = likes.some((t) => t.hash === track.hash);
 
     if (isLiked) {
-      removeLike(track.hash)
+      await removeLike(track.hash)
     } else {
-      addLike(track.hash)
+      await addLike(track.hash)
     }
   },
 }));
