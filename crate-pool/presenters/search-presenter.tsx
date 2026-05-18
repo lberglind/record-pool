@@ -4,6 +4,7 @@ import { QueryParams, Track } from "@/models/types";
 import { TrackStore } from "@/models/useTrackStore";
 import { LikeStore, useLikeStore } from "@/models/useLikeStore";
 import UploadView from "@/views/upload-view";
+import {usePlaylistStore} from "@/models/usePlaylistStore";
 import TracksLayoutView from "@/views/tracks-layout-view";
 import { use, useEffect, useMemo, useState } from "react";
 
@@ -17,14 +18,13 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
   const fetchLikes = useLikeStore(s => s.fetchLikes);
+  const playlists = usePlaylistStore((state) => state.playlists);
+  const fetchPlaylists = usePlaylistStore((state) => state.fetchPlaylists);
+  const addTrackToPlaylist = usePlaylistStore((state) => state.addTrackToPlaylist);
+  const [playlistMessage, setPlaylistMessage] = useState("");
 
-  /*
-  console.log("TrackStore state:", {
-    tracks: trackModel.tracks,
-    currentTrack: trackModel.currentTrack,
-    isLoading: trackModel.isLoading
-  });
-  */
+  // Get query params from URL
+  const { query } = useQueryParams();
 
   useEffect(() => {
     fetchLikes();
@@ -72,6 +72,42 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
     queryParams.last_timestamp,
     queryParams.last_hash,
   ]);
+
+  useEffect(() => {
+    fetchPlaylists();
+  }, [fetchPlaylists]);
+
+  async function handleAddToPlaylist(playlistID: string, track: Track) {
+    if (!playlistID) {
+      return;
+    }
+
+    const playlist = playlists.find(
+        (playlist) => playlist.playlistID === playlistID
+    );
+
+    const alreadyExists = playlist?.tracks?.some(
+        (playlistTrack) => playlistTrack.hash === track.hash
+    );
+
+    if (alreadyExists) {
+      setPlaylistMessage("Track is already in this playlist");
+
+      setTimeout(() => {
+        setPlaylistMessage("");
+      }, 2500);
+
+      return;
+    }
+
+    await addTrackToPlaylist(playlistID, track.hash);
+    await fetchPlaylists();
+    setPlaylistMessage("Added to playlist");
+
+    setTimeout(() => {
+      setPlaylistMessage("");
+    }, 2500);
+  }
 
   async function handleTrackUpload(file: File | null) {
     if (file) {
