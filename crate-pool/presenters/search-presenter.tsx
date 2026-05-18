@@ -4,7 +4,7 @@ import { QueryParams, Track } from "@/models/types";
 import { TrackStore } from "@/models/useTrackStore";
 import { LikeStore, useLikeStore } from "@/models/useLikeStore";
 import UploadView from "@/views/upload-view";
-import {usePlaylistStore} from "@/models/usePlaylistStore";
+import { usePlaylistStore } from "@/models/usePlaylistStore";
 import TracksLayoutView from "@/views/tracks-layout-view";
 import { use, useEffect, useMemo, useState } from "react";
 
@@ -17,14 +17,13 @@ interface SearchPresenterProps {
 export default function SearchPresenter({ trackModel, likeModel, queryParams }: SearchPresenterProps) {
   const [currentTrackFile, setCurrentTrackFile] = useState<File | null>(null);
   const [currentXmlFile, setCurrentXmlFile] = useState<File | null>(null);
+
   const fetchLikes = useLikeStore(s => s.fetchLikes);
+
   const playlists = usePlaylistStore((state) => state.playlists);
   const fetchPlaylists = usePlaylistStore((state) => state.fetchPlaylists);
   const addTrackToPlaylist = usePlaylistStore((state) => state.addTrackToPlaylist);
   const [playlistMessage, setPlaylistMessage] = useState("");
-
-  // Get query params from URL
-  const { query } = useQueryParams();
 
   useEffect(() => {
     fetchLikes();
@@ -83,11 +82,11 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
     }
 
     const playlist = playlists.find(
-        (playlist) => playlist.playlistID === playlistID
+      (playlist) => playlist.playlistID === playlistID
     );
 
     const alreadyExists = playlist?.tracks?.some(
-        (playlistTrack) => playlistTrack.hash === track.hash
+      (playlistTrack) => playlistTrack.hash === track.hash
     );
 
     if (alreadyExists) {
@@ -163,6 +162,9 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
         likedHashes={likedHashes}
         closeTrackPreview={closeTrackPreview}
         error={trackModel.error || likeModel.error}
+        onAddToPlaylist={addTrackToPlaylist}
+        playlistMessage={playlistMessage}
+        playlists={playlists}
       />
       <UploadView
         track={currentTrackFile}
