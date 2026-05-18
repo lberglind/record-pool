@@ -48,12 +48,8 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
     addTrackToPlaylist: async (playlistId: string, trackHash: string) => {
         try {
             await addTrackToPlaylist(playlistId, trackHash);
-            set({ playlistMessage: "Track added to playlist!" });
-            setTimeout(() => set({ playlistMessage: "" }), 3000);
         } catch (error) {
             console.error("Failed to add track to playlist:", error);
-            set({ playlistMessage: "Failed to add track to playlist." });
-            setTimeout(() => set({ playlistMessage: "" }), 3000);
             throw new Error("Failed to add track to playlist");
         }
     },
