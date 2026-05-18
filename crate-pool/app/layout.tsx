@@ -5,10 +5,11 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import {NavbarPresenter} from "@/presenters/navbar-presenter";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useUserStore } from "@/models/useUserStore";
 import LoginPresenter from "@/presenters/login-presenter";
 import { Spinner } from "@/components/ui/spinner";
+import { NavbarFallbackView } from "@/views/navbar-fallback-view";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -41,7 +42,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
+          <Suspense fallback={<NavbarFallbackView />}>
             <NavbarPresenter />
+          </Suspense>
             <main>
               {authStatus === "loading" && (
                 <div className="p-4">

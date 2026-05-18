@@ -1,3 +1,4 @@
+"use client"
 
 import ProfilePresenter from "@/presenters/profile-presenter"
 

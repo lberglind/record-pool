@@ -28,7 +28,7 @@ export async function search(query: QueryParams) {
   return data;
 }
 
-export async function fetchNextPage(params: Record<string, string>, lastTrack: Track) {
+/* export async function fetchNextPage(params: Record<string, string>, lastTrack: Track) {
   const nextParams = { ...params };
 
 
@@ -40,6 +40,7 @@ export async function fetchNextPage(params: Record<string, string>, lastTrack: T
   return search(nextParams);
 
 }
+*/
 
 export async function fetchSearchPage(params: Record<string, string>, page: number) {
   const pageParams = { ...params };
