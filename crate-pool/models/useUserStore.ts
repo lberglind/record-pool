@@ -1,5 +1,4 @@
-import { getCurrentUser } from "@/api/userSource";
-import { logoutAction } from "@/app/logout/actions";
+import { getCurrentUser, logoutCurrentUser } from "@/api/userSource";
 import { env } from "@/config/env";
 import { create } from "zustand";
 import { User } from "./types";
@@ -44,7 +43,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
   logout: async () => {
     set({ authStatus: "loading" });
     try {
-      await logoutAction();
+      await logoutCurrentUser();
       set({ user: null, authStatus: "unauthenticated", hasFetchedUser: true });
     } catch (error) {
       set({ authStatus: "authenticated" });
