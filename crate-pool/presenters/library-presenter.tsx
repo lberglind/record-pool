@@ -3,6 +3,7 @@
 import LibraryView from "@/views/library-view"
 import {useEffect, useState} from "react";
 import {usePlaylistStore} from "@/models/usePlaylistStore";
+import { toast } from "sonner";
 
 export default function LibraryPresenter() {
     const [playlistName, setPlaylistName] = useState("");
@@ -23,19 +24,34 @@ export default function LibraryPresenter() {
             return;
         }
 
-        await createPlaylist(playlistName.trim());
-        setPlaylistName("");
+        try {
+            await createPlaylist(playlistName.trim());
+            toast.success("Playlist created");
+            setPlaylistName("");
+        } catch (error) {
+            toast.error("Failed to create playlist");
+        }
     }
 
     async function handleRemoveTrackFromPlaylist(
         playlistID: string,
         trackHash: string
     ) {
-        await removeTrackFromPlaylist(playlistID, trackHash);
+        try {
+            await removeTrackFromPlaylist(playlistID, trackHash);
+            toast.success("Track removed from playlist");
+        } catch (error) {
+            toast.error("Failed to remove track from playlist");
+        }
     }
 
     async function handleDeletePlaylist(playlistID: string) {
-        await deletePlaylist(playlistID);
+        try {
+            await deletePlaylist(playlistID);
+            toast.success("Playlist deleted");
+        } catch (error) {
+            toast.error("Failed to delete playlist");
+        }
     }
 
     return (

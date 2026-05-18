@@ -10,6 +10,7 @@ import { useUserStore } from "@/models/useUserStore";
 import LoginPresenter from "@/presenters/login-presenter";
 import { Spinner } from "@/components/ui/spinner";
 import { NavbarFallbackView } from "@/views/navbar-fallback-view";
+import { Toaster } from "@/components/ui/sonner"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -55,6 +56,7 @@ export default function RootLayout({
               {authStatus === "unauthenticated" && hasFetchedUser && <LoginPresenter />}
               {authStatus === "authenticated" && hasFetchedUser && children}
             </main>
+            <Toaster position="top-center" richColors/>
         </ThemeProvider>
       </body>
     </html>

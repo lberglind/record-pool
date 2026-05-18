@@ -41,6 +41,7 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
             await get().fetchPlaylists();
         } catch (error) {
             console.error("Failed to create playlist:", error);
+            throw new Error("Failed to create playlist");
         }
     },
 
@@ -53,6 +54,7 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
             console.error("Failed to add track to playlist:", error);
             set({ playlistMessage: "Failed to add track to playlist." });
             setTimeout(() => set({ playlistMessage: "" }), 3000);
+            throw new Error("Failed to add track to playlist");
         }
     },
 
@@ -64,6 +66,7 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
             console.error("Failed to remove track from playlist:", error);
             set({ playlistMessage: "Failed to remove track from playlist." });
             setTimeout(() => set({ playlistMessage: "" }), 3000);
+            throw new Error("Failed to remove track from playlist");
         }
     },
 
@@ -75,6 +78,7 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
             console.error("Failed to delete playlist:", error);
             set({ playlistMessage: "Failed to delete playlist." });
             setTimeout(() => set({ playlistMessage: "" }), 3000);
+            throw new Error("Failed to delete playlist");
         }
     },
 }));

@@ -41,6 +41,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: "Failed to upload track" });
+      throw new Error("Failed to upload track");
     }
   },
   uploadXML: async (file: File) => {
@@ -50,6 +51,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: "Failed to upload XML" });
+      throw new Error("Failed to upload XML");
     }
   },
   downloadTrack: async (track: Track) => {
@@ -59,6 +61,7 @@ export const useTrackStore = create<TrackStore>((set) => ({
       set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: "Failed to download track" });
+      throw new Error("Failed to download track");
     }
   },
 }))
