@@ -66,7 +66,8 @@ export async function uploadTrack(file: File) {
   if (!res.ok) {
     throw new Error("Track Upload failed");
   }
-  return await res.json();
+  const textResponse = await res.text();
+  return { message: textResponse };
 
 }
 
@@ -89,7 +90,8 @@ export async function uploadXML(file: File) {
     throw new Error("XML Upload failed");
   }
 
-  return await res.json();
+  const textResponse = await res.text();
+  return { message: textResponse };
 }
 
 export async function downloadTrack(track: Track) {
