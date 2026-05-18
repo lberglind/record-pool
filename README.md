@@ -9,3 +9,6 @@ A user is authenticated via a slack OAuth token from the connected workspace whi
 To enter website use: `https://pool.berglind.io/`
 
 Enhanced Tracking Protection may need to be disabled to allow the third-party session cookie needed for authentication.
+
+## 3rd party components
+3rd party components are used in most views, check upload-view.tsx for specific example. Specific components can be found in components/ui
