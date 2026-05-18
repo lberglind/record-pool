@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { NavbarView } from "@/views/navbar-view";
 import FilterView from "@/views/filter-view";
@@ -39,6 +39,19 @@ export function NavbarPresenter() {
     }
 
     debouncedSetQuery(value); // debounce the URL update
+  }
+
+  function handleSearchSubmit(): void {
+    debouncedSetQuery.flush?.();
+  }
+
+  function handleSearchInputChange(event: ChangeEvent<HTMLInputElement>): void {
+    handleSearchQueryChange(event.target.value);
+  }
+
+  function handleSearchFormSubmit(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    handleSearchSubmit();
   }
 
   function handleLibraryClick(): void {
@@ -126,7 +139,8 @@ export function NavbarPresenter() {
         searchQuery={searchQueryState}
         urlQuery={urlQuery}
         activePath={pathname}
-        onSearchQueryChange={handleSearchQueryChange}
+        onSearchInputChange={handleSearchInputChange}
+        onSearchFormSubmit={handleSearchFormSubmit}
         onClearSearch={handleClearSearch}
         onLibraryClick={handleLibraryClick}
         onLikedClick={handleLikedClick}
