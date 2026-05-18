@@ -960,14 +960,44 @@
         "domain.Track": {
             "type": "object",
             "properties": {
+                "album": {
+                    "type": "string"
+                },
+                "album_artist": {
+                    "type": "string"
+                },
                 "artist": {
                     "type": "string"
+                },
+                "bitrate": {
+                    "type": "number"
+                },
+                "bpm": {
+                    "type": "number"
+                },
+                "duration": {
+                    "type": "number"
                 },
                 "format": {
                     "type": "string"
                 },
+                "genre": {
+                    "type": "string"
+                },
                 "hash": {
                     "type": "string"
+                },
+                "publisher": {
+                    "type": "string"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "sample_rate": {
+                    "type": "number"
+                },
+                "size": {
+                    "type": "number"
                 },
                 "timeStamp": {
                     "type": "string"
