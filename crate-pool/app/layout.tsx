@@ -28,6 +28,7 @@ export default function RootLayout({
 }>) {
   const authStatus = useUserStore((s) => s.authStatus);
   const fetchUser = useUserStore((s) => s.fetchUser);
+  const hasFetchedUser = useUserStore((s) => s.hasFetchedUser);
 
   useEffect(() => {
     // ensure we fetch current user once on client mount
@@ -46,13 +47,13 @@ export default function RootLayout({
             <NavbarPresenter />
           </Suspense>
             <main>
-              {authStatus === "loading" && (
-                <div className="p-4">
-                  <Spinner />
+              {!hasFetchedUser && authStatus === "loading" && (
+                <div className="p-4 w-full flex items-center justify-center">
+                  Getting user info... <Spinner className="ml-2" />
                 </div>
               )}
-              {authStatus === "unauthenticated" && <LoginPresenter />}
-              {authStatus === "authenticated" && children}
+              {authStatus === "unauthenticated" && hasFetchedUser && <LoginPresenter />}
+              {authStatus === "authenticated" && hasFetchedUser && children}
             </main>
         </ThemeProvider>
       </body>

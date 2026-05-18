@@ -19,7 +19,7 @@ export default function FilterView({ clearFilters, query, releaseValue, duration
         <div className="w-full border-b bg-background/50 backdrop-blur px-4 py-4">
             <div className="mx-auto max-w-7xl">
                 <div className="grid gap-6 md:grid-cols-4">
-                    <SliderRange
+                    {/* <SliderRange
                         value={releaseValue}
                         min={1900}
                         max={2026}
@@ -27,7 +27,7 @@ export default function FilterView({ clearFilters, query, releaseValue, duration
                         onChange={onReleaseChange}
                         text="Release Year"
                         className="mt-2"
-                    />
+                    /> */}
 
                     <SliderRange
                         value={durationValue}

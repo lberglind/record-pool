@@ -18,7 +18,9 @@ interface TracksLayoutProps {
 export default function TracksLayoutView(props: TracksLayoutProps) {
   if (props.isLoading) {
     return (
-      <Spinner />
+      <div className="pt-8 w-full flex items-center justify-center">
+        Loading tracks... <Spinner className="ml-2" />
+      </div>
     );
   }
   return (
