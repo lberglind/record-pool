@@ -1,3 +1,4 @@
+"use client"
 
 import LikedPresenter from "@/presenters/liked-presenter"
 

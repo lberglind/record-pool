@@ -28,7 +28,7 @@ export async function search(query: QueryParams) {
   return data;
 }
 
-export async function fetchNextPage(params: Record<string, string>, lastTrack: Track) {
+/* export async function fetchNextPage(params: Record<string, string>, lastTrack: Track) {
   const nextParams = { ...params };
 
 
@@ -40,6 +40,7 @@ export async function fetchNextPage(params: Record<string, string>, lastTrack: T
   return search(nextParams);
 
 }
+*/
 
 export async function fetchSearchPage(params: Record<string, string>, page: number) {
   const pageParams = { ...params };
@@ -65,7 +66,8 @@ export async function uploadTrack(file: File) {
   if (!res.ok) {
     throw new Error("Track Upload failed");
   }
-  return await res.json();
+  const textResponse = await res.text();
+  return { message: textResponse };
 
 }
 
@@ -88,5 +90,12 @@ export async function uploadXML(file: File) {
     throw new Error("XML Upload failed");
   }
 
-  return await res.json();
+  const textResponse = await res.text();
+  return { message: textResponse };
+}
+
+export async function downloadTrack(track: Track) {
+  const url = `${env.apiUrl}/tracks/${track.hash}/file`;
+  // This is like clicking a link; the browser handles the download
+  window.location.assign(url);
 }

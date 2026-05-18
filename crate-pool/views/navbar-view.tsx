@@ -3,37 +3,21 @@ import { Search, Library, Heart, User, X, ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { NavbarViewProps } from "@/models/navbarTypes";
-import type { ChangeEvent, SubmitEvent } from "react";
 import Link from "next/link";
-
-{/* <Button
-                            type="button"
-                            variant={isQueryEmpty ? "ghost" : "default"}
-                            className="gap-2 cursor-pointer"
-                            onClick={onClearSearch}
-                        >
-                            Clear
-                        </Button> */}
 
 //props and types defined in navbarTypes.ts
 export function NavbarView(props: NavbarViewProps) {
     const {
         searchQuery,
         activePath,
-        onSearchQueryChange,
+        onSearchInputChange,
+        onSearchFormSubmit,
         onLibraryClick,
         onLikedClick,
         onProfileClick,
         isFilterViewOpen,
         onToggleFilterView
     } = props; 
-
-    // ran when user types in search bar
-    // event has type of a ChangeEvent which is triggered when the value of an <input> element is changed
-    //returns void
-    function handleSearchInputChange(event: ChangeEvent<HTMLInputElement>): void {
-        onSearchQueryChange(event.target.value);
-    }
 
     // check if the current path matches any of the active paths for ghost highlighting
     // This is used to determine which navigation button should be highlighted as active
@@ -58,6 +42,7 @@ export function NavbarView(props: NavbarViewProps) {
                 adjusts to layout */}
                 <form
                     className="hidden min-w-0 flex-1 md:block"
+                    onSubmit={onSearchFormSubmit}
                 >
                     <div className="flex gap-2 px-8">
                         <div className="relative w-full">
@@ -75,7 +60,7 @@ export function NavbarView(props: NavbarViewProps) {
                          onChange fires custom event up*/}
                             <Input
                                 value={searchQuery}
-                                onChange={handleSearchInputChange}
+                                onChange={onSearchInputChange}
                                 type="search"
                                 placeholder="Search tracks, artists, playlists..."
                                 //input padding
@@ -143,13 +128,13 @@ export function NavbarView(props: NavbarViewProps) {
             {/* search for mobile or small screens,
              shown on row below by separating divs */}
             <div className="border-t px-4 py-3 md:hidden">
-                <form>
+                <form onSubmit={onSearchFormSubmit}>
                     <div className="relative">
                         <Search
                             className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             value={searchQuery}
-                            onChange={handleSearchInputChange}
+                            onChange={onSearchInputChange}
                             type="search"
                             placeholder="Search..."
                             className="pl-9"

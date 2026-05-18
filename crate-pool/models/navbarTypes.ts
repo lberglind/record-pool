@@ -1,3 +1,5 @@
+import type { ChangeEvent, FormEvent } from "react";
+
 //define types for props
 export interface NavbarViewProps {
     searchQuery: string;
@@ -5,7 +7,8 @@ export interface NavbarViewProps {
     activePath: string;
     isFilterViewOpen: boolean;
     onToggleFilterView: () => void;
-    onSearchQueryChange: (value: string) => void;
+    onSearchInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    onSearchFormSubmit: (event: FormEvent<HTMLFormElement>) => void;
     onClearSearch: () => void;
     onLibraryClick: () => void;
     onLikedClick: () => void;
