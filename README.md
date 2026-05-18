@@ -48,3 +48,34 @@ Enhanced Tracking Protection may need to be disabled to allow the third-party se
 
 ## 5. Utils
 - **utils.ts** – Helper functions for formatting (time, dates) and merging CSS classes (cn)
+
+## User-evaluation
+
+## Prototyping-stage
+The user was shown a prototype on paper together with a simple prototype web-page and noted the following: 
+- The structure was clear at this point
+- The navbar at the top allowed for easy navigation and the different pages: "Crate Pool", "Library", "Liked" and "Profile" seemed to all be relevant.
+- The search bar had most of the correct functionality but that it could be good to add some sort of filters to adjust what was shown when searching. For example only showing songs over or under a specified BPM or selecting genres.
+- The profile page looks good.
+- The liked page looks good.
+- The library page looks good (could be called "playlists", but that's a personal preference).
+- All icons look really good together with the overall UI that looks clean and professional.
+
+We decided to add the filter function for searching and also decided to stick with "library" instead of "playlists" as this would allow for further categories inside of library in the future, not just playlists. 
+
+## Formative evaluation-stage
+The user was now shown a close to finished web-page and noted the following:
+
+- The UI was overall really clean and professional (especially liked the highlighting of buttons when pressed, e.g the different pages).
+- Though that the filter funciton fit well and enhanced the experience.
+- Everything is responsive and works as expected.
+- The page can be contracted and expanded and it still works like expected.
+- It would be good to add a like button besides the eye-icon on the start page. This would allow the user to see which songs they had liked directly in the table instead of having to go into the track-preview-view.
+- Does not like that the log in button is part of the page in the corner, making it unclear if you have to be logged-in to get access to the application-functionality.
+
+  
+We decided to add the ability for the user to see if the track was liked or not in the table, we also added the ability to actually like the track directly from the table. We also decided to create a smoother and clearer log-in experience by clearly stating that the user should log in to continue, we also put it in the middle of the page to impove the look. 
+
+
+
+
