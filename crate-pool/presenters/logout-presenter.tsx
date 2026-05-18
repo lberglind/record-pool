@@ -8,13 +8,13 @@ import { Spinner } from "@/components/ui/spinner";
 
 export default function LogoutPresenter() {
   const router = useRouter();
-  const userModel = useUserStore()
+  const logout = useUserStore((state) => state.logout);
 
   useEffect(() => {
-    userModel.logout().then(() => {
-      router.push("/");
+    logout().then(() => {
+      router.replace("/");
     });
-  }, [userModel.logout, router]);
+  }, [logout, router]);
 
   return (
     <Item>
