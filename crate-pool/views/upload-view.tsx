@@ -16,8 +16,8 @@ import { PlusIcon } from "lucide-react";
 interface uploadViewProps {
   track: File | null;
   xml: File | null;
-  onTrackFileChange: (f: File) => void;
-  onXmlFileChange: (f: File) => void;
+  onTrackFileChange: (f: File | null) => void;
+  onXmlFileChange: (f: File | null) => void;
   onTrackUpload: (f: File | null) => void;
   onXmlUpload: (f: File | null) => void;
 }
@@ -28,9 +28,23 @@ export default function UploadView(props: uploadViewProps) {
   const [trackFileName, setTrackFileName] = useState("")
   const [xmlFileName, setXmlFileName] = useState("")
 
+  function clearUpload() {
+    if (trackInputRef.current) trackInputRef.current.value = "";
+    if (xmlInputRef.current) xmlInputRef.current.value = "";
+
+    setTrackFileName("")
+    setXmlFileName("")
+    props.onTrackFileChange(null)
+    props.onXmlFileChange(null)
+  }
+
   return (
     <div className="flex flex-col">
-      <Dialog>
+      <Dialog onOpenChange={(open) => {
+        if (!open) {
+          clearUpload();
+        }
+      }}>
         <DialogTrigger render={<Button className={"relative h-16 w-16 absolute bottom-5 right-5"}><PlusIcon /></Button>} />
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
