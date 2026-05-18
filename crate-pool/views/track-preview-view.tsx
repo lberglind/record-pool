@@ -60,13 +60,13 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
 
 
   return (
-    <Card>
+    <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>{track.title || "Unknown Title"}</CardTitle>
         <CardDescription>{track.artist || "Unknown Artist"}</CardDescription>
         <CardAction><Button size="icon-lg" variant="ghost" onClick={props.onExitPreview}><X /></Button></CardAction>
       </CardHeader>
-      <CardContent className="relative aspect-square w-full">
+      <CardContent>
         {visibleDetails.map((detail) => (
           <div className="w-full flex justify-between" key={detail.label}>
             <p>{detail.label}</p>
@@ -94,7 +94,7 @@ export default function TrackPreviewView(props: TrackPreviewViewProps) {
               props.playlists.map((playlist) => (
                 <DropdownMenuItem
                   key={playlist.playlistID}
-                  onClick={() => props.onAddToPlaylist(playlist.playlistID)}
+                  onClick={() => props.onAddToPlaylist(playlist.playlistID, track.hash)}
                 >
                   {playlist.name}
                 </DropdownMenuItem>

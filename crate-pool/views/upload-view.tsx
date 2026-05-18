@@ -45,7 +45,7 @@ export default function UploadView(props: uploadViewProps) {
           clearUpload();
         }
       }}>
-        <DialogTrigger render={<Button className={"relative h-16 w-16 absolute bottom-5 right-5"}><PlusIcon /></Button>} />
+        <DialogTrigger render={<Button className={"relative h-16 w-16 absolute fixed bottom-5 right-5"}><PlusIcon /></Button>} />
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Upload tracks or XML</DialogTitle>

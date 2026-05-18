@@ -11,6 +11,7 @@ import {
 interface PlaylistStore {
     playlists: Playlist[];
     isLoading: boolean;
+    playlistMessage: string;
     fetchPlaylists: () => Promise<void>;
     createPlaylist: (name: string) => Promise<void>;
     addTrackToPlaylist: (playlistId: string, trackHash: string) => Promise<void>;
@@ -21,7 +22,7 @@ interface PlaylistStore {
 export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
     playlists: [],
     isLoading: false,
-
+    playlistMessage: "",
     fetchPlaylists: async () => {
         set({isLoading: true});
 
@@ -46,8 +47,12 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
     addTrackToPlaylist: async (playlistId: string, trackHash: string) => {
         try {
             await addTrackToPlaylist(playlistId, trackHash);
+            set({ playlistMessage: "Track added to playlist!" });
+            setTimeout(() => set({ playlistMessage: "" }), 3000);
         } catch (error) {
             console.error("Failed to add track to playlist:", error);
+            set({ playlistMessage: "Failed to add track to playlist." });
+            setTimeout(() => set({ playlistMessage: "" }), 3000);
         }
     },
 
@@ -57,6 +62,8 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
             await get().fetchPlaylists();
         } catch (error) {
             console.error("Failed to remove track from playlist:", error);
+            set({ playlistMessage: "Failed to remove track from playlist." });
+            setTimeout(() => set({ playlistMessage: "" }), 3000);
         }
     },
 
@@ -66,6 +73,8 @@ export const usePlaylistStore = create<PlaylistStore>((set, get) => ({
             await get().fetchPlaylists();
         } catch (error) {
             console.error("Failed to delete playlist:", error);
+            set({ playlistMessage: "Failed to delete playlist." });
+            setTimeout(() => set({ playlistMessage: "" }), 3000);
         }
     },
 }));

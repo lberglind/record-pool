@@ -31,7 +31,7 @@ export function SliderRange({
   }, [value[0], value[1]]);
 
   return (
-    <div className={`grid w-full max-w-xs gap-3 ${className}`}>
+    <div className={`grid w-full gap-3 md:max-w-xs ${className ?? ""}`}>
       <div className="flex justify-between">
         <Label>{text}</Label>
         <span className="text-sm text-muted-foreground">

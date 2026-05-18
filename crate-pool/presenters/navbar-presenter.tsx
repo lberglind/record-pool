@@ -117,7 +117,7 @@ export function NavbarPresenter() {
     }
 
     return (
-      <div className="fixed top-16 left-0 right-0 z-40 w-full animate-in fade-in">
+      <div className="fixed left-0 right-0 z-40 w-full animate-in fade-in top-[7.5rem] max-h-[calc(100vh-7.5rem)] overflow-y-auto md:top-16 md:max-h-[calc(100vh-4rem)]">
         <FilterView
           clearFilters={clearFilters}
           query={query}

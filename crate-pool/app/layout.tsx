@@ -44,7 +44,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <Suspense fallback={<NavbarFallbackView />}>
-            <NavbarPresenter />
+            {authStatus === "authenticated" && hasFetchedUser && <NavbarPresenter />}
           </Suspense>
             <main>
               {!hasFetchedUser && authStatus === "loading" && (

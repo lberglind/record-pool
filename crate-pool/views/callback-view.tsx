@@ -3,14 +3,18 @@ import { Spinner } from "@/components/ui/spinner"
 
 export const CallbackView = () => {
   return (
-    <Item>
-      <ItemMedia variant="icon">
-        <Spinner />
-      </ItemMedia>
-      <ItemContent>
-        <ItemTitle>Finalizing your session...</ItemTitle>
-        <ItemDescription>You will soon be redirected.</ItemDescription>
-      </ItemContent>
-    </Item>
+    <div className="w-full min-h-dvh flex items-center justify-center">
+      <div>
+      <Item>
+        <ItemMedia variant="icon">
+          <Spinner />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>Finalizing your session...</ItemTitle>
+          <ItemDescription>You will soon be redirected.</ItemDescription>
+        </ItemContent>
+      </Item>
+      </div>
+    </div>
   )
 }

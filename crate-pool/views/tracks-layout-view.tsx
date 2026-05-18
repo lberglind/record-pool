@@ -28,7 +28,7 @@ export default function TracksLayoutView(props: TracksLayoutProps) {
     );
   }
   return (
-    <div className="flex flex-row gap-4 pt-8">
+    <div className="flex flex-col gap-4 pt-8 lg:flex-row">
       {props.error && <p className="text-destructive text-sm">{props.error}</p>}
       <TracksTableView tracks={props.tracks} onPreview={props.onPreview} onLike={props.handleLike} likedHashes={props.likedHashes} />
       {props.currentTrack && <TrackPreviewView

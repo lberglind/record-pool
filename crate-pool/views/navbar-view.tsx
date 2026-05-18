@@ -1,4 +1,4 @@
-import { Search, Library, Heart, User, X, ListFilter } from "lucide-react";
+import { Search, Library, Heart, User, ListFilter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,8 +71,10 @@ export function NavbarView(props: NavbarViewProps) {
                         <Button
                             type="button"
                             variant={!isFilterViewOpen ? "ghost" : "default"}
-                            className="gap-2 cursor-pointer"
+                            size="icon"
+                            className="cursor-pointer"
                             onClick={onToggleFilterView}
+                            aria-label="Toggle filters"
                         >
                             <ListFilter className="h-4 w-4" />
                         </Button>
@@ -129,17 +131,40 @@ export function NavbarView(props: NavbarViewProps) {
              shown on row below by separating divs */}
             <div className="border-t px-4 py-3 md:hidden">
                 <form onSubmit={onSearchFormSubmit}>
-                    <div className="relative">
-                        <Search
-                            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            value={searchQuery}
-                            onChange={onSearchInputChange}
-                            type="search"
-                            placeholder="Search..."
-                            className="pl-9"
-                            aria-label="Search"
-                        />
+                    <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                            {/* Search icon */}
+                            <button
+                                type="submit"
+                                disabled={isSearchDisabled}
+                                //active when search query exists; change cursor to pointer and activate click
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground enabled:cursor-pointer disabled:cursor-default"
+                                aria-label="Search"
+                            >
+                                <Search className="h-4 w-4" />
+                            </button>
+                            {/* Search text inside form,
+                         onChange fires custom event up*/}
+                            <Input
+                                value={searchQuery}
+                                onChange={onSearchInputChange}
+                                type="search"
+                                placeholder="Search tracks, artists, playlists..."
+                                //input padding
+                                className="pl-10"
+                                aria-label="Search"
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            variant={!isFilterViewOpen ? "ghost" : "default"}
+                            size="icon"
+                            className="cursor-pointer"
+                            onClick={onToggleFilterView}
+                            aria-label="Toggle filters"
+                        >
+                            <ListFilter className="h-4 w-4" />
+                        </Button>
                     </div>
                 </form>
             </div>

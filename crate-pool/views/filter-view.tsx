@@ -16,9 +16,9 @@ interface FilterViewProps {
 
 export default function FilterView({ clearFilters, query, releaseValue, durationValue, bpmValue, onReleaseChange, onDurationChange, onBPMChange, onGenreChange }: FilterViewProps) {
     return (
-        <div className="w-full border-b bg-background/50 backdrop-blur px-4 py-4">
+        <div className="w-full border-b bg-background/50 backdrop-blur px-4 py-3 sm:py-4">
             <div className="mx-auto max-w-7xl">
-                <div className="grid gap-6 md:grid-cols-4">
+                <div className="grid gap-6 md:grid-cols-3">
                     {/* <SliderRange
                         value={releaseValue}
                         min={1900}
@@ -52,23 +52,32 @@ export default function FilterView({ clearFilters, query, releaseValue, duration
                     {/* Genre Filter */}
                     <div>
                         <label className="text-sm font-medium">Genre</label>
-                        <div className="flex gap-2 mt-2 flex-wrap">
-                            <Button variant={query.genre === "pop" ? "default" : "outline"} size="sm" className="text-xs" onClick={() => onGenreChange("pop")}>
+                        <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                            <Button variant={query.genre === "pop" ? "default" : "outline"} size="sm" className="w-full text-xs sm:w-auto" onClick={() => onGenreChange("pop")}>
                                 Pop
                             </Button>
-                            <Button variant={query.genre === "rap" ? "default" : "outline"} size="sm" className="text-xs" onClick={() => onGenreChange("rap")}>
+                            <Button variant={query.genre === "rap" ? "default" : "outline"} size="sm" className="w-full text-xs sm:w-auto" onClick={() => onGenreChange("rap")}>
                                 Rap
                             </Button>
-                            <Button variant={query.genre === "dance" ? "default" : "outline"} size="sm" className="text-xs" onClick={() => onGenreChange("dance")}>
+                            <Button variant={query.genre === "dance" ? "default" : "outline"} size="sm" className="w-full text-xs sm:w-auto" onClick={() => onGenreChange("dance")}>
                                 Dance
+                            </Button>
+                            <Button variant={query.genre === "edm" ? "default" : "outline"} size="sm" className="w-full text-xs sm:w-auto" onClick={() => onGenreChange("edm")}>
+                                EDM
+                            </Button>
+                            <Button variant={query.genre === "rock" ? "default" : "outline"} size="sm" className="w-full text-xs sm:w-auto" onClick={() => onGenreChange("rock")}>
+                                Rock
+                            </Button>
+                            <Button variant={query.genre === "house" ? "default" : "outline"} size="sm" className="w-full text-xs sm:w-auto" onClick={() => onGenreChange("house")}>
+                                House
                             </Button>
                         </div>
                     </div>
                 </div>
 
                 {/* Reset Button */}
-                <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" onClick={clearFilters}>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={clearFilters}>
                         Reset Filters
                     </Button>
                 </div>

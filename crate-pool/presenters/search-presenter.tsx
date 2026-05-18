@@ -23,7 +23,7 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
   const playlists = usePlaylistStore((state) => state.playlists);
   const fetchPlaylists = usePlaylistStore((state) => state.fetchPlaylists);
   const addTrackToPlaylist = usePlaylistStore((state) => state.addTrackToPlaylist);
-  const [playlistMessage, setPlaylistMessage] = useState("");
+  const playlistMessage = usePlaylistStore((state) => state.playlistMessage);
 
   useEffect(() => {
     fetchLikes();
@@ -76,38 +76,6 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
     fetchPlaylists();
   }, [fetchPlaylists]);
 
-  async function handleAddToPlaylist(playlistID: string, track: Track) {
-    if (!playlistID) {
-      return;
-    }
-
-    const playlist = playlists.find(
-      (playlist) => playlist.playlistID === playlistID
-    );
-
-    const alreadyExists = playlist?.tracks?.some(
-      (playlistTrack) => playlistTrack.hash === track.hash
-    );
-
-    if (alreadyExists) {
-      setPlaylistMessage("Track is already in this playlist");
-
-      setTimeout(() => {
-        setPlaylistMessage("");
-      }, 2500);
-
-      return;
-    }
-
-    await addTrackToPlaylist(playlistID, track.hash);
-    await fetchPlaylists();
-    setPlaylistMessage("Added to playlist");
-
-    setTimeout(() => {
-      setPlaylistMessage("");
-    }, 2500);
-  }
-
   async function handleTrackUpload(file: File | null) {
     if (file) {
       await trackModel.uploadTrack(file);
@@ -143,11 +111,11 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
 
   // Wrapper-funktion för att hantera gilla-markeringar via likeModel
   function handleToggleLike(track: Track) {
-    if (likedHashes.has(track.hash)) {
-      likeModel.removeLike(track.hash);
-    } else {
-      likeModel.addLike(track.hash);
-    }
+    likeModel.toggleLike(track);
+  }
+
+  function handleAddToPlaylist(playlistID: string, hash: string) {
+    addTrackToPlaylist(playlistID, hash)
   }
 
   return (
@@ -162,7 +130,7 @@ export default function SearchPresenter({ trackModel, likeModel, queryParams }: 
         likedHashes={likedHashes}
         closeTrackPreview={closeTrackPreview}
         error={trackModel.error || likeModel.error}
-        onAddToPlaylist={addTrackToPlaylist}
+        onAddToPlaylist={handleAddToPlaylist}
         playlistMessage={playlistMessage}
         playlists={playlists}
       />
